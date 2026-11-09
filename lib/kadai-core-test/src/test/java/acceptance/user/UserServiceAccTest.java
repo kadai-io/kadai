@@ -185,10 +185,7 @@ class UserServiceAccTest {
       Workbasket workbasket =
           defaultTestWorkbasket().buildAndStore(workbasketService, "businessadmin");
       createAccessItem(
-          "query-group-a",
-          workbasket,
-          WorkbasketPermission.READ,
-          WorkbasketPermission.OPEN);
+          "query-group-a", workbasket, WorkbasketPermission.READ, WorkbasketPermission.OPEN);
 
       User userA =
           randomTestUser()
@@ -381,8 +378,7 @@ class UserServiceAccTest {
       User incompleteUser =
           randomTestUser().groups(Set.of("bulk-read")).buildAndStore(userService, "businessadmin");
 
-      List<User> users =
-          userService.getUsers(Set.of(completeUser.getId(), incompleteUser.getId()));
+      List<User> users = userService.getUsers(Set.of(completeUser.getId(), incompleteUser.getId()));
 
       User returnedCompleteUser =
           users.stream()
@@ -411,15 +407,12 @@ class UserServiceAccTest {
               .domain("DOMAIN_A")
               .buildAndStore(workbasketService, "businessadmin");
 
-      createAccessItem(
-          "bulk-read-other-workbasket", readWorkbasket, WorkbasketPermission.READ);
-      createAccessItem(
-          "bulk-open-other-workbasket", openWorkbasket, WorkbasketPermission.OPEN);
+      createAccessItem("bulk-read-other-workbasket", readWorkbasket, WorkbasketPermission.READ);
+      createAccessItem("bulk-open-other-workbasket", openWorkbasket, WorkbasketPermission.OPEN);
 
       User user =
           randomTestUser()
-              .groups(
-                  Set.of("bulk-read-other-workbasket", "bulk-open-other-workbasket"))
+              .groups(Set.of("bulk-read-other-workbasket", "bulk-open-other-workbasket"))
               .buildAndStore(userService, "businessadmin");
 
       User returnedUser =

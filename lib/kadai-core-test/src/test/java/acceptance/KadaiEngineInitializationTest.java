@@ -108,8 +108,7 @@ public class KadaiEngineInitializationTest {
     @Test
     @SuppressWarnings("unchecked")
     void should_InitializePriorityServiceProviders() throws Exception {
-      InternalKadaiEngine internalKadaiEngine =
-          InternalKadaiEngineResolver.resolve(kadaiEngine);
+      InternalKadaiEngine internalKadaiEngine = InternalKadaiEngineResolver.resolve(kadaiEngine);
       PriorityServiceManager priorityServiceManager =
           internalKadaiEngine.getPriorityServiceManager();
       Field priorityServiceProvidersField =
@@ -129,8 +128,7 @@ public class KadaiEngineInitializationTest {
 
     @Test
     void should_ResolveInternalEngineFromPublicEngine() {
-      InternalKadaiEngine internalKadaiEngine =
-          InternalKadaiEngineResolver.resolve(kadaiEngine);
+      InternalKadaiEngine internalKadaiEngine = InternalKadaiEngineResolver.resolve(kadaiEngine);
 
       assertThat(internalKadaiEngine.getEngine()).isSameAs(kadaiEngine);
     }

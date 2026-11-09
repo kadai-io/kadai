@@ -69,8 +69,7 @@ class TerminateTaskAccTest {
   @KadaiInject TaskService taskService;
   @KadaiInject ClassificationService classificationService;
   @KadaiInject WorkbasketService workbasketService;
-  @KadaiInject
-  CurrentUserContext currentUserContext;
+  @KadaiInject CurrentUserContext currentUserContext;
 
   ClassificationSummary defaultClassificationSummary;
   WorkbasketSummary defaultWorkbasketSummary;

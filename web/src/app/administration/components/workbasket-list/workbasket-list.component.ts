@@ -32,23 +32,23 @@ import {
   DeselectWorkbasket,
   GetWorkbasketsSummary,
   SelectWorkbasket
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
-import { Workbasket } from '../../../shared/models/workbasket';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
+import { Workbasket } from 'app/shared/models/workbasket';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
-import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { Router } from '@angular/router';
-import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
-import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from '../../models/workbasket-component';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
-import { QueryPagingParameter } from '../../../shared/models/query-paging-parameter';
-import { FilterSelectors } from '../../../shared/store/filter-store/filter.selectors';
-import { WorkbasketListToolbarComponent } from '../workbasket-list-toolbar/workbasket-list-toolbar.component';
+import { WORKBASKETS_ROUTE } from 'app/shared/util/administration-routes';
+import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from 'app/w/workbasket-component';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { FilterSelectors } from 'app/shared/store/filter-store/filter.selectors';
+import { WorkbasketListToolbarComponent } from 'app/administration/components/workbasket-list-toolbar/workbasket-list-toolbar.component';
 import { AsyncPipe } from '@angular/common';
-import { IconTypeComponent } from '../type-icon/icon-type.component';
+import { IconTypeComponent } from 'app/administration/components/type-icon/icon-type.component';
 import { MatDivider } from '@angular/material/divider';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { PaginationComponent } from 'app/shared/components/pagination/pagination.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({

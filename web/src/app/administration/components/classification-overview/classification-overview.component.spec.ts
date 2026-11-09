@@ -19,23 +19,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement, Component } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { DomainState } from '../../../shared/store/domain-store/domain.state';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
-import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
 import { ClassificationOverviewComponent } from './classification-overview.component';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
-import { Observable, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   CreateClassification,
   DeselectClassification,
   SelectClassification
-} from '../../../shared/store/classification-store/classification.actions';
-import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+} from 'app/shared/store/classification-store/classification.actions';
+import { classificationStateMock, engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
 
 const routeParamsMock = { id: 'new-classification' };
 
@@ -63,10 +63,10 @@ describe('ClassificationOverviewComponent', () => {
         provideStore([ClassificationState, EngineConfigurationState, DomainState]),
         provideRouter([{ path: '**', component: BlankRouteComponent }]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
+        { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
 
         provideHttpClientTesting(),
         provideNoopAnimations(),
-        provideAngularSvgIcon(),
         {
           provide: ActivatedRoute,
           useValue: mockActivatedRoute

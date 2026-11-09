@@ -146,9 +146,8 @@ public class LdapClient {
     Set<String> userGroups = kadaiConfiguration.getRoleMap().get(KadaiRole.USER);
 
     final OrFilter groupMembershipOrFilter = new OrFilter();
-    userGroups.forEach(
-        group ->
-            groupMembershipOrFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), group)));
+    userGroups.forEach(group ->
+        groupMembershipOrFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), group)));
 
     final AndFilter andFilter = new AndFilter();
     andFilter.and(userDetailsOrFilter);
@@ -203,25 +202,23 @@ public class LdapClient {
           ldapTemplate.getContextSource(),
           operations -> {
             PagedResultsControlExchangeDirContextProcessor processor =
-                new PagedResultsControlExchangeDirContextProcessor(
-                    COMPLETE_USER_SEARCH_PAGE_SIZE);
-            return collectCompleteUserSnapshot(
-                ignored -> {
-                    List<User> page =
-                        operations.search(
-                            getUserSearchBase(),
-                            userRoleFilter().encode(),
-                            controls,
-                            new UserInfoContextMapper(),
-                            processor);
-                    var response = processor.getExchange().getResponse();
-                    return new LdapUserPage(
-                        page,
-                        response != null,
-                        response == null || response.getCookie() == null
-                            ? new byte[0]
-                            : response.getCookie());
-                });
+                new PagedResultsControlExchangeDirContextProcessor(COMPLETE_USER_SEARCH_PAGE_SIZE);
+            return collectCompleteUserSnapshot(ignored -> {
+              List<User> page =
+                  operations.search(
+                      getUserSearchBase(),
+                      userRoleFilter().encode(),
+                      controls,
+                      new UserInfoContextMapper(),
+                      processor);
+              var response = processor.getExchange().getResponse();
+              return new LdapUserPage(
+                  page,
+                  response != null,
+                  response == null || response.getCookie() == null
+                      ? new byte[0]
+                      : response.getCookie());
+            });
           },
           true,
           false,
@@ -282,11 +279,10 @@ public class LdapClient {
   private OrFilter userRoleFilter() {
     Set<String> userGroupsOrUser = kadaiConfiguration.getRoleMap().get(KadaiRole.USER);
     final OrFilter userOrGroupFilter = new OrFilter();
-    userGroupsOrUser.forEach(
-        userOrGroup -> {
-          userOrGroupFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), userOrGroup));
-          userOrGroupFilter.or(new EqualsFilter(getUserIdAttribute(), userOrGroup));
-        });
+    userGroupsOrUser.forEach(userOrGroup -> {
+      userOrGroupFilter.or(new EqualsFilter(getUserMemberOfGroupAttribute(), userOrGroup));
+      userOrGroupFilter.or(new EqualsFilter(getUserIdAttribute(), userOrGroup));
+    });
     return userOrGroupFilter;
   }
 
@@ -577,8 +573,7 @@ public class LdapClient {
     }
 
     AndFilter filter = new AndFilter();
-    filter.and(
-        new EqualsFilter(getPermissionSearchFilterName(), getPermissionSearchFilterValue()));
+    filter.and(new EqualsFilter(getPermissionSearchFilterName(), getPermissionSearchFilterValue()));
     filter.and(new PresentFilter(getPermissionNameAttribute()));
     filter.and(new EqualsFilter(getEffectivePermissionAccessIdAttribute(), accessId));
     return hasExactAccessId(getPermissionSearchBase(), filter);
@@ -1199,9 +1194,8 @@ public class LdapClient {
       boolean matchesGroupFilter =
           groupFilterValues != null
               && Arrays.stream(groupFilterValues)
-                  .anyMatch(
-                      value ->
-                          value != null && value.equalsIgnoreCase(getGroupSearchFilterValue()));
+                  .anyMatch(value ->
+                      value != null && value.equalsIgnoreCase(getGroupSearchFilterValue()));
       boolean isPermission =
           !permissionsAreEmpty()
               && context.getStringAttribute(getPermissionNameAttribute()) != null;

@@ -25,9 +25,8 @@ import { provideRouter, Router } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideStore, Store } from '@ngxs/store';
-import { DomainState } from '../../../shared/store/domain-store/domain.state';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
-import { of } from 'rxjs';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 describe('MonitorComponent', () => {
   let component: MonitorComponent;

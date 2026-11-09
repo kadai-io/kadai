@@ -27,14 +27,14 @@ import { WorkbasketDistributionTargets } from 'app/shared/models/workbasket-dist
 import { Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 
 import { Store } from '@ngxs/store';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
-import { DomainSelectors } from '../../store/domain-store/domain.selectors';
-import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
-import { WorkbasketRepresentation } from '../../models/workbasket-representation';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { asUrlQueryString } from '../../util/query-parameters-v2';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
+import { WorkbasketRepresentation } from 'app/shared/models/workbasket-representation';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 @Injectable({
   providedIn: 'root'

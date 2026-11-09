@@ -20,20 +20,20 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
-import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { filter, takeUntil } from 'rxjs/operators';
-import { ClassificationSelectors } from '../../../shared/store/classification-store/classification.selectors';
+import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import {
   CreateClassification,
   DeselectClassification,
   GetClassifications,
   SelectClassification
-} from '../../../shared/store/classification-store/classification.actions';
-import { Classification } from '../../../shared/models/classification';
-import { ClassificationListComponent } from '../classification-list/classification-list.component';
+} from 'app/shared/store/classification-store/classification.actions';
+import { Classification } from 'app/shared/models/classification';
+import { ClassificationListComponent } from 'app/administration/components/classification-list/classification-list.component';
 
-import { ClassificationDetailsComponent } from '../classification-details/classification-details.component';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { ClassificationDetailsComponent } from 'app/administration/components/classification-details/classification-details.component';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 
 @Component({
   selector: 'kadai-administration-classification-overview',

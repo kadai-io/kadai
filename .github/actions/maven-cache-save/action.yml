@@ -1,0 +1,21 @@
+name: Save the Maven cache
+description: Prune the KADAI jars from ~/.m2/repository and save it
+inputs:
+  key:
+    description: Key from the restore action's cache-primary-key output
+    required: true
+runs:
+  using: composite
+  steps:
+    # The jars must not enter the cache and a negated 'path:' entry cannot
+    # exclude them: the save tars every resolved path recursively, so an
+    # ancestor entry such as 'io' drags the subtree back in.
+    - name: Prune KADAI artifacts
+      shell: bash
+      run: rm -rf ~/.m2/repository/io/kadai
+    - uses: actions/cache/save@v6
+      with:
+        path: ~/.m2/repository
+        # ci/change_version.sh rewrites the pom versions on tag builds, so the
+        # key must be the one the restore action resolved, not a fresh hash.
+        key: ${{ inputs.key }}

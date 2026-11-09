@@ -66,10 +66,11 @@ public class DockerContainerCreator {
                       "/bin/sh",
                       "-c",
                       """
-                          localedef -i de_DE -c -f UTF-8 -A \
-                          /usr/share/locale/locale.alias de_DE.UTF-8 \
-                          && export LANG=de_DE.UTF-8 \
-                          && /usr/local/bin/docker-entrypoint.sh postgres -c fsync=off""")
+                      localedef -i de_DE -c -f UTF-8 -A \
+                      /usr/share/locale/locale.alias de_DE.UTF-8 \
+                      && export LANG=de_DE.UTF-8 \
+                      && /usr/local/bin/docker-entrypoint.sh postgres -c fsync=off\
+                      """)
                   .waitingFor(
                       new LogMessageWaitStrategy()
                           .withRegEx(

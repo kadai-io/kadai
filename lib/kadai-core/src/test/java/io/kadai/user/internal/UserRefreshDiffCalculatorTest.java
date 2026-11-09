@@ -51,12 +51,9 @@ class UserRefreshDiffCalculatorTest {
             new UserAccessIdRow("changed", "add"), new UserAccessIdRow("inserted", "new-group"));
     assertThat(plan.groupsToDelete())
         .containsExactly(
-            new UserAccessIdRow("changed", "remove"),
-            new UserAccessIdRow("stale", "stale-group"));
-    assertThat(plan.permissionsToInsert())
-        .containsExactly(new UserAccessIdRow("changed", "p2"));
-    assertThat(plan.permissionsToDelete())
-        .containsExactly(new UserAccessIdRow("changed", "p"));
+            new UserAccessIdRow("changed", "remove"), new UserAccessIdRow("stale", "stale-group"));
+    assertThat(plan.permissionsToInsert()).containsExactly(new UserAccessIdRow("changed", "p2"));
+    assertThat(plan.permissionsToDelete()).containsExactly(new UserAccessIdRow("changed", "p"));
     assertThat(plan.updatedUsers()).isEqualTo(1);
   }
 

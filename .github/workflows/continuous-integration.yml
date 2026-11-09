@@ -1,6 +1,11 @@
 name: CI
 on:
   workflow_dispatch:
+    inputs:
+      full_run:
+        description: "Ignore the changed-path filters and run the whole pipeline (for workflow-only changes)"
+        type: boolean
+        default: false
   push:
     branches:
       - master
@@ -28,10 +33,22 @@ env:
   ARTIFACTS_FRONTEND_COVERAGE_PATH: web/coverage
 
   CACHE_WEB_NAME: web
-  # IMPORTANT: this cannot start with CACHE_MAVEN_NAME's value
-  # because the 'compile_backend' job would otherwise use this as a fallback cache.
-  CACHE_MAVEN_FOR_WEB_NAME: mvn-for-web
-  CACHE_MAVEN_NAME: maven
+  # Cache key prefixes. No name may start with another name's value, because
+  # 'restore-keys' is a prefix match: 'compile_backend' would otherwise fall back
+  # to the web-only cache and re-download all backend dependencies on every run.
+  # Bump the -vN suffix to purge. An entry is immutable, and restore-keys restores
+  # the newest matching entry and saves it again plus the delta, so outdated
+  # artifacts accumulate and every run pays for them. 'Check maven cache' in
+  # 'compile_backend' prints the purge commands when an entry passes 500 MB.
+  # The cache steps live in .github/actions/maven-cache-restore and -save.
+  # Not from this file: 'Automatic Dependency Submission', a workflow GitHub
+  # manages outside the repository, caches ~/.m2/repository under its own
+  # 'Linux-jdk21-temurin-maven-*' keys, one entry per branch and none on master,
+  # where writing caches is denied. That cache is switched off with the
+  # repository variable GH_DEPENDENCY_SUBMISSION_SKIP_CACHE; the submission
+  # still runs and still feeds the dependency graph.
+  CACHE_MAVEN_FOR_WEB_NAME: mvn-for-web-v2
+  CACHE_MAVEN_NAME: maven-v2
   CACHE_SONAR_NAME: sonar
 
 jobs:
@@ -44,7 +61,9 @@ jobs:
       frontend_changed: ${{ steps.filter.outputs.frontend }} 
       code_changed: ${{ steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true' }}  
       # Master coverage must contain the complete test suite, independent of the changed paths.
-      run_all_tests: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+      # Docs-only master pushes change no code, so they need no tests (and no coverage analysis).
+      # Use workflow_dispatch with full_run to force a full run for such a change.
+      run_all_tests: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/master' && (steps.filter.outputs.backend == 'true' || steps.filter.outputs.frontend == 'true')) || inputs.full_run == true }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -90,15 +109,30 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Cache maven dependencies
+      - name: Restore maven cache
         id: cache
-        uses: actions/cache@v6
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
+      - name: Check maven cache
+        # A from-scratch build fills ~330 MB; anything well above that is stale content.
+        # The KADAI jars are uploaded as an artifact and pruned before the save, so
+        # finding them here means a job cached them.
+        run: |
+          size=$(du -sm ~/.m2/repository 2>/dev/null | cut -f1)
+          echo "Restored maven cache: ${size:-0} MB"
+          if [ "${size:-0}" -gt 500 ]; then
+            echo "::warning::Maven cache is ${size} MB, above the 500 MB purge threshold"
+            echo "Purge by deleting every entry under the maven cache names while no run is building:"
+            echo "  gh cache list --repo ${GITHUB_REPOSITORY} --key Linux-${CACHE_MAVEN_NAME}"
+            echo "  gh cache list --repo ${GITHUB_REPOSITORY} --key Linux-${CACHE_MAVEN_FOR_WEB_NAME}"
+            echo "  gh cache delete <id> --repo ${GITHUB_REPOSITORY}"
+          fi
+          if [ -n "$(ls -A ~/.m2/repository/io/kadai 2>/dev/null)" ]; then
+            echo "::error::~/.m2/repository/io/kadai is part of the maven cache; every job prunes it before saving, so this entry was saved without the prune"
+            exit 1
+          fi
       - name: Change versions to match tag
         run: ci/change_version.sh -m .
       - name: Compile & build
@@ -127,6 +161,11 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_JARS_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_JARS_PATH }}
           if-no-files-found: error
+      - name: Save maven cache
+        if: ${{ success() && steps.cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -163,13 +202,10 @@ jobs:
         with:
           path: web/node_modules
           key: ${{ runner.OS }}-${{ env.CACHE_WEB_NAME }}-${{ hashFiles('**/yarn.lock') }}
-      - name: Cache maven dependencies (for web)
+      - name: Restore maven cache
         id: maven-cache
-        uses: actions/cache@v6
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       - name: Populate maven cache
@@ -211,6 +247,11 @@ jobs:
           name: ${{ env.ARTIFACTS_KADAI_WEB_NAME }}
           path: ${{ env.ARTIFACTS_KADAI_WEB_PATH }}
           if-no-files-found: error
+      - name: Save maven cache
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -248,13 +289,10 @@ jobs:
         if: steps.web-cache.outputs.cache-hit != 'true'
         working-directory: web
         run: yarn install --immutable
-      - name: Cache maven dependencies (for web)
+      - name: Restore maven cache
         id: maven-cache
-        uses: actions/cache@v6
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.OS }}-${{ env.CACHE_MAVEN_FOR_WEB_NAME }}
       # Theoretically this step below not necessary because we reuse the cache from the 'compile_frontend' job.
@@ -297,6 +335,11 @@ jobs:
           display-badge: true
           pr-comment: false
         continue-on-error: true
+      - name: Save maven cache
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -349,14 +392,12 @@ jobs:
         if: steps.web-cache.outputs.cache-hit != 'true'
         working-directory: web
         run: yarn install --immutable
-      - name: Cache maven dependencies
+      - name: Restore maven cache
         id: maven-cache
-        uses: actions/cache@v6
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
         uses: actions/download-artifact@v8
         with:
@@ -400,6 +441,11 @@ jobs:
         with:
           name: ${{ env.ARTIFACTS_CYPRESS_TESTS_NAME }}
           path: ${{ env.ARTIFACTS_CYPRESS_TESTS_PATH }}
+      - name: Save maven cache
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -518,12 +564,10 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ matrix.java_version }}
-      - name: Cache maven dependencies
-        uses: actions/cache@v6
+      - name: Restore maven cache
+        id: maven-cache
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
@@ -535,7 +579,8 @@ jobs:
         run: |
           ci/change_version.sh -m .
       - name: Test
-        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -Djacoco.destFile=target/jacoco-${{matrix.database}}.exec -T 1C
+        # The javadoc and sources jars are built by compile_backend and only published by release_artifacts.
+        run: ./mvnw -B verify -pl :${{matrix.module}} -Dcheckstyle.skip -Dmaven.javadoc.skip -Dmaven.source.skip -Djacoco.destFile=target/jacoco-${{matrix.database}}.exec -T 1C
         env:
           DB: ${{ matrix.database }}
       - name: Eco CI Measurement of ${{ matrix.module }} (H2)
@@ -560,6 +605,11 @@ jobs:
           name: ${{ env.ARTIFACTS_JACOCO_REPORTS_NAME }}-${{ matrix.module }}-${{ matrix.database }}
           path: ${{ env.ARTIFACTS_JACOCO_REPORTS_PATH }}
           if-no-files-found: ignore
+      - name: Save maven cache
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -654,12 +704,10 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Cache maven dependencies
-        uses: actions/cache@v6
+      - name: Restore maven cache
+        id: maven-cache
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       # Download backend artifacts only when backend code changed or a release tag is pushed.
@@ -767,6 +815,11 @@ jobs:
           display-badge: true
           pr-comment: false
         continue-on-error: true
+      - name: Save maven cache
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -816,12 +869,10 @@ jobs:
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
-      - name: Cache maven dependencies
-        uses: actions/cache@v6
+      - name: Restore maven cache
+        id: maven-cache
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download kadai artifacts
@@ -857,6 +908,11 @@ jobs:
           time: '60s'
       - name: Smoke test documentation
         run: ci/verify_docs_alive.sh
+      - name: Save maven cache
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5
@@ -905,12 +961,10 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_SONAR_NAME }}
-      - name: Cache maven dependencies
-        uses: actions/cache@v6
+      - name: Restore maven cache
+        id: maven-cache
+        uses: ./.github/actions/maven-cache-restore
         with:
-          path: |
-            ~/.m2
-            !~/.m2/repository/io/kadai
           key: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-${{ env.CACHE_MAVEN_NAME }}
       - name: Download JaCoCo reports
@@ -958,6 +1012,11 @@ jobs:
           display-badge: true
           pr-comment: false
         continue-on-error: true
+      - name: Save maven cache
+        if: ${{ success() && steps.maven-cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/maven-cache-save
+        with:
+          key: ${{ steps.maven-cache.outputs.cache-primary-key }}
       - name: Cancel workflow
         if: failure()
         uses: andymckay/cancel-action@0.5

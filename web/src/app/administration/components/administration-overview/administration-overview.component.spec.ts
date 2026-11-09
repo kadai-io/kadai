@@ -18,15 +18,14 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { of } from 'rxjs';
 import { provideRouter, Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideStore, Store } from '@ngxs/store';
-import { DomainState } from '../../../shared/store/domain-store/domain.state';
-import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 const kadaiEngineServiceSpy = {
   isCustomRoutingRulesEnabled: vi.fn().mockReturnValue(of(false))

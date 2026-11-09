@@ -43,36 +43,34 @@ class CreateHistoryEventOnWorkbasketAccessItemCreationAccTest extends AbstractAc
   void should_CreateWorkbasketAccessItemCreatedHistoryEvent_When_AccessItemIsCreated()
       throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String workbasketId = "WBI:100000000000000000000000000000000004";
+        CheckedRunnable.rethrowing(() -> {
+          final String workbasketId = "WBI:100000000000000000000000000000000004";
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          List<WorkbasketHistoryEvent> events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              WorkbasketAccessItem newWorkbasketAccessItem =
-                  workbasketService.newWorkbasketAccessItem(workbasketId, "peter");
+          WorkbasketAccessItem newWorkbasketAccessItem =
+              workbasketService.newWorkbasketAccessItem(workbasketId, "peter");
 
-              workbasketService.createWorkbasketAccessItem(newWorkbasketAccessItem);
+          workbasketService.createWorkbasketAccessItem(newWorkbasketAccessItem);
 
-              events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType)
-                  .isEqualTo(WorkbasketHistoryEventType.ACCESS_ITEM_CREATED.getName());
-              assertThat(details).contains("\"newValue\":\"peter\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-6-9");
-              assertThat(events.get(0).getProxyAccessId())
-                  .isEqualTo("cn=business-admins,cn=groups,ou=test,o=kadai");
-            }),
+          assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.ACCESS_ITEM_CREATED.getName());
+          assertThat(details).contains("\"newValue\":\"peter\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-6-9");
+          assertThat(events.get(0).getProxyAccessId())
+              .isEqualTo("cn=business-admins,cn=groups,ou=test,o=kadai");
+        }),
         KadaiRole.BUSINESS_ADMIN,
         "user-6-9");
   }

@@ -148,8 +148,7 @@ class UserRefreshPreparationTest {
     UserRefreshState stableUser = usersById.get("stable");
     Set<String> stableUserGroups = stableUser.groups();
 
-    assertThatThrownBy(usersById::clear)
-        .isInstanceOf(UnsupportedOperationException.class);
+    assertThatThrownBy(usersById::clear).isInstanceOf(UnsupportedOperationException.class);
     assertThatThrownBy(() -> stableUserGroups.add("x"))
         .isInstanceOf(UnsupportedOperationException.class);
   }
@@ -163,16 +162,14 @@ class UserRefreshPreparationTest {
         Arguments.of("long name", (Consumer<User>) user -> user.setLongName("x".repeat(65))),
         Arguments.of("email", (Consumer<User>) user -> user.setEmail("x".repeat(65))),
         Arguments.of("phone", (Consumer<User>) user -> user.setPhone("x".repeat(33))),
-        Arguments.of(
-            "mobile phone", (Consumer<User>) user -> user.setMobilePhone("x".repeat(33))),
+        Arguments.of("mobile phone", (Consumer<User>) user -> user.setMobilePhone("x".repeat(33))),
         Arguments.of("org 1", (Consumer<User>) user -> user.setOrgLevel1("x".repeat(33))),
         Arguments.of("org 2", (Consumer<User>) user -> user.setOrgLevel2("x".repeat(33))),
         Arguments.of("org 3", (Consumer<User>) user -> user.setOrgLevel3("x".repeat(33))),
         Arguments.of("org 4", (Consumer<User>) user -> user.setOrgLevel4("x".repeat(33))),
         Arguments.of("group", (Consumer<User>) user -> user.setGroups(Set.of("x".repeat(257)))),
         Arguments.of(
-            "permission",
-            (Consumer<User>) user -> user.setPermissions(Set.of("x".repeat(257)))));
+            "permission", (Consumer<User>) user -> user.setPermissions(Set.of("x".repeat(257)))));
   }
 
   private static User user(String id) {

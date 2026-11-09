@@ -132,13 +132,12 @@ public class SampleDataGenerator {
   }
 
   private void executeAndCacheScripts(Stream<String> scripts, String cacheKey) {
-    runScripts(
-        runner ->
-            CACHED_SCRIPTS.computeIfAbsent(cacheKey, key -> parseScripts(scripts)).stream()
-                .map(s -> s.getBytes(StandardCharsets.UTF_8))
-                .map(ByteArrayInputStream::new)
-                .map(s -> new InputStreamReader(s, StandardCharsets.UTF_8))
-                .forEach(runner::runScript));
+    runScripts(runner ->
+        CACHED_SCRIPTS.computeIfAbsent(cacheKey, key -> parseScripts(scripts)).stream()
+            .map(s -> s.getBytes(StandardCharsets.UTF_8))
+            .map(ByteArrayInputStream::new)
+            .map(s -> new InputStreamReader(s, StandardCharsets.UTF_8))
+            .forEach(runner::runScript));
   }
 
   private ScriptRunner getScriptRunner(

@@ -124,10 +124,9 @@ class CallbackStateAccTest extends AbstractAccTest {
   void should_NotThrowUnsupportedOperationException_When_ExternalIdListIsUnmodifiable() {
     TaskService taskService = kadaiEngine.getTaskService();
 
-    assertThatCode(
-            () ->
-                taskService.setCallbackStateForTasks(
-                    List.of(""), CallbackState.CALLBACK_PROCESSING_COMPLETED))
+    assertThatCode(() ->
+            taskService.setCallbackStateForTasks(
+                List.of(""), CallbackState.CALLBACK_PROCESSING_COMPLETED))
         .doesNotThrowAnyException();
   }
 
@@ -346,8 +345,7 @@ class CallbackStateAccTest extends AbstractAccTest {
     // let's set it to CALLBACK_PROCESSING_REQUIRED
     List<TaskSummary> completedTasks =
         taskService.createTaskQuery().stateIn(TaskState.COMPLETED).list();
-    List<String> externalIds =
-        completedTasks.stream().map(TaskSummary::getExternalId).toList();
+    List<String> externalIds = completedTasks.stream().map(TaskSummary::getExternalId).toList();
     BulkOperationResults<String, KadaiException> bulkResultCompleted =
         taskService.setCallbackStateForTasks(
             externalIds, CallbackState.CALLBACK_PROCESSING_REQUIRED);
@@ -368,8 +366,7 @@ class CallbackStateAccTest extends AbstractAccTest {
             .list();
     assertThat(tasksToBeActedUpon).hasSize(numberOfCompletedTasksAtStartOfTest);
     // now we set callback state to callback_processing_completed
-    externalIds =
-        tasksToBeActedUpon.stream().map(TaskSummary::getExternalId).toList();
+    externalIds = tasksToBeActedUpon.stream().map(TaskSummary::getExternalId).toList();
     BulkOperationResults<String, KadaiException> bulkResult =
         taskService.setCallbackStateForTasks(
             externalIds, CallbackState.CALLBACK_PROCESSING_COMPLETED);

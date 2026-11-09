@@ -18,27 +18,27 @@
 
 import { DebugElement } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
+import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
+import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
+import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { classificationStateMock, engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { ClassificationDetailsComponent } from './classification-details.component';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import {
   CopyClassification,
   RemoveSelectedClassification,
   RestoreSelectedClassification,
   SaveCreatedClassification,
   SaveModifiedClassification
-} from '../../../shared/store/classification-store/classification.actions';
+} from 'app/shared/store/classification-store/classification.actions';
 import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DomainState } from '../../../shared/store/domain-store/domain.state';
 import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
@@ -67,7 +67,7 @@ describe('ClassificationDetailsComponent', () => {
   let component: ClassificationDetailsComponent;
   let store: Store;
   let actions$: Observable<any>;
-
+        
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationDetailsComponent],
@@ -75,8 +75,8 @@ describe('ClassificationDetailsComponent', () => {
         provideRouter([{ path: '**', children: [] }]),
         provideStore([ClassificationState, EngineConfigurationState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
+        { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         { provide: ClassificationsService, useValue: classificationServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }

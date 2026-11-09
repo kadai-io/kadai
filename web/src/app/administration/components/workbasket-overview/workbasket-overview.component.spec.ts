@@ -20,20 +20,20 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
 import { Component, DebugElement } from '@angular/core';
 import { Actions, ofActionCompleted, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { DomainState } from '../../../shared/store/domain-store/domain.state';
-import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { Observable, of, firstValueFrom } from 'rxjs';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
-import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { take } from 'rxjs/operators';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { CreateWorkbasket, SelectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
 
 @Component({ template: '' })
 class BlankRouteComponent {}
@@ -66,8 +66,7 @@ describe('WorkbasketOverviewComponent', () => {
           useValue: mockActivatedRoute
         },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -246,8 +245,7 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: ActivatedRoute, useValue: mockActivatedRouteAlternativeId },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);

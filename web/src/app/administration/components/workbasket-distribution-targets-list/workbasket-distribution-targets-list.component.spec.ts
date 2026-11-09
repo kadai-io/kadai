@@ -17,23 +17,23 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
 import { By } from '@angular/platform-browser';
 import { DebugElement } from '@angular/core';
 import { MatListOption } from '@angular/material/list';
 import { WorkbasketDistributionTargetsListComponent } from './workbasket-distribution-targets-list.component';
-import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
-import { Side } from '../../models/workbasket-distribution-enums';
+import { engineConfigurationMock, workbasketReadStateMock } from 'app/shared/store/mock-data/mock-store';
+import { Side } from 'app/administration/models/workbasket-distribution-enums';
 import { provideStore, Store } from '@ngxs/store';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
 import { EMPTY, of, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { OrderBy } from '../../../shared/pipes/order-by.pipe';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { OrderBy } from 'app/shared/pipes/order-by.pipe';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { WorkbasketDistributionTarget } from '../../../shared/models/workbasket-distribution-target';
-import { SetWorkbasketFilter } from '../../../shared/store/filter-store/filter.actions';
+import { WorkbasketDistributionTarget } from 'app/shared/models/workbasket-distribution-target';
+import { SetWorkbasketFilter } from 'app/shared/store/filter-store/filter.actions';
 
 describe('WorkbasketDistributionTargetsListComponent', () => {
   let fixture: ComponentFixture<WorkbasketDistributionTargetsListComponent>;
@@ -92,9 +92,9 @@ describe('WorkbasketDistributionTargetsListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketDistributionTargetsListComponent],
       providers: [
+        { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
         provideStore([WorkbasketState, FilterState]),
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         { provide: ActivatedRoute, useValue: activatedRouteMock }
       ]
     }).compileComponents();

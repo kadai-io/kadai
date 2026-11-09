@@ -18,16 +18,15 @@
 
 import { ClassificationTypesSelectorComponent } from './classification-types-selector.component';
 import { Router, provideRouter } from '@angular/router';
-import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
+import { CLASSIFICATIONS_ROUTE } from 'app/shared/util/administration-routes';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
-import { Location } from '@angular/common';
 import { provideLocationMocks } from '@angular/common/testing';
 import { provideStore, Store } from '@ngxs/store';
-import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
-import { classificationStateMock } from '../../../shared/store/mock-data/mock-store';
+import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
+import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
+import { classificationStateMock } from 'app/shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

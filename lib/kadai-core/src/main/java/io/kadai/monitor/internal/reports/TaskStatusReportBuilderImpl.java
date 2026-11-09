@@ -64,19 +64,16 @@ public class TaskStatusReportBuilderImpl implements TaskStatusReport.Builder {
       Map<String, String> displayMap =
           kadaiEngine
               .getEngine()
-              .runAsAdmin(
-                  () ->
-                      workbasketService
-                          .createWorkbasketQuery()
-                          .keyIn(report.getRows().keySet().toArray(new String[0]))
-                          .domainIn(domains)
-                          .list()
-                          .stream()
-                          .collect(
-                              Collectors.toMap(
-                                  WorkbasketSummary::getKey,
-                                  WorkbasketSummary::getName,
-                                  (a, b) -> a)));
+              .runAsAdmin(() ->
+                  workbasketService
+                      .createWorkbasketQuery()
+                      .keyIn(report.getRows().keySet().toArray(new String[0]))
+                      .domainIn(domains)
+                      .list()
+                      .stream()
+                      .collect(
+                          Collectors.toMap(
+                              WorkbasketSummary::getKey, WorkbasketSummary::getName, (a, b) -> a)));
       report.augmentDisplayNames(displayMap);
       return report;
     } finally {

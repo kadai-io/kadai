@@ -78,13 +78,12 @@ class KadaiEngineModesTest {
       TestUser expected =
           new TestUser("teamlead-42", "Max", "Mustermann", "Long name of teamlead-42");
 
-      transactionTemplate.execute(
-          status -> {
-            thisKadaiEngineProxy
-                .getEngine()
-                .executeInDatabaseConnection(() -> thisMapper.insert(expected));
-            return new Object();
-          });
+      transactionTemplate.execute(status -> {
+        thisKadaiEngineProxy
+            .getEngine()
+            .executeInDatabaseConnection(() -> thisMapper.insert(expected));
+        return new Object();
+      });
 
       TestUser actual =
           thatKadaiEngineProxy
@@ -107,14 +106,13 @@ class KadaiEngineModesTest {
 
       ThrowingCallable call =
           () ->
-              transactionTemplate.execute(
-                  status -> {
-                    status.setRollbackOnly();
-                    thisKadaiEngineProxy
-                        .getEngine()
-                        .executeInDatabaseConnection(() -> thisMapper.insert(expected));
-                    throw expectedException;
-                  });
+              transactionTemplate.execute(status -> {
+                status.setRollbackOnly();
+                thisKadaiEngineProxy
+                    .getEngine()
+                    .executeInDatabaseConnection(() -> thisMapper.insert(expected));
+                throw expectedException;
+              });
 
       assertThatExceptionOfType(IllegalStateException.class)
           .isThrownBy(call)

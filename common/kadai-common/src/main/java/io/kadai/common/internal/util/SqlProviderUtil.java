@@ -25,12 +25,12 @@ public class SqlProviderUtil {
   public static final String CLOSING_SCRIPT_TAG = "</script>";
   public static final String OPENING_WHERE_TAG = "<where>";
   public static final String CLOSING_WHERE_TAG = "</where>";
+
   /**
    * DB2 uncommitted-read suffix for explicit column-value discovery queries only.
    *
    * <p>Do not use this for entity, list, count, relationship, monitor, or history reads because a
-   * statement-level WITH UR overrides the isolation behavior expected from the caller's
-   * connection.
+   * statement-level WITH UR overrides the isolation behavior expected from the caller's connection.
    */
   public static final String DB2_WITH_UR_FOR_COLUMN_QUERY =
       "<if test=\"_databaseId == 'db2'\">with UR </if>";
@@ -153,14 +153,13 @@ public class SqlProviderUtil {
   public static StringBuilder whereCustomStatements(
       String baseCollection, String baseColumn, int customBound, StringBuilder sb) {
     IntStream.rangeClosed(1, customBound)
-        .forEach(
-            x -> {
-              String column = baseColumn + "_" + x;
-              whereIn(baseCollection + x + "In", column, sb);
-              whereNotIn(baseCollection + x + "NotIn", column, sb);
-              whereLike(baseCollection + x + "Like", column, sb);
-              whereNotLike(baseCollection + x + "NotLike", column, sb);
-            });
+        .forEach(x -> {
+          String column = baseColumn + "_" + x;
+          whereIn(baseCollection + x + "In", column, sb);
+          whereNotIn(baseCollection + x + "NotIn", column, sb);
+          whereLike(baseCollection + x + "Like", column, sb);
+          whereNotLike(baseCollection + x + "NotLike", column, sb);
+        });
     return sb;
   }
 
@@ -172,14 +171,13 @@ public class SqlProviderUtil {
   public static StringBuilder whereCustomIntStatements(
       String baseCollection, String baseColumn, int customBound, StringBuilder sb) {
     IntStream.rangeClosed(1, customBound)
-        .forEach(
-            x -> {
-              String column = baseColumn + "_" + x;
-              whereIn(baseCollection + x + "In", column, sb);
-              whereNotIn(baseCollection + x + "NotIn", column, sb);
-              whereInInterval(baseCollection + x + "Within", column, sb);
-              whereNotInInterval(baseCollection + x + "NotWithin", column, sb);
-            });
+        .forEach(x -> {
+          String column = baseColumn + "_" + x;
+          whereIn(baseCollection + x + "In", column, sb);
+          whereNotIn(baseCollection + x + "NotIn", column, sb);
+          whereInInterval(baseCollection + x + "Within", column, sb);
+          whereNotInInterval(baseCollection + x + "NotWithin", column, sb);
+        });
     return sb;
   }
 }

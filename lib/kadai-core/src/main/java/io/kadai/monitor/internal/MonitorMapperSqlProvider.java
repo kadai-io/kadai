@@ -322,27 +322,25 @@ public class MonitorMapperSqlProvider {
   private static StringBuilder whereCustomStatements(
       String baseCollection, String baseColumn, int customBound, StringBuilder sb) {
     IntStream.rangeClosed(1, customBound)
-        .forEach(
-            x -> {
-              String column = baseColumn + "_" + x;
-              whereIn(baseCollection + x + "In", column, sb);
-              whereNotIn(baseCollection + x + "NotIn", column, sb);
-              whereLike(baseCollection + x + "Like", column, sb);
-            });
+        .forEach(x -> {
+          String column = baseColumn + "_" + x;
+          whereIn(baseCollection + x + "In", column, sb);
+          whereNotIn(baseCollection + x + "NotIn", column, sb);
+          whereLike(baseCollection + x + "Like", column, sb);
+        });
     return sb;
   }
 
   private static StringBuilder whereCustomIntStatements(
       String baseCollection, String baseColumn, int customBound, StringBuilder sb) {
     IntStream.rangeClosed(1, customBound)
-        .forEach(
-            x -> {
-              String column = baseColumn + "_" + x;
-              whereIn(baseCollection + x + "In", column, sb);
-              whereNotIn(baseCollection + x + "NotIn", column, sb);
-              whereInInterval(baseCollection + x + "Within", column, sb);
-              whereNotInInterval(baseCollection + x + "NotWithin", column, sb);
-            });
+        .forEach(x -> {
+          String column = baseColumn + "_" + x;
+          whereIn(baseCollection + x + "In", column, sb);
+          whereNotIn(baseCollection + x + "NotIn", column, sb);
+          whereInInterval(baseCollection + x + "Within", column, sb);
+          whereNotInInterval(baseCollection + x + "NotWithin", column, sb);
+        });
     return sb;
   }
 

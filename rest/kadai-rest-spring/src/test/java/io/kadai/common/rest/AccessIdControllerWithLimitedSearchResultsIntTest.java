@@ -47,9 +47,7 @@ class AccessIdControllerWithLimitedSearchResultsIntTest {
     ResponseEntity<Boolean> response =
         restClient
             .get()
-            .uri(
-                restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION)
-                    + "?access-id=user-b-2")
+            .uri(restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION) + "?access-id=user-b-2")
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
             .retrieve()
             .toEntity(Boolean.class);

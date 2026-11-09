@@ -20,8 +20,8 @@ import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { TaskService } from './task.service';
-import { RuntimeConfigService } from '../../shared/services/runtime-config/runtime-config.service';
-import { Task } from '../models/task';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { Task } from 'app/workplace/models/task';
 
 describe('TaskService', () => {
   let service: TaskService;

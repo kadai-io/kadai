@@ -27,8 +27,8 @@ import {
 } from '@angular/common/http';
 import { tap } from 'rxjs/operators';
 import { environment } from 'environments/environment';
-import { NotificationService } from '../services/notifications/notification.service';
-import { RequestInProgressService } from '../services/request-in-progress/request-in-progress.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 interface ErrorNotification {
   key: string;

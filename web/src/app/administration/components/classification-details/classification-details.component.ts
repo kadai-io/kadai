@@ -33,27 +33,26 @@ import { map, take, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { AsyncPipe } from '@angular/common';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import {
   ClassificationCategoryImages,
   CustomField,
   CustomFields,
   getCustomFields
-} from '../../../shared/models/customisation';
-import { Classification } from '../../../shared/models/classification';
-import { customFieldCount } from '../../../shared/models/classification-summary';
+} from 'app/shared/models/customisation';
+import { Classification } from 'app/shared/models/classification';
+import { customFieldCount } from 'app/shared/models/classification-summary';
 
 import {
   CopyClassification,
-  DeselectClassification,
   RemoveSelectedClassification,
   RestoreSelectedClassification,
   SaveCreatedClassification,
   SaveModifiedClassification,
   SelectClassification
-} from '../../../shared/store/classification-store/classification.actions';
-import { Pair } from '../../../shared/models/pair';
-import { trimForm } from '../../../shared/util/form-trimmer';
+} from 'app/shared/store/classification-store/classification.actions';
+import { Pair } from 'app/shared/models/pair';
+import { trimForm } from 'app/shared/util/form-trimmer';
 import { MatToolbar } from '@angular/material/toolbar';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatButton } from '@angular/material/button';
@@ -63,9 +62,9 @@ import { MatDivider } from '@angular/material/divider';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { FieldErrorDisplayComponent } from '../../../shared/components/field-error-display/field-error-display.component';
+import { FieldErrorDisplayComponent } from 'app/shared/components/field-error-display/field-error-display.component';
 import { MatSelect, MatSelectTrigger } from '@angular/material/select';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatOption } from '@angular/material/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';

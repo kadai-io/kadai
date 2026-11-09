@@ -27,8 +27,7 @@ public class TaskIdListRepresentationModel {
   @JsonProperty("taskIds")
   private final List<String> taskIds;
 
-  public TaskIdListRepresentationModel(
-        @JsonProperty("taskIds") List<String> taskIds) {
+  public TaskIdListRepresentationModel(@JsonProperty("taskIds") List<String> taskIds) {
     this.taskIds = taskIds;
   }
 

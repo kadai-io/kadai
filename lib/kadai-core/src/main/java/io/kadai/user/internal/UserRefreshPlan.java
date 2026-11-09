@@ -63,11 +63,8 @@ public record UserRefreshPlan(
         && orphanPermissionsToDelete.isEmpty();
   }
 
-  private static List<UserAccessIdRow> copyRows(
-      List<UserAccessIdRow> rows, String fieldName) {
-    return Objects.requireNonNull(rows, fieldName).stream()
-        .map(copyRow())
-        .toList();
+  private static List<UserAccessIdRow> copyRows(List<UserAccessIdRow> rows, String fieldName) {
+    return Objects.requireNonNull(rows, fieldName).stream().map(copyRow()).toList();
   }
 
   private static Function<UserAccessIdRow, UserAccessIdRow> copyRow() {

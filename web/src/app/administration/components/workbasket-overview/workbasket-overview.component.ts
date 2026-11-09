@@ -18,24 +18,20 @@
 
 import { Component, ElementRef, inject, OnInit, signal, viewChild, OnDestroy } from '@angular/core';
 import { Store } from '@ngxs/store';
-import { DomainSelectors } from '../../../shared/store/domain-store/domain.selectors';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, take, takeUntil } from 'rxjs/operators';
-import { ACTION } from '../../../shared/models/action';
-import { WorkbasketAndAction, WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
+import { WorkbasketAndAction, WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
 
-import {
-  CreateWorkbasket,
-  DeselectWorkbasket,
-  SelectWorkbasket
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { Workbasket } from '../../../shared/models/workbasket';
-import { WorkbasketListComponent } from '../workbasket-list/workbasket-list.component';
+import { CreateWorkbasket, SelectWorkbasket, DeselectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { WorkbasketListComponent } from 'app/administration/components/workbasket-list/workbasket-list.component';
 
 import { MatIcon } from '@angular/material/icon';
-import { WorkbasketDetailsComponent } from '../workbasket-details/workbasket-details.component';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { WorkbasketDetailsComponent } from 'app/administration/components/workbasket-details/workbasket-details.component';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
+import { ACTION } from 'app/shared/models/action';
 
 @Component({
   selector: 'kadai-administration-workbasket-overview',

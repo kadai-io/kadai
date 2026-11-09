@@ -24,10 +24,10 @@ import { Classification } from 'app/shared/models/classification';
 
 import { ClassificationPagingList } from 'app/shared/models/classification-paging-list';
 import { ClassificationQuerySortParameter, Sorting } from 'app/shared/models/sorting';
-import { RuntimeConfigService } from '../runtime-config/runtime-config.service';
-import { asUrlQueryString } from '../../util/query-parameters-v2';
-import { ClassificationQueryFilterParameter } from '../../models/classification-query-filter-parameter';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
+import { ClassificationQueryFilterParameter } from 'app/shared/models/classification-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
 
 @Injectable({
   providedIn: 'root'

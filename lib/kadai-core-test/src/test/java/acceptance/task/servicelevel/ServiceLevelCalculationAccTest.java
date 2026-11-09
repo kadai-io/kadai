@@ -181,10 +181,9 @@ class ServiceLevelCalculationAccTest {
       throws Exception {
     ClassificationSummary classificationSummary = classificationWithServiceLevel(TWO_HOURS);
 
-    assertThatCode(
-            () ->
-                createTaskWithPlannedAndDue(
-                    "2023-03-02T16:00:00.000Z", "2023-03-02T17:59:59.999Z", classificationSummary))
+    assertThatCode(() ->
+            createTaskWithPlannedAndDue(
+                "2023-03-02T16:00:00.000Z", "2023-03-02T17:59:59.999Z", classificationSummary))
         .doesNotThrowAnyException();
   }
 
@@ -194,10 +193,9 @@ class ServiceLevelCalculationAccTest {
       throws Exception {
     ClassificationSummary classificationSummary = classificationWithServiceLevel(ZERO_SECONDS);
 
-    assertThatCode(
-            () ->
-                createTaskWithPlannedAndDue(
-                    "2023-03-03T16:00:00.000Z", "2023-03-03T16:00:00.000Z", classificationSummary))
+    assertThatCode(() ->
+            createTaskWithPlannedAndDue(
+                "2023-03-03T16:00:00.000Z", "2023-03-03T16:00:00.000Z", classificationSummary))
         .doesNotThrowAnyException();
   }
 

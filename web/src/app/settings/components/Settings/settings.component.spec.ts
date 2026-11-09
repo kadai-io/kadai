@@ -19,11 +19,11 @@
 import { Observable } from 'rxjs';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { SettingsState } from '../../../shared/store/settings-store/settings.state';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { SettingsState } from 'app/shared/store/settings-store/settings.state';
 import { SettingsComponent } from './settings.component';
-import { settingsStateMock } from '../../../shared/store/mock-data/mock-store';
-import { SetSettings } from '../../../shared/store/settings-store/settings.actions';
+import { settingsStateMock } from 'app/shared/store/mock-data/mock-store';
+import { SetSettings } from 'app/shared/store/settings-store/settings.actions';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 

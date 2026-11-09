@@ -201,7 +201,8 @@ class ServiceLevelPriorityWithWorkingDaysCalculationAccTest extends AbstractAccT
           If you are reading this error message, \
           now satisfies one of the two conditions just described. \
           To avoid stopping a CI pipeline due to this flakiness, \
-          the .isCloseTo assertion will be skipped.""");
+          the .isCloseTo assertion will be skipped.\
+          """);
       return;
     }
 

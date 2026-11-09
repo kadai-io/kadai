@@ -1461,10 +1461,9 @@ public class KadaiConfiguration {
       final List<Field> fields = ReflectionUtil.retrieveAllFields(getClass());
       for (Field field : fields) {
         Optional.ofNullable(field.getAnnotation(KadaiProperty.class))
-            .flatMap(
-                kadaiProperty ->
-                    PropertyParser.getPropertyParser(field.getType())
-                        .parse(props, separator, field, kadaiProperty))
+            .flatMap(kadaiProperty ->
+                PropertyParser.getPropertyParser(field.getType())
+                    .parse(props, separator, field, kadaiProperty))
             .ifPresent(value -> setFieldValue(field, value));
       }
     }
@@ -1485,11 +1484,10 @@ public class KadaiConfiguration {
       classificationTypes = classificationTypes.stream().map(String::toUpperCase).toList();
       classificationCategoriesByType =
           classificationCategoriesByType.entrySet().stream()
-              .map(
-                  e ->
-                      Map.entry(
-                          e.getKey().toUpperCase(),
-                          e.getValue().stream().map(String::toUpperCase).toList()))
+              .map(e ->
+                  Map.entry(
+                      e.getKey().toUpperCase(),
+                      e.getValue().stream().map(String::toUpperCase).toList()))
               .sorted(Comparator.comparingInt(e -> classificationTypes.indexOf(e.getKey())))
               .collect(
                   Collectors.toMap(
@@ -1500,13 +1498,12 @@ public class KadaiConfiguration {
       roleMap =
           Arrays.stream(KadaiRole.values())
               .map(role -> Pair.of(role, roleMap.getOrDefault(role, Set.of())))
-              .map(
-                  pair ->
-                      Pair.of(
-                          pair.getLeft(),
-                          pair.getRight().stream()
-                              .map(String::toLowerCase)
-                              .collect(Collectors.toSet())))
+              .map(pair ->
+                  Pair.of(
+                      pair.getLeft(),
+                      pair.getRight().stream()
+                          .map(String::toLowerCase)
+                          .collect(Collectors.toSet())))
               .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
     }
 

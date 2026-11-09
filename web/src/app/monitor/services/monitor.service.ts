@@ -20,9 +20,9 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ChartData } from 'app/monitor/models/chart-data';
-import { ReportData } from '../models/report-data';
-import { asUrlQueryString } from '../../shared/util/query-parameters-v2';
-import { TaskState } from '../../shared/models/task-state';
+import { ReportData } from 'app/monitor/models/report-data';
+import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
+import { TaskState } from 'app/shared/models/task-state';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 const monitorUrl = '/v1/monitor';

@@ -324,9 +324,8 @@ class CreateTaskAccTest {
         .contains(
             IntStream.rangeClosed(1, 27)
                 .mapToObj(String::valueOf)
-                .map(
-                    number ->
-                        String.format("Property_%s=Property Value of Property_%s", number, number))
+                .map(number ->
+                    String.format("Property_%s=Property Value of Property_%s", number, number))
                 .collect(Collectors.toSet()));
     assertThat(firstAttachment.getCreated()).isNotNull();
     assertThat(firstAttachment.getModified()).isNotNull();

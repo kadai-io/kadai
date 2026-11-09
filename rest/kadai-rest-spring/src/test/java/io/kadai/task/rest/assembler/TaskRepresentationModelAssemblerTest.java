@@ -569,9 +569,8 @@ class TaskRepresentationModelAssemblerTest {
       Map<String, String> customAttributes,
       List<TaskRepresentationModel.CustomAttribute> repModelAttributes) {
     assertThat(repModelAttributes).hasSize(customAttributes.size());
-    repModelAttributes.forEach(
-        attribute ->
-            assertThat(attribute.getValue()).isEqualTo(customAttributes.get(attribute.getKey())));
+    repModelAttributes.forEach(attribute ->
+        assertThat(attribute.getValue()).isEqualTo(customAttributes.get(attribute.getKey())));
   }
 
   private void testEqualityAttachments(

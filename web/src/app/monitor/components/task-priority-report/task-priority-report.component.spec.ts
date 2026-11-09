@@ -26,10 +26,10 @@ import { BehaviorSubject } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TaskPriorityReportComponent } from './task-priority-report.component';
-import { TaskPriorityReportFilterStateService } from '../../services/task-priority-report-filter-state.service';
-import { TaskPriorityReportDataService } from '../../services/task-priority-report-data.service';
-import { SettingMembers } from '../../../settings/components/Settings/expected-members';
-import { ReportData } from '../../models/report-data';
+import { TaskPriorityReportFilterStateService } from 'app/monitor/services/task-priority-report-filter-state.service';
+import { TaskPriorityReportDataService } from 'app/monitor/services/task-priority-report-data.service';
+import { SettingMembers } from 'app/settings/components/Settings/expected-members';
+import { ReportData } from 'app/monitor/models/report-data';
 import { Settings } from 'app/settings/models/settings';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideStore, State } from '@ngxs/store';

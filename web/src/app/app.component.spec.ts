@@ -30,7 +30,6 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from './shared/services/selected-route/selected-route';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { WindowRefService } from './shared/services/window/window.service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -103,7 +102,6 @@ describe('AppComponent', () => {
         { provide: SidenavService, useValue: sidenavServiceMock },
         { provide: OrientationService, useValue: orientationServiceMock },
         { provide: WindowRefService, useValue: windowRefServiceMock },
-        provideAngularSvgIcon(),
         provideNoopAnimations(),
         provideHttpClientTesting(),
         provideStore([DomainState]),

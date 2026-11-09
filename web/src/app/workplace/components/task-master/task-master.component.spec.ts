@@ -22,30 +22,29 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { By } from '@angular/platform-browser';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { TaskMasterComponent } from './task-master.component';
-import { TaskListToolbarComponent } from '../task-list-toolbar/task-list-toolbar.component';
-import { TaskListComponent } from '../task-list/task-list.component';
-import { PaginationComponent } from '../../../shared/components/pagination/pagination.component';
+import { TaskListToolbarComponent } from 'app/workplace/components/task-list-toolbar/task-list-toolbar.component';
+import { TaskListComponent } from 'app/workplace/components/task-list/task-list.component';
+import { PaginationComponent } from 'app/shared/components/pagination/pagination.component';
 import { provideStore, Store } from '@ngxs/store';
-import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
-import { WorkplaceState } from '../../../shared/store/workplace-store/workplace.state';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { TaskService } from '../../services/task.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { OrientationService } from '../../../shared/services/orientation/orientation.service';
-import { Orientation } from '../../../shared/models/orientation';
-import { Task } from '../../models/task';
-import { ObjectReference } from '../../models/object-reference';
-import { SelectTask, SelectWorkbasket, SetPageSize } from '../../../shared/store/task-store/task.actions';
-import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { UserInfo } from '../../../shared/models/user-info';
+import { TaskWorkflowState } from 'app/shared/store/task-store/task.state';
+import { WorkplaceState } from 'app/shared/store/workplace-store/workplace.state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { TaskService } from 'app/workplace/services/task.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { OrientationService } from 'app/shared/services/orientation/orientation.service';
+import { Orientation } from 'app/shared/models/orientation';
+import { Task } from 'app/workplace/models/task';
+import { ObjectReference } from 'app/workplace/models/object-reference';
+import { SelectTask, SelectWorkbasket, SetPageSize } from 'app/shared/store/task-store/task.actions';
+import { selectedWorkbasketMock } from 'app/shared/store/mock-data/mock-store';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { UserInfo } from 'app/shared/models/user-info';
 
 @Component({ selector: 'kadai-task-list-toolbar', template: '', standalone: true })
 class StubTaskListToolbarComponent {
@@ -231,7 +230,6 @@ describe('TaskMasterComponent - HTML template without overrideComponent', () => 
         { provide: Router, useValue: routerMock },
         { provide: ActivatedRoute, useValue: { queryParams: queryParams$.asObservable(), parent: {} } },
         provideNoopAnimations(),
-        provideAngularSvgIcon(),
         provideHttpClientTesting()
       ]
     }).compileComponents();

@@ -20,12 +20,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgxsModule, Store } from '@ngxs/store';
 import { WorkbasketFilterComponent } from './workbasket-filter.component';
-import { FilterState } from '../../store/filter-store/filter.state';
-import { SetWorkbasketFilter } from '../../store/filter-store/filter.actions';
-import { WorkbasketType } from '../../models/workbasket-type';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { SetWorkbasketFilter } from 'app/shared/store/filter-store/filter.actions';
+import { WorkbasketType } from 'app/shared/models/workbasket-type';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { provideAnimations } from '@angular/platform-browser/animations';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 describe('WorkbasketFilterComponent', () => {
@@ -44,7 +43,7 @@ describe('WorkbasketFilterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketFilterComponent, NgxsModule.forRoot([FilterState])],
-      providers: [provideAnimations(), provideAngularSvgIcon(), provideHttpClientTesting()]
+      providers: [provideAnimations(), provideHttpClientTesting()]
     }).compileComponents();
 
     store = TestBed.inject(Store);

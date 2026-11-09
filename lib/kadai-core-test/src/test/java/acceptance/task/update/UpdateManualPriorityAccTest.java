@@ -163,9 +163,7 @@ class UpdateManualPriorityAccTest {
     Classification primaryClassification =
         defaultTestClassification().priority(1).buildAndStore(classificationService);
     Classification attachmentClassification =
-        defaultTestClassification()
-            .priority(-3)
-            .buildAndStore(classificationService);
+        defaultTestClassification().priority(-3).buildAndStore(classificationService);
     Attachment attachment = taskService.newAttachment();
     attachment.setClassificationSummary(attachmentClassification.asSummary());
     attachment.setObjectReference(defaultObjectReference);

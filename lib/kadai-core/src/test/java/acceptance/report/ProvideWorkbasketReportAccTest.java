@@ -510,8 +510,7 @@ class ProvideWorkbasketReportAccTest extends AbstractReportAccTest {
 
   @WithAccessId(user = "monitor")
   @Test
-  void should_ApplyDomainFilterToAllCombinedFilters_When_RetrievingCustomValues()
-      throws Exception {
+  void should_ApplyDomainFilterToAllCombinedFilters_When_RetrievingCustomValues() throws Exception {
     List<String> customValues =
         MONITOR_SERVICE
             .createWorkbasketReportBuilder()

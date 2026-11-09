@@ -35,8 +35,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 /**
- * Acceptance test documenting the transactional boundary of {@code
- * TaskServiceImpl#createTask()}.
+ * Acceptance test documenting the transactional boundary of {@code TaskServiceImpl#createTask()}.
  *
  * <p>{@code postprocessTaskCreation()} runs inside the DB transaction, consistent with other SPI
  * hooks (e.g. {@code afterRequestReview}, {@code afterRequestChanges}). A failure in
@@ -45,8 +44,8 @@ import org.junit.jupiter.api.Test;
  */
 @KadaiIntegrationTest
 @WithServiceProvider(
-        serviceProviderInterface = CreateTaskPostprocessor.class,
-        serviceProviders = ThrowingCreateTaskPostProcessorProvider.class)
+    serviceProviderInterface = CreateTaskPostprocessor.class,
+    serviceProviders = ThrowingCreateTaskPostProcessorProvider.class)
 class CreateTaskPostProcessingTransactionAccTest {
 
   @KadaiInject TaskService taskService;
@@ -57,21 +56,21 @@ class CreateTaskPostProcessingTransactionAccTest {
   @WithAccessId(user = "businessadmin")
   @BeforeAll
   void setup(ClassificationService classificationService, WorkbasketService workbasketService)
-          throws Exception {
+      throws Exception {
     classificationSummary =
-            DefaultTestEntities.defaultTestClassification()
-                    .buildAndStoreAsSummary(classificationService);
+        DefaultTestEntities.defaultTestClassification()
+            .buildAndStoreAsSummary(classificationService);
 
     workbasketSummary =
-            DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
+        DefaultTestEntities.defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService);
 
     WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
-            .accessId("user-1-1")
-            .workbasketId(workbasketSummary.getId())
-            .permission(WorkbasketPermission.READ)
-            .permission(WorkbasketPermission.OPEN)
-            .permission(WorkbasketPermission.APPEND)
-            .buildAndStore(workbasketService);
+        .accessId("user-1-1")
+        .workbasketId(workbasketSummary.getId())
+        .permission(WorkbasketPermission.READ)
+        .permission(WorkbasketPermission.OPEN)
+        .permission(WorkbasketPermission.APPEND)
+        .buildAndStore(workbasketService);
   }
 
   @WithAccessId(user = "user-1-1")
@@ -82,8 +81,8 @@ class CreateTaskPostProcessingTransactionAccTest {
     newTaskToCreate.setPrimaryObjRef(DefaultTestEntities.defaultTestObjectReference().build());
 
     assertThatThrownBy(() -> taskService.createTask(newTaskToCreate))
-            .isInstanceOf(UnsupportedOperationException.class)
-            .hasMessageContaining(ThrowingCreateTaskPostProcessorProvider.ERROR_MESSAGE);
+        .isInstanceOf(UnsupportedOperationException.class)
+        .hasMessageContaining(ThrowingCreateTaskPostProcessorProvider.ERROR_MESSAGE);
   }
 
   static class ThrowingCreateTaskPostProcessorProvider implements CreateTaskPostprocessor {

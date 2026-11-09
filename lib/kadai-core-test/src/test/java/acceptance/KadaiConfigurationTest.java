@@ -592,17 +592,16 @@ class KadaiConfigurationTest {
       ReflectionUtil.retrieveAllFields(KadaiConfiguration.class).stream()
           .filter(f -> !ignoredFields.contains(f.getName()))
           .forEach(
-              CheckedConsumer.rethrowing(
-                  field -> {
-                    field.setAccessible(true);
-                    Object value = field.get(configuration);
-                    Object defaultValue = field.get(defaultConfiguration);
-                    assertThat(value)
-                        .as(
-                            "Field '%s' (%s) should not be a default configuration value",
-                            field.getName(), kadaiPropertyNameByFieldName.get(field.getName()))
-                        .isNotEqualTo(defaultValue);
-                  }));
+              CheckedConsumer.rethrowing(field -> {
+                field.setAccessible(true);
+                Object value = field.get(configuration);
+                Object defaultValue = field.get(defaultConfiguration);
+                assertThat(value)
+                    .as(
+                        "Field '%s' (%s) should not be a default configuration value",
+                        field.getName(), kadaiPropertyNameByFieldName.get(field.getName()))
+                    .isNotEqualTo(defaultValue);
+              }));
     }
   }
 
@@ -718,13 +717,12 @@ class KadaiConfigurationTest {
       Stream<Field> fields =
           ReflectionUtil.retrieveAllFields(KadaiConfiguration.class).stream()
               .filter(f -> Map.class.isAssignableFrom(f.getType()))
-              .filter(
-                  f -> {
-                    ParameterizedType genericType = (ParameterizedType) f.getGenericType();
-                    Class<?> childClass =
-                        ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
-                    return Collection.class.isAssignableFrom(childClass);
-                  });
+              .filter(f -> {
+                ParameterizedType genericType = (ParameterizedType) f.getGenericType();
+                Class<?> childClass =
+                    ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
+                return Collection.class.isAssignableFrom(childClass);
+              });
 
       // when
       KadaiConfiguration configuration = builder.build();
@@ -737,18 +735,17 @@ class KadaiConfigurationTest {
             Map<?, Collection<?>> o = (Map<?, Collection<?>>) field.get(configuration);
 
             o.values()
-                .forEach(
-                    collection -> {
-                      // PLEASE do not change this to the _assertThatThrownBy_ syntax.
-                      // That syntax does not respect the given description and thus might confuse
-                      // future devs.
-                      assertThatExceptionOfType(UnsupportedOperationException.class)
-                          .as(
-                              "Nested Collection within Map '%s' "
-                                  + "should be an unmodifiable Collection",
-                              field.getName())
-                          .isThrownBy(() -> collection.add(null));
-                    });
+                .forEach(collection -> {
+                  // PLEASE do not change this to the _assertThatThrownBy_ syntax.
+                  // That syntax does not respect the given description and thus might confuse
+                  // future devs.
+                  assertThatExceptionOfType(UnsupportedOperationException.class)
+                      .as(
+                          "Nested Collection within Map '%s' "
+                              + "should be an unmodifiable Collection",
+                          field.getName())
+                      .isThrownBy(() -> collection.add(null));
+                });
           };
 
       return DynamicTest.stream(fields, Field::getName, testCase);
@@ -791,57 +788,53 @@ class KadaiConfigurationTest {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Collection.class.isAssignableFrom(f.getType()))
           .forEach(
-              CheckedConsumer.rethrowing(
-                  f -> {
-                    f.setAccessible(true);
-                    Supplier<Collection<?>> collectionSupplier =
-                        mutableCollectionByClass.get(f.getType());
-                    if (collectionSupplier == null) {
-                      throw new SystemException(
-                          String.format("Unknown Collection class '%s'", f.getType()));
-                    }
-                    f.set(builder, collectionSupplier.get());
-                  }));
+              CheckedConsumer.rethrowing(f -> {
+                f.setAccessible(true);
+                Supplier<Collection<?>> collectionSupplier =
+                    mutableCollectionByClass.get(f.getType());
+                if (collectionSupplier == null) {
+                  throw new SystemException(
+                      String.format("Unknown Collection class '%s'", f.getType()));
+                }
+                f.set(builder, collectionSupplier.get());
+              }));
     }
 
     private void initializeWithMutableMaps(Builder builder) throws Exception {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Map.class.isAssignableFrom(f.getType()))
           .forEach(
-              CheckedConsumer.rethrowing(
-                  f -> {
-                    f.setAccessible(true);
-                    f.set(builder, new HashMap<>());
-                  }));
+              CheckedConsumer.rethrowing(f -> {
+                f.setAccessible(true);
+                f.set(builder, new HashMap<>());
+              }));
     }
 
     private void initializeWithMutableCollectionsAsMapValues(Builder builder) throws Exception {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Map.class.isAssignableFrom(f.getType()))
-          .filter(
-              f -> {
+          .filter(f -> {
+            ParameterizedType genericType = (ParameterizedType) f.getGenericType();
+            Class<?> childClass =
+                ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
+            return Collection.class.isAssignableFrom(childClass);
+          })
+          .forEach(
+              CheckedConsumer.rethrowing(f -> {
                 ParameterizedType genericType = (ParameterizedType) f.getGenericType();
                 Class<?> childClass =
                     ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
-                return Collection.class.isAssignableFrom(childClass);
-              })
-          .forEach(
-              CheckedConsumer.rethrowing(
-                  f -> {
-                    ParameterizedType genericType = (ParameterizedType) f.getGenericType();
-                    Class<?> childClass =
-                        ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
 
-                    Supplier<Collection<?>> collectionSupplier =
-                        mutableCollectionByClass.get(childClass);
-                    if (collectionSupplier == null) {
-                      throw new SystemException(
-                          String.format("Unknown Collection class '%s'", f.getType()));
-                    }
+                Supplier<Collection<?>> collectionSupplier =
+                    mutableCollectionByClass.get(childClass);
+                if (collectionSupplier == null) {
+                  throw new SystemException(
+                      String.format("Unknown Collection class '%s'", f.getType()));
+                }
 
-                    f.setAccessible(true);
-                    f.set(builder, Map.of("", collectionSupplier.get()));
-                  }));
+                f.setAccessible(true);
+                f.set(builder, Map.of("", collectionSupplier.get()));
+              }));
     }
   }
 
@@ -1006,8 +999,7 @@ class KadaiConfigurationTest {
                   TestContainerExtension.createDataSourceForH2(), false, "KADAI")
               .taskCleanupJobMinimumAgeByDomain(overrides);
 
-      assertThatThrownBy(builder::build)
-          .isInstanceOf(InvalidArgumentException.class);
+      assertThatThrownBy(builder::build).isInstanceOf(InvalidArgumentException.class);
     }
 
     @Test
@@ -1017,8 +1009,7 @@ class KadaiConfigurationTest {
                   TestContainerExtension.createDataSourceForH2(), false, "KADAI")
               .taskCleanupJobMinimumAgeByDomain(Map.of("   ", Duration.ofDays(1)));
 
-      assertThatThrownBy(builder::build)
-          .isInstanceOf(InvalidArgumentException.class);
+      assertThatThrownBy(builder::build).isInstanceOf(InvalidArgumentException.class);
     }
 
     @Test
@@ -1062,8 +1053,7 @@ class KadaiConfigurationTest {
               .domains(List.of("DOMAIN_A"))
               .taskCleanupJobMinimumAgeByDomain(Map.of("DOMAIN_A", Duration.ofDays(-1)));
 
-      assertThatThrownBy(builder::build)
-          .isInstanceOf(InvalidArgumentException.class);
+      assertThatThrownBy(builder::build).isInstanceOf(InvalidArgumentException.class);
     }
 
     @ParameterizedTest

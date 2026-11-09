@@ -19,7 +19,7 @@
 import { Injectable, signal } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { UserInfo } from 'app/shared/models/user-info';
-import { Version } from '../../models/version';
+import { Version } from 'app/shared/models/version';
 
 @Injectable({
   providedIn: 'root'

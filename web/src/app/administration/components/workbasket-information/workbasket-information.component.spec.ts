@@ -17,32 +17,32 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { AccessIdsService } from '../../../shared/services/access-ids/access-ids.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { ACTION } from '../../../shared/models/action';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { ACTION } from 'app/shared/models/action';
 import {
   MarkWorkbasketForDeletion,
   RemoveDistributionTarget,
   UpdateWorkbasket
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
   workbasketReadStateMock
-} from '../../../shared/store/mock-data/mock-store';
+} from 'app/shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   triggerWorkBasketSaved: vi.fn(),
@@ -75,13 +75,13 @@ describe('WorkbasketInformationComponent', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketInformationComponent],
       providers: [
+        { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
         provideStore([EngineConfigurationState, WorkbasketState]),
         provideRouter([{ path: '**', children: [] }]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: AccessIdsService, useValue: accessIdsServiceMock },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

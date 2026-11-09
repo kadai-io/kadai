@@ -158,17 +158,8 @@ class UserRefreshBatchWriterTest {
     new UserRefreshBatchWriter(connection, batchSize)
         .apply(
             new UserRefreshPlan(
-                List.of(),
-                List.of(),
-                ids,
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                List.of(),
-                0,
-                0));
+                List.of(), List.of(), ids, List.of(), List.of(), List.of(), List.of(), List.of(),
+                List.of(), 0, 0));
 
     verify(delete, times(expectedFlushes)).executeBatch();
   }
@@ -206,8 +197,7 @@ class UserRefreshBatchWriterTest {
     UserRefreshBatchWriter writer = new UserRefreshBatchWriter(connection, 5);
     UserRefreshPlan plan = plan(List.of(user("one", "data")), List.of());
 
-    assertThatThrownBy(() -> writer.apply(plan))
-        .isInstanceOf(SystemException.class);
+    assertThatThrownBy(() -> writer.apply(plan)).isInstanceOf(SystemException.class);
   }
 
   @Test
@@ -261,8 +251,7 @@ class UserRefreshBatchWriterTest {
             List.of(),
             List.of());
 
-    assertThatThrownBy(() -> writer.apply(plan))
-        .isInstanceOf(SystemException.class);
+    assertThatThrownBy(() -> writer.apply(plan)).isInstanceOf(SystemException.class);
 
     verify(insert).close();
     verify(group).close();
@@ -273,8 +262,7 @@ class UserRefreshBatchWriterTest {
     Connection connection = mock(Connection.class);
     statement(connection, UserRefreshBatchWriter.INSERT_USER_SQL);
 
-    new UserRefreshBatchWriter(connection, 5)
-        .apply(plan(List.of(user("one", "data")), List.of()));
+    new UserRefreshBatchWriter(connection, 5).apply(plan(List.of(user("one", "data")), List.of()));
 
     verify(connection, never()).commit();
     verify(connection, never()).rollback();
@@ -297,17 +285,8 @@ class UserRefreshBatchWriterTest {
   private static UserRefreshPlan plan(
       List<UserRefreshState> inserts, List<UserRefreshState> updates) {
     return new UserRefreshPlan(
-        inserts,
-        updates,
-        List.of(),
-        List.of(),
-        List.of(),
-        List.of(),
-        List.of(),
-        List.of(),
-        List.of(),
-        0,
-        0);
+        inserts, updates, List.of(), List.of(), List.of(), List.of(), List.of(), List.of(),
+        List.of(), 0, 0);
   }
 
   private static UserRefreshPlan plan(

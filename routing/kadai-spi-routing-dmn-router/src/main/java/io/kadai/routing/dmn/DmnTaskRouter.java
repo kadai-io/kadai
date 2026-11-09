@@ -143,18 +143,17 @@ public class DmnTaskRouter implements TaskRoutingProvider {
       // Unfortunately the WorkbasketQuery does not support a keyDomainIn operation.
       // Therefore we fetch every workbasket separately
 
-      kadaiEngine.runAsAdmin(
-          () -> {
-            try {
-              return workbasketService.getWorkbasket(workbasketKey, domain);
-            } catch (Exception e) {
-              throw new SystemException(
-                  String.format(
-                      "Unknown workbasket defined in DMN Table. key: '%s', domain: '%s'",
-                      workbasketKey, domain),
-                  e);
-            }
-          });
+      kadaiEngine.runAsAdmin(() -> {
+        try {
+          return workbasketService.getWorkbasket(workbasketKey, domain);
+        } catch (Exception e) {
+          throw new SystemException(
+              String.format(
+                  "Unknown workbasket defined in DMN Table. key: '%s', domain: '%s'",
+                  workbasketKey, domain),
+              e);
+        }
+      });
     }
   }
 }

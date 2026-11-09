@@ -24,11 +24,7 @@ import io.kadai.task.api.models.TaskSummary;
 public class TaskTransferredEvent extends TaskHistoryEvent {
 
   public TaskTransferredEvent(
-      String id,
-      TaskSummary task,
-      String oldWorkbasketId,
-      String newWorkbasketId,
-      String details) {
+      String id, TaskSummary task, String oldWorkbasketId, String newWorkbasketId, String details) {
     super(id, task, details);
     eventType = TaskHistoryEventType.TRANSFERRED.getName();
     created = task.getModified();

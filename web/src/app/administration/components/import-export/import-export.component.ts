@@ -24,7 +24,7 @@ import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors'
 import { FetchDomains } from 'app/shared/store/domain-store/domain.actions';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { ImportExportService } from 'app/administration/services/import-export.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { Observable, Subject } from 'rxjs';
 import { HotToastService } from '@ngneat/hot-toast';
 import { takeUntil } from 'rxjs/operators';

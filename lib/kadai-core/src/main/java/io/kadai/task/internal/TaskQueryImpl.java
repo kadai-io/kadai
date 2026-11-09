@@ -2073,17 +2073,16 @@ public class TaskQueryImpl implements TaskQuery {
   }
 
   public List<TaskSummary> list() {
-    return kadaiEngine.executeInDatabaseConnection(
-        () -> {
-          checkForIllegalParamCombinations();
-          checkOpenReadAndReadTasksPermissionForSpecifiedWorkbaskets();
-          setupJoinAndOrderParameters();
-          setupAccessIds();
-          List<TaskSummaryImpl> tasks =
-              kadaiEngine.getSqlSession().selectList(getLinkToMapperScript(), this);
+    return kadaiEngine.executeInDatabaseConnection(() -> {
+      checkForIllegalParamCombinations();
+      checkOpenReadAndReadTasksPermissionForSpecifiedWorkbaskets();
+      setupJoinAndOrderParameters();
+      setupAccessIds();
+      List<TaskSummaryImpl> tasks =
+          kadaiEngine.getSqlSession().selectList(getLinkToMapperScript(), this);
 
-          return taskService.augmentTaskSummariesByContainedSummariesWithPartitioning(tasks);
-        });
+      return taskService.augmentTaskSummariesByContainedSummariesWithPartitioning(tasks);
+    });
   }
 
   @Override

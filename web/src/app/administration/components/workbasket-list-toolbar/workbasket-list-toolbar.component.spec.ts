@@ -24,15 +24,14 @@ import { DomainState } from '../../../shared/store/domain-store/domain.state';
 import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
 import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { Observable, of } from 'rxjs';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
-import { ACTION } from '../../../shared/models/action';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { CreateWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
+import { ACTION } from 'app/shared/models/action';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { provideRouter, Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('WorkbasketListToolbarComponent', () => {
   let fixture: ComponentFixture<WorkbasketListToolbarComponent>;
@@ -49,8 +48,7 @@ describe('WorkbasketListToolbarComponent', () => {
         provideStore([WorkbasketState, FilterState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

@@ -43,15 +43,14 @@ class SqlConnectionRunnerAccTest extends AbstractAccTest {
     String taskId = "TKI:000000000000000000000000000000000050";
 
     // when
-    runner.runWithConnection(
-        connection -> {
-          PreparedStatement preparedStatement =
-              connection.prepareStatement("select * from TASK where ID = ?");
-          preparedStatement.setString(1, taskId);
-          ResultSet resultSet = preparedStatement.executeQuery();
-          // then
-          assertThat(resultSet.next()).isTrue();
-        });
+    runner.runWithConnection(connection -> {
+      PreparedStatement preparedStatement =
+          connection.prepareStatement("select * from TASK where ID = ?");
+      preparedStatement.setString(1, taskId);
+      ResultSet resultSet = preparedStatement.executeQuery();
+      // then
+      assertThat(resultSet.next()).isTrue();
+    });
   }
 
   @Test
@@ -63,10 +62,9 @@ class SqlConnectionRunnerAccTest extends AbstractAccTest {
     // when
     ThrowingCallable code =
         () ->
-            runner.runWithConnection(
-                connection -> {
-                  throw expectedException;
-                });
+            runner.runWithConnection(connection -> {
+              throw expectedException;
+            });
 
     // then
     assertThatThrownBy(code).isInstanceOf(SystemException.class).hasCause(expectedException);

@@ -17,39 +17,35 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
+import { WORKBASKETS_ROUTE } from 'app/shared/util/administration-routes';
 import { WorkbasketDetailsComponent } from './workbasket-details.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import { ACTION } from '../../../shared/models/action';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { DomainState } from '../../../shared/store/domain-store/domain.state';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
+import { ACTION } from 'app/shared/models/action';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
   workbasketReadStateMock
-} from '../../../shared/store/mock-data/mock-store';
+} from 'app/shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import {
   CopyWorkbasket,
   CreateWorkbasket,
-  DeselectWorkbasket,
   OnButtonPressed,
   SaveNewWorkbasket,
-  SelectComponent,
   UpdateWorkbasket
-} from '../../../shared/store/workbasket-store/workbasket.actions';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { provideRouter, Router } from '@angular/router';
-import { WorkbasketComponent } from '../../models/workbasket-component';
+import { WorkbasketComponent } from 'app/models/workbasket-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
-import { ButtonAction } from '../../models/button-action';
+import { ButtonAction } from 'app/administration/models/button-action';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   getWorkBasket: vi.fn().mockReturnValue(of(selectedWorkbasketMock)),
@@ -86,8 +82,7 @@ describe('WorkbasketDetailsComponent', () => {
         provideRouter([{ path: '**', children: [] }]),
         provideNoopAnimations(),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

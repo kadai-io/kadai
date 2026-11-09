@@ -20,24 +20,29 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { WorkbasketDistributionTargetsComponent } from './workbasket-distribution-targets.component';
 import { Observable, of } from 'rxjs';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { Actions, provideStore, Store } from '@ngxs/store';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
 import { ActivatedRoute } from '@angular/router';
+<<<<<<< HEAD
 import { engineConfigurationMock, workbasketReadStateMock } from '../../../shared/store/mock-data/mock-store';
 import { FilterState } from '../../../shared/store/filter-store/filter.state';
+=======
+import { engineConfigurationMock, workbasketReadStateMock } from 'app/shared/store/mock-data/mock-store';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+>>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { Side } from '../../models/workbasket-distribution-enums';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { Side } from 'app/administration/models/workbasket-distribution-enums';
 import {
   FetchAvailableDistributionTargets,
   FetchWorkbasketDistributionTargets,
   UpdateWorkbasketDistributionTargets
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { ClearWorkbasketFilter } from '../../../shared/store/filter-store/filter.actions';
-import { ButtonAction } from '../../models/button-action';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { ClearWorkbasketFilter } from 'app/shared/store/filter-store/filter.actions';
+import { ButtonAction } from 'app/administration/models/button-action';
 
 const activatedRouteMock = {
   firstChild: {
@@ -69,7 +74,6 @@ describe('WorkbasketDistributionTargetsComponent', () => {
       imports: [WorkbasketDistributionTargetsComponent],
       providers: [
         provideStore([WorkbasketState, FilterState]),
-        provideAngularSvgIcon(),
 
         provideHttpClientTesting(),
         { provide: WorkbasketService, useValue: workbasketServiceSpy },

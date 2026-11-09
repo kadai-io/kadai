@@ -18,24 +18,23 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
+import { CLASSIFICATIONS_ROUTE } from 'app/shared/util/administration-routes';
 import { Component, DebugElement, input } from '@angular/core';
-import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { DomainState } from '../../../shared/store/domain-store/domain.state';
-import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
-import { ImportExportService } from '../../services/import-export.service';
-import { ClassificationState } from '../../../shared/store/classification-store/classification.state';
+import { Actions, provideStore, Store } from '@ngxs/store';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { ImportExportService } from 'app/administration/services/import-export.service';
+import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
 import { ClassificationListComponent } from './classification-list.component';
-import { classificationStateMock, engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
+import { classificationStateMock, engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import { CreateClassification } from '../../../shared/store/classification-store/classification.actions';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { By } from '@angular/platform-browser';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { ClassificationCategoriesService } from '../../../shared/services/classification-categories/classification-categories.service';
+import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon, SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({
@@ -68,7 +67,6 @@ describe('ClassificationListComponent', () => {
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
     })
@@ -387,7 +385,6 @@ describe('ClassificationListComponent — HTML template coverage without overrid
         provideStore([ClassificationState, EngineConfigurationState, DomainState]),
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         provideNoopAnimations(),
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy }

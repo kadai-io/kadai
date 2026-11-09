@@ -16,16 +16,16 @@
  *
  */
 
-import { Workbasket } from '../../models/workbasket';
-import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../models/sorting';
-import { ACTION } from '../../models/action';
-import { WorkbasketAccessItemWrite } from '../../models/workbasket-access-items';
-import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
-import { ButtonAction } from '../../../administration/models/button-action';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { WorkbasketSummary } from '../../models/workbasket-summary';
-import { Side } from '../../../administration/models/workbasket-distribution-enums';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
+import { ACTION } from 'app/shared/models/action';
+import { WorkbasketAccessItemWrite } from 'app/shared/models/workbasket-access-items';
+import { WorkbasketComponent } from 'app/administration/models/workbasket-component';
+import { ButtonAction } from 'app/administration/models/button-action';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
+import { Side } from 'app/administration/models/workbasket-distribution-enums';
 
 // Workbasket List
 export class GetWorkbasketsSummary {

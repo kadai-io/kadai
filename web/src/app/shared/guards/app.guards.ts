@@ -20,10 +20,10 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { KadaiEngineService } from '../services/kadai-engine/kadai-engine.service';
-import { BusinessAdminRoles } from '../roles/business-admin.roles';
-import { MonitorRoles } from '../roles/monitor.roles';
-import { UserRoles } from '../roles/user.roles';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { BusinessAdminRoles } from 'app/shared/roles/business-admin.roles';
+import { MonitorRoles } from 'app/shared/roles/monitor.roles';
+import { UserRoles } from 'app/shared/roles/user.roles';
 
 export const roleGuard =
   (roles: string[], fallbackUrl: string): CanActivateFn =>

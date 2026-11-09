@@ -36,12 +36,18 @@ import {
   UpdateClassification
 } from './classification.actions';
 
+<<<<<<< HEAD
 import { ClassificationCategoriesService } from '../../services/classification-categories/classification-categories.service';
 import { ClassificationsService } from '../../services/classifications/classifications.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { DomainState } from '../domain-store/domain.state';
 import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
 import { RuntimeConfigService } from '../../services/runtime-config/runtime-config.service';
+=======
+import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+>>>>>>> f865f5da6bf8948afb01b104ea178fdf075bcd13
 import { ClassificationSelectors } from './classification.selectors';
 
 const mockClassificationTypes = {

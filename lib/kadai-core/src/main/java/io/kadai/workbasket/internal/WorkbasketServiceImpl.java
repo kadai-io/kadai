@@ -68,9 +68,11 @@ import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -180,17 +182,16 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       workbasketMapper.insert(workbasket);
 
-      eventPublisher.publishing(
-          () -> {
-            String details =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    newWorkbasket("", MASTER_DOMAIN), newWorkbasket);
+      eventPublisher.publishing(() -> {
+        String details =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(
+                newWorkbasket("", MASTER_DOMAIN), newWorkbasket);
 
-            return new WorkbasketCreatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                newWorkbasket,
-                details);
-          });
+        return new WorkbasketCreatedEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+            newWorkbasket,
+            details);
+      });
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Method createWorkbasket() created Workbasket '{}'", workbasket);
       }
@@ -231,6 +232,7 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       }
 
       checkModifiedHasNotChanged(oldWorkbasket, workbasketImplToUpdate);
+      validateAndPreserveCreated(oldWorkbasket, workbasketImplToUpdate);
       workbasketImplToUpdate.setModified(Instant.now());
 
       if (workbasketImplToUpdate.getId() == null || workbasketImplToUpdate.getId().isEmpty()) {
@@ -239,17 +241,16 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         workbasketMapper.update(workbasketImplToUpdate);
       }
 
-      eventPublisher.publishing(
-          () -> {
-            String details =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    oldWorkbasket, workbasketToUpdate);
+      eventPublisher.publishing(() -> {
+        String details =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(
+                oldWorkbasket, workbasketToUpdate);
 
-            return new WorkbasketUpdatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                workbasketToUpdate,
-                details);
-          });
+        return new WorkbasketUpdatedEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+            workbasketToUpdate,
+            details);
+      });
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -300,17 +301,16 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       try {
         workbasketAccessMapper.insert(accessItem);
 
-        eventPublisher.publishing(
-            () -> {
-              String details =
-                  ObjectAttributeChangeDetector.determineChangesInAttributes(
-                      newWorkbasketAccessItem("", ""), accessItem);
+        eventPublisher.publishing(() -> {
+          String details =
+              ObjectAttributeChangeDetector.determineChangesInAttributes(
+                  newWorkbasketAccessItem("", ""), accessItem);
 
-              return new WorkbasketAccessItemCreatedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                  wb,
-                  details);
-            });
+          return new WorkbasketAccessItemCreatedEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+              wb,
+              details);
+        });
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug(
               "Method createWorkbasketAccessItem() created workbaskteAccessItem {}", accessItem);
@@ -359,19 +359,17 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       workbasketAccessMapper.update(accessItem);
 
-      eventPublisher.publishing(
-          () -> {
-            String details =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    originalItem, accessItem);
+      eventPublisher.publishing(() -> {
+        String details =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(originalItem, accessItem);
 
-            Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
+        Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
 
-            return new WorkbasketAccessItemUpdatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                workbasket,
-                details);
-          });
+        return new WorkbasketAccessItemUpdatedEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+            workbasket,
+            details);
+      });
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -397,20 +395,17 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       workbasketAccessMapper.delete(accessItemId);
 
-      accessItemOpt.ifPresent(
-          accessItem ->
-              eventPublisher.publishing(
-                  () -> {
-                    String details =
-                        ObjectAttributeChangeDetector.determineChangesInAttributes(
-                            accessItem, newWorkbasketAccessItem("", ""));
-                    Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
-                    return new WorkbasketAccessItemDeletedEvent(
-                        IdGenerator.generateWithPrefix(
-                            IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                        workbasket,
-                        details);
-                  }));
+      accessItemOpt.ifPresent(accessItem ->
+          eventPublisher.publishing(() -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    accessItem, newWorkbasketAccessItem("", ""));
+            Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
+            return new WorkbasketAccessItemDeletedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                workbasket,
+                details);
+          }));
 
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug(
@@ -517,34 +512,35 @@ public class WorkbasketServiceImpl implements WorkbasketService {
           NotAuthorizedOnWorkbasketException {
     kadaiEngine.getEngine().checkRoleMembership(KadaiRole.BUSINESS_ADMIN, KadaiRole.ADMIN);
 
-    Set<WorkbasketAccessItemImpl> accessItems =
-        checkAccessItemsPreconditionsAndSetId(workbasketId, wbAccessItems);
-
     try {
       kadaiEngine.openConnection();
-      // this is necessary to verify that the requested workbasket exists.
-      getWorkbasket(workbasketId);
+      // This also verifies that the caller is authorized to update the parent Workbasket.
+      Workbasket parentWorkbasket = getWorkbasket(workbasketId);
 
+      // The existing identities are needed to distinguish updates to owned items from attempts to
+      // insert a caller-selected identity. Load them before validating the whole replacement.
+      List<WorkbasketAccessItemImpl> currentAccessItems =
+          workbasketAccessMapper.findByWorkbasketId(workbasketId);
+      List<WorkbasketAccessItemImpl> accessItems =
+          checkAccessItemsPreconditionsAndSetId(
+              workbasketId, parentWorkbasket.getKey(), wbAccessItems, currentAccessItems);
       final List<WorkbasketAccessItemImpl> originalAccessItems =
-          kadaiEngine.getEngine().isHistoryEnabled()
-              ? workbasketAccessMapper.findByWorkbasketId(workbasketId)
-              : new ArrayList<>();
+          kadaiEngine.getEngine().isHistoryEnabled() ? currentAccessItems : new ArrayList<>();
 
       // delete all current ones
       workbasketAccessMapper.deleteAllAccessItemsForWorkbasketId(workbasketId);
       accessItems.forEach(workbasketAccessMapper::insert);
 
-      eventPublisher.publishing(
-          () -> {
-            String details =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(
-                    originalAccessItems, new ArrayList<>(accessItems));
-            Workbasket workbasket = workbasketMapper.findById(workbasketId);
-            return new WorkbasketAccessItemsUpdatedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                workbasket,
-                details);
-          });
+      eventPublisher.publishing(() -> {
+        String details =
+            ObjectAttributeChangeDetector.determineChangesInAttributes(
+                originalAccessItems, new ArrayList<>(accessItems));
+        Workbasket workbasket = workbasketMapper.findById(workbasketId);
+        return new WorkbasketAccessItemsUpdatedEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+            workbasket,
+            details);
+      });
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -572,10 +568,9 @@ public class WorkbasketServiceImpl implements WorkbasketService {
   @Override
   public List<WorkbasketPermission> getPermissionsForWorkbasket(String workbasketId) {
     WorkbasketAccessItem wbAcc =
-        kadaiEngine.executeInDatabaseConnection(
-            () ->
-                workbasketAccessMapper.findByWorkbasketAndAccessId(
-                    workbasketId, kadaiEngine.getEngine().getCurrentUserContext().getAccessIds()));
+        kadaiEngine.executeInDatabaseConnection(() ->
+            workbasketAccessMapper.findByWorkbasketAndAccessId(
+                workbasketId, kadaiEngine.getEngine().getCurrentUserContext().getAccessIds()));
     return this.getPermissionsFromWorkbasketAccessItem(wbAcc);
   }
 
@@ -661,17 +656,16 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         }
 
         if (!targetWorkbasketIds.isEmpty()) {
-          eventPublisher.publishing(
-              () -> {
-                String details =
-                    ObjectAttributeChangeDetector.determineChangesInAttributes(
-                        originalTargetWorkbasketIds, targetWorkbasketIds);
+          eventPublisher.publishing(() -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(
+                    originalTargetWorkbasketIds, targetWorkbasketIds);
 
-                return new WorkbasketDistributionTargetsUpdatedEvent(
-                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                    sourceWorkbasket,
-                    details);
-              });
+            return new WorkbasketDistributionTargetsUpdatedEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                sourceWorkbasket,
+                details);
+          });
         }
       }
 
@@ -712,16 +706,15 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       } else {
         distributionTargetMapper.insert(sourceWorkbasketId, targetWorkbasketId);
 
-        eventPublisher.publishing(
-            () -> {
-              String details =
-                  "{\"changes\":{\"newValue\":\"" + targetWorkbasketId + "\",\"oldValue\":\"\"}}";
+        eventPublisher.publishing(() -> {
+          String details =
+              "{\"changes\":{\"newValue\":\"" + targetWorkbasketId + "\",\"oldValue\":\"\"}}";
 
-              return new WorkbasketDistributionTargetAddedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                  sourceWorkbasket,
-                  details);
-            });
+          return new WorkbasketDistributionTargetAddedEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+              sourceWorkbasket,
+              details);
+        });
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug(
               "addDistributionTarget inserted distribution target sourceId = {}, targetId = {}",
@@ -753,22 +746,20 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       if (numberOfDistTargets > 0) {
         distributionTargetMapper.delete(sourceWorkbasketId, targetWorkbasketId);
 
-        eventPublisher.tryPublishing(
-            () ->
-                Optional.ofNullable(workbasketMapper.findById(sourceWorkbasketId))
-                    .map(
-                        workbasket -> {
-                          String details =
-                              "{\"changes\":{\"newValue\":\"\",\"oldValue\":\""
-                                  + targetWorkbasketId
-                                  + "\"}}";
+        eventPublisher.tryPublishing(() ->
+            Optional.ofNullable(workbasketMapper.findById(sourceWorkbasketId))
+                .map(workbasket -> {
+                  String details =
+                      "{\"changes\":{\"newValue\":\"\",\"oldValue\":\""
+                          + targetWorkbasketId
+                          + "\"}}";
 
-                          return new WorkbasketDistributionTargetRemovedEvent(
-                              IdGenerator.generateWithPrefix(
-                                  IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                              workbasket,
-                              details);
-                        }));
+                  return new WorkbasketDistributionTargetRemovedEvent(
+                      IdGenerator.generateWithPrefix(
+                          IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                      workbasket,
+                      details);
+                }));
         if (LOGGER.isDebugEnabled()) {
           LOGGER.debug(
               "removeDistributionTarget deleted distribution target sourceId = {}, targetId = {}",
@@ -843,17 +834,16 @@ public class WorkbasketServiceImpl implements WorkbasketService {
         workbasketMapper.delete(workbasketId);
         deleteReferencesToWorkbasket(workbasketId);
 
-        eventPublisher.publishing(
-            () -> {
-              String details =
-                  ObjectAttributeChangeDetector.determineChangesInAttributes(
-                      workbasketToDelete, newWorkbasket("", MASTER_DOMAIN));
+        eventPublisher.publishing(() -> {
+          String details =
+              ObjectAttributeChangeDetector.determineChangesInAttributes(
+                  workbasketToDelete, newWorkbasket("", MASTER_DOMAIN));
 
-              return new WorkbasketDeletedEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                  workbasketToDelete,
-                  details);
-            });
+          return new WorkbasketDeletedEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+              workbasketToDelete,
+              details);
+        });
       } else {
         markWorkbasketForDeletion(workbasketId);
       }
@@ -954,23 +944,19 @@ public class WorkbasketServiceImpl implements WorkbasketService {
 
       workbasketAccessMapper.deleteAccessItemsForAccessId(accessId);
 
-      eventPublisher.publishingAll(
-          () ->
-              workbasketAccessItems.stream()
-                  .map(
-                      accessItem -> {
-                        String details =
-                            ObjectAttributeChangeDetector.determineChangesInAttributes(
-                                accessItem, new WorkbasketAccessItemImpl());
-                        Workbasket workbasket =
-                            workbasketMapper.findById(accessItem.getWorkbasketId());
-                        return new WorkbasketAccessItemDeletedEvent(
-                            IdGenerator.generateWithPrefix(
-                                IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                            workbasket,
-                            details);
-                      })
-                  .collect(toList()));
+      eventPublisher.publishingAll(() ->
+          workbasketAccessItems.stream()
+              .map(accessItem -> {
+                String details =
+                    ObjectAttributeChangeDetector.determineChangesInAttributes(
+                        accessItem, new WorkbasketAccessItemImpl());
+                Workbasket workbasket = workbasketMapper.findById(accessItem.getWorkbasketId());
+                return new WorkbasketAccessItemDeletedEvent(
+                    IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+                    workbasket,
+                    details);
+              })
+              .collect(toList()));
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -992,50 +978,91 @@ public class WorkbasketServiceImpl implements WorkbasketService {
     }
   }
 
-  private Set<WorkbasketAccessItemImpl> checkAccessItemsPreconditionsAndSetId(
-      String workbasketId, List<WorkbasketAccessItem> wbAccessItems)
+  private void validateAndPreserveCreated(
+      Workbasket oldWorkbasket, WorkbasketImpl workbasketImplToUpdate)
+      throws InvalidArgumentException {
+    Instant requestedCreated = workbasketImplToUpdate.getCreated();
+    if (requestedCreated != null && !requestedCreated.equals(oldWorkbasket.getCreated())) {
+      throw new InvalidArgumentException("The Workbasket creation timestamp cannot be changed.");
+    }
+    workbasketImplToUpdate.setCreated(oldWorkbasket.getCreated());
+  }
+
+  private List<WorkbasketAccessItemImpl> checkAccessItemsPreconditionsAndSetId(
+      String workbasketId,
+      String workbasketKey,
+      List<WorkbasketAccessItem> wbAccessItems,
+      List<WorkbasketAccessItemImpl> currentAccessItems)
       throws InvalidArgumentException, LogicalDuplicateInPayloadException {
+    if (wbAccessItems == null) {
+      throw new InvalidArgumentException("Workbasket access items must not be null.");
+    }
+
+    Map<String, WorkbasketAccessItemImpl> currentItemsById = new HashMap<>();
+    for (WorkbasketAccessItemImpl currentAccessItem : currentAccessItems) {
+      currentItemsById.put(currentAccessItem.getId(), currentAccessItem);
+    }
 
     Set<String> ids = new HashSet<>();
-    Set<WorkbasketAccessItemImpl> accessItems = new HashSet<>();
+    Set<String> accessIds = new HashSet<>();
+    List<WorkbasketAccessItemImpl> accessItems = new ArrayList<>();
 
     for (WorkbasketAccessItem workbasketAccessItem : wbAccessItems) {
-      if (workbasketAccessItem != null) {
-        WorkbasketAccessItemImpl wbAccessItemImpl = (WorkbasketAccessItemImpl) workbasketAccessItem;
-
-        if (wbAccessItemImpl.getWorkbasketId() == null) {
-          throw new InvalidArgumentException(
-              String.format(
-                  "Checking the preconditions of the current WorkbasketAccessItem failed "
-                      + "- WBID is NULL. WorkbasketAccessItem=%s",
-                  workbasketAccessItem));
-        } else if (!wbAccessItemImpl.getWorkbasketId().equals(workbasketId)) {
-          throw new InvalidArgumentException(
-              String.format(
-                  "Checking the preconditions of the current WorkbasketAccessItem failed "
-                      + "- the WBID does not match. Target-WBID=''%s'' WorkbasketAccessItem=%s",
-                  workbasketId, workbasketAccessItem));
-        }
-
-        String accessId = wbAccessItemImpl.getAccessId();
-        if (accessId == null || accessId.isBlank()) {
-          throw new InvalidArgumentException(
-              String.format(
-                  "Checking the preconditions of the current WorkbasketAccessItem failed "
-                      + "- accessId is null or empty. WorkbasketAccessItem=%s, accessId=%s",
-                  workbasketAccessItem, accessId));
-        }
-
-        if (wbAccessItemImpl.getId() == null || wbAccessItemImpl.getId().isEmpty()) {
-          wbAccessItemImpl.setId(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_AUTHORIZATION));
-        }
-        if (ids.contains(accessId)) {
-          throw new LogicalDuplicateInPayloadException(accessId);
-        }
-        ids.add(accessId);
-        accessItems.add(wbAccessItemImpl);
+      if (workbasketAccessItem == null) {
+        throw new InvalidArgumentException("Workbasket access items must not contain null items.");
       }
+
+      WorkbasketAccessItemImpl wbAccessItemImpl = (WorkbasketAccessItemImpl) workbasketAccessItem;
+      String suppliedWorkbasketId = wbAccessItemImpl.getWorkbasketId();
+      if (suppliedWorkbasketId == null || suppliedWorkbasketId.isEmpty()) {
+        wbAccessItemImpl.setWorkbasketId(workbasketId);
+      } else if (!suppliedWorkbasketId.equals(workbasketId)) {
+        throw new InvalidArgumentException(
+            String.format(
+                "The WorkbasketAccessItem Workbasket ID '%s' does not match target '%s'.",
+                suppliedWorkbasketId, workbasketId));
+      }
+
+      String accessId = wbAccessItemImpl.getAccessId();
+      if (accessId == null || accessId.isBlank()) {
+        throw new InvalidArgumentException(
+            String.format(
+                "Checking the preconditions of the current WorkbasketAccessItem failed "
+                    + "- accessId is null or empty. WorkbasketAccessItem=%s, accessId=%s",
+                workbasketAccessItem, accessId));
+      }
+      accessId = accessId.toLowerCase();
+      wbAccessItemImpl.setAccessId(accessId);
+      wbAccessItemImpl.setWorkbasketKey(workbasketKey);
+
+      if (!accessIds.add(accessId)) {
+        throw new LogicalDuplicateInPayloadException(accessId);
+      }
+
+      String accessItemId = wbAccessItemImpl.getId();
+      if (accessItemId == null || accessItemId.isEmpty()) {
+        wbAccessItemImpl.setId(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_AUTHORIZATION));
+      } else {
+        if (!ids.add(accessItemId)) {
+          throw new InvalidArgumentException(
+              String.format("WorkbasketAccessItem ID '%s' occurs more than once.", accessItemId));
+        }
+        WorkbasketAccessItemImpl currentItem = currentItemsById.get(accessItemId);
+        if (currentItem == null || !workbasketId.equals(currentItem.getWorkbasketId())) {
+          throw new InvalidArgumentException(
+              String.format(
+                  "WorkbasketAccessItem ID '%s' is not owned by Workbasket '%s'.",
+                  accessItemId, workbasketId));
+        }
+        if (!accessId.equals(currentItem.getAccessId().toLowerCase())) {
+          throw new InvalidArgumentException(
+              String.format(
+                  "WorkbasketAccessItem ID '%s' cannot be assigned to a different access ID.",
+                  accessItemId));
+        }
+      }
+      accessItems.add(wbAccessItemImpl);
     }
     return accessItems;
   }
@@ -1151,12 +1178,11 @@ public class WorkbasketServiceImpl implements WorkbasketService {
       workbasket.setMarkedForDeletion(true);
       workbasketMapper.update(workbasket);
 
-      eventPublisher.publishing(
-          () ->
-              new WorkbasketMarkedForDeletionEvent(
-                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
-                  workbasket,
-                  null));
+      eventPublisher.publishing(() ->
+          new WorkbasketMarkedForDeletionEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_WORKBASKET_HISTORY_EVENT),
+              workbasket,
+              null));
     } finally {
       kadaiEngine.returnConnection();
     }

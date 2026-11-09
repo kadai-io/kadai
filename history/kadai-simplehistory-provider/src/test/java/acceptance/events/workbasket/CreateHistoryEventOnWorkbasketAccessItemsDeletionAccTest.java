@@ -46,53 +46,46 @@ class CreateHistoryEventOnWorkbasketAccessItemsDeletionAccTest extends AbstractA
   void should_CreateWorkbasketAccessItemDeletedHistoryEvents_When_AccessItemsAreDeleted()
       throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String accessId = "teamlead-1";
+        CheckedRunnable.rethrowing(() -> {
+          final String accessId = "teamlead-1";
 
-              String[] workbasketIds =
-                  new String[] {
-                    "WBI:100000000000000000000000000000000001",
-                    "WBI:100000000000000000000000000000000004",
-                    "WBI:100000000000000000000000000000000005",
-                    "WBI:100000000000000000000000000000000010"
-                  };
+          String[] workbasketIds =
+              new String[] {
+                "WBI:100000000000000000000000000000000001",
+                "WBI:100000000000000000000000000000000004",
+                "WBI:100000000000000000000000000000000005",
+                "WBI:100000000000000000000000000000000010"
+              };
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(workbasketIds)
-                      .list();
+          List<WorkbasketHistoryEvent> events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketIds).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              workbasketService.deleteWorkbasketAccessItemsForAccessId(accessId);
+          workbasketService.deleteWorkbasketAccessItemsForAccessId(accessId);
 
-              events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(workbasketIds)
-                      .orderByWorkbasketId(ASCENDING)
-                      .list();
+          events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(workbasketIds)
+                  .orderByWorkbasketId(ASCENDING)
+                  .list();
 
-              assertThat(events).hasSize(4);
+          assertThat(events).hasSize(4);
 
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(events)
-                  .extracting(WorkbasketHistoryEvent::getEventType)
-                  .containsOnly(WorkbasketHistoryEventType.ACCESS_ITEM_DELETED.getName());
-              assertThat(events)
-                  .extracting(WorkbasketHistoryEvent::getUserId)
-                  .containsOnly("user-6-6");
-              assertThat(events)
-                  .extracting(WorkbasketHistoryEvent::getProxyAccessId)
-                  .containsOnly("admin");
+          assertThat(events)
+              .extracting(WorkbasketHistoryEvent::getEventType)
+              .containsOnly(WorkbasketHistoryEventType.ACCESS_ITEM_DELETED.getName());
+          assertThat(events).extracting(WorkbasketHistoryEvent::getUserId).containsOnly("user-6-6");
+          assertThat(events)
+              .extracting(WorkbasketHistoryEvent::getProxyAccessId)
+              .containsOnly("admin");
 
-              assertThat(details)
-                  .contains("\"oldValue\":\"WBI:100000000000000000000000000000000001\"");
-            }),
+          assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000001\"");
+        }),
         "user-6-6");
   }
 

@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="470" viewBox="0 0 900 470" role="img" aria-labelledby="title desc">
+  <title id="title">Routing and prioritization in KADAI</title>
+  <desc id="desc">Tasks from ERP, CRM, Camunda, e-mail, batch systems or created manually flow into KADAI, which classifies, routes and prioritizes them into workbaskets so that users work on the most urgent task first.</desc>
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif; fill: #1f2328; }
+    .mono { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; }
+    .t { fill: #1f2328; }
+    .m { fill: #59636e; }
+    .cap { font-size: 11px; font-weight: 700; letter-spacing: 1.4px; fill: #59636e; }
+    .lbl { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #59636e; }
+    .lbl-mint { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #116149; font-weight: 600; }
+    .lbl-rose { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #cf222e; }
+    .lbl-amber { font-family: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace; font-size: 12px; fill: #9a6700; }
+    .card { fill: #ffffff; stroke: #d1d9e0; stroke-width: 1.2; }
+    .card-dashed { fill: #ffffff; stroke: #8c959f; stroke-width: 1.2; stroke-dasharray: 5 4; }
+    .zone { fill: #f6f8fa; stroke: #d1d9e0; stroke-width: 1.2; }
+    .zone-dashed { fill: none; stroke: #d1d9e0; stroke-width: 1.2; stroke-dasharray: 6 5; }
+    .zone-mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.2; }
+    .mint { fill: #e6f5f0; stroke: #84c8b4; stroke-width: 1.4; }
+    .mint-solid { fill: #84c8b4; }
+    .blue { fill: #ddf4ff; stroke: #80ccff; stroke-width: 1.4; }
+    .green { fill: #dafbe1; stroke: #4ac26b; stroke-width: 1.4; }
+    .amber { fill: #fff8c5; stroke: #d4a72c; stroke-width: 1.4; }
+    .rose { fill: #ffebe9; stroke: #ff8182; stroke-width: 1.4; }
+    .t-mint { fill: #116149; }
+    .t-blue { fill: #0969da; }
+    .t-green { fill: #1a7f37; }
+    .t-amber { fill: #9a6700; }
+    .t-rose { fill: #cf222e; }
+    .f-text { fill: #1f2328; }
+    .f-muted { fill: #59636e; }
+    .f-line { fill: #8c959f; }
+    .f-mint { fill: #2f9c7e; }
+    .f-green { fill: #4ac26b; }
+    .f-amber { fill: #d4a72c; }
+    .f-rose { fill: #ff8182; }
+    .f-blue { fill: #80ccff; }
+    .e { fill: none; stroke: #8c959f; stroke-width: 1.5; }
+    .e-dash { fill: none; stroke: #8c959f; stroke-width: 1.5; stroke-dasharray: 4 4; }
+    .e-mint { fill: none; stroke: #2f9c7e; stroke-width: 2.2; }
+    .e-rose { fill: none; stroke: #ff8182; stroke-width: 1.6; }
+    .e-amber { fill: none; stroke: #d4a72c; stroke-width: 1.6; }
+    .e-green { fill: none; stroke: #4ac26b; stroke-width: 1.8; }
+    .on-mint { fill: #0d1117; }
+    .logo-mint { fill: #84c8b4; }
+    .logo-bar { fill: #1f1f1f; }
+  </style>
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-line"/></marker>
+    <marker id="ah-mint" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-mint"/></marker>
+    <marker id="ah-rose" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-rose"/></marker>
+    <marker id="ah-amber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-amber"/></marker>
+    <marker id="ah-green" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="f-green"/></marker>
+  </defs>
+<text x="24" y="40" class="cap">SOURCES</text>
+<rect x="24" y="64" width="186" height="40" rx="10" class="card-dashed"/><text x="40" y="89" class="t" style="font-size:13px;font-weight:600">ERP system</text>
+<path d="M210 84 H236 V230 H268" class="e" marker-end="url(#ah)"/>
+<rect x="176" y="77" width="24" height="14" rx="4" class="f-green"/>
+<rect x="24" y="120" width="186" height="40" rx="10" class="card-dashed"/><text x="40" y="145" class="t" style="font-size:13px;font-weight:600">CRM system</text>
+<path d="M210 140 H236 V230 H268" class="e" marker-end="url(#ah)"/>
+<rect x="176" y="133" width="24" height="14" rx="4" class="f-rose"/>
+<rect x="24" y="176" width="186" height="40" rx="10" class="card-dashed"/><text x="40" y="201" class="t" style="font-size:13px;font-weight:600">Camunda / BPMN</text>
+<path d="M210 196 H236 V230 H268" class="e" marker-end="url(#ah)"/>
+<rect x="176" y="189" width="24" height="14" rx="4" class="f-amber"/>
+<rect x="24" y="232" width="186" height="40" rx="10" class="card-dashed"/><text x="40" y="257" class="t" style="font-size:13px;font-weight:600">E-mail inbox</text>
+<path d="M210 252 H236 V230 H268" class="e" marker-end="url(#ah)"/>
+<rect x="176" y="245" width="24" height="14" rx="4" class="f-rose"/>
+<rect x="24" y="288" width="186" height="40" rx="10" class="card-dashed"/><text x="40" y="313" class="t" style="font-size:13px;font-weight:600">Other systems</text>
+<path d="M210 308 H236 V230 H268" class="e" marker-end="url(#ah)"/>
+<rect x="176" y="301" width="24" height="14" rx="4" class="f-green"/>
+<rect x="24" y="360" width="186" height="52" rx="10" class="card-dashed"/>
+<g transform="translate(52 386) scale(0.8)"><circle cx="0" cy="-9" r="8" class="f-muted"/><path class="f-muted" d="M-15 15a15 13 0 0 1 30 0v2h-30Z"/></g>
+<text x="76" y="382" class="t" style="font-size:13px;font-weight:600">Created manually</text>
+<text x="76" y="398" class="m" style="font-size:12px">by a user</text>
+<path d="M210 386 H236 V230 H268" class="e" marker-end="url(#ah)"/>
+<rect x="270" y="24" width="290" height="422" rx="18" class="zone-mint"/>
+<g transform="translate(292 42) scale(0.04062)"><path class="logo-mint" d="m28.33,432.59h8.25c7.63,0,14.9-3.24,20.01-8.9l162.68-180.47c4.46-4.95,6.93-11.38,6.93-18.04V27.94c0-14.88-12.06-26.94-26.94-26.94H28.33C13.45,1,1.38,13.06,1.38,27.94v377.7c0,14.88,12.06,26.94,26.94,26.94Z"/><path class="logo-mint" d="m478.41,500.19c-10.47-11.34-28.3-11.58-39.08-.54l-111.94,114.72c-9.95,10.2-10.24,26.38-.66,36.93l158.88,174.93c5.11,5.62,12.35,8.83,19.95,8.83h220.54c23.49,0,35.73-27.97,19.8-45.22l-267.48-289.64Z"/><path class="logo-bar" d="m764.88,56.23l4.2-4.58c4.56-4.97,7.09-11.47,7.09-18.22v-5.49c0-14.88-12.06-26.94-26.94-26.94h-219.77c-7.6,0-14.85,3.21-19.96,8.84l-42.07,46.39h297.45Z"/><polygon class="logo-bar" points="425.46 102.5 346.7 189.33 642.75 189.33 722.43 102.5 425.46 102.5"/><polygon class="logo-bar" points="304.74 235.6 225.98 322.43 520.61 322.43 600.29 235.6 304.74 235.6"/><polygon class="logo-bar" points="184.01 368.7 105.25 455.53 398.47 455.53 478.15 368.7 184.01 368.7"/><path class="logo-bar" d="m63.29,501.8l-53.06,58.5c-4.5,4.96-6.99,11.41-6.99,18.1v10.23h273.1l79.68-86.83H63.29Z"/><polygon class="logo-bar" points="154.2 721.74 233.88 634.9 3.24 634.9 3.24 721.74 154.2 721.74"/><path class="logo-bar" d="m3.24,768.01v40.11c0,14.88,12.06,26.94,26.94,26.94h8.19c7.55,0,14.75-3.17,19.85-8.73l53.52-58.32H3.24Z"/></g>
+<text x="330" y="68" class="t" style="font-size:20px;font-weight:800" letter-spacing="2">KADAI</text>
+<rect x="290" y="96" width="250" height="96" rx="12" class="card"/>
+<circle cx="314" cy="122" r="12" class="mint-solid"/>
+<text x="314" y="127" text-anchor="middle" class="on-mint" style="font-size:13px;font-weight:800">1</text>
+<text x="336" y="127" class="t" style="font-size:15px;font-weight:700">Classify</text>
+<text x="306" y="154" class="m" style="font-size:12px">Service level &amp; priority are</text>
+<text x="306" y="171" class="m" style="font-size:12px">derived from the classification</text>
+<rect x="290" y="208" width="250" height="96" rx="12" class="card"/>
+<circle cx="314" cy="234" r="12" class="mint-solid"/>
+<text x="314" y="239" text-anchor="middle" class="on-mint" style="font-size:13px;font-weight:800">2</text>
+<text x="336" y="239" class="t" style="font-size:15px;font-weight:700">Route</text>
+<text x="306" y="266" class="m" style="font-size:12px">Finds the right workbasket, e.g.</text>
+<text x="306" y="283" class="m" style="font-size:12px">via DMN decision tables</text>
+<rect x="290" y="320" width="250" height="96" rx="12" class="card"/>
+<circle cx="314" cy="346" r="12" class="mint-solid"/>
+<text x="314" y="351" text-anchor="middle" class="on-mint" style="font-size:13px;font-weight:800">3</text>
+<text x="336" y="351" class="t" style="font-size:15px;font-weight:700">Prioritize</text>
+<text x="306" y="378" class="m" style="font-size:12px">Custom rules and a scheduled job</text>
+<text x="306" y="395" class="m" style="font-size:12px">keep priorities up to date</text>
+<rect x="430" y="339" width="20" height="14" rx="4" class="f-rose"/>
+<rect x="456" y="339" width="20" height="14" rx="4" class="f-rose"/>
+<rect x="482" y="339" width="20" height="14" rx="4" class="f-amber"/>
+<rect x="508" y="339" width="20" height="14" rx="4" class="f-green"/>
+<text x="612" y="40" class="cap">WORKBASKETS</text>
+<path d="M560 230 H584 V130 H606" class="e" marker-end="url(#ah)"/>
+<rect x="608" y="96" width="172" height="68" rx="12" class="card"/>
+<g transform="translate(624 108) scale(0.85)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g>
+<text x="656" y="126" class="t" style="font-size:13px;font-weight:600">Workbasket A</text>
+<rect x="624" y="140" width="22" height="12" rx="4" class="f-rose"/>
+<rect x="652" y="140" width="22" height="12" rx="4" class="f-amber"/>
+<rect x="680" y="140" width="22" height="12" rx="4" class="f-green"/>
+<path d="M560 230 H584 V242 H606" class="e" marker-end="url(#ah)"/>
+<rect x="608" y="208" width="172" height="68" rx="12" class="card"/>
+<g transform="translate(624 220) scale(0.85)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g>
+<text x="656" y="238" class="t" style="font-size:13px;font-weight:600">Workbasket B</text>
+<rect x="624" y="252" width="22" height="12" rx="4" class="f-rose"/>
+<rect x="652" y="252" width="22" height="12" rx="4" class="f-amber"/>
+<rect x="680" y="252" width="22" height="12" rx="4" class="f-green"/>
+<rect x="708" y="252" width="22" height="12" rx="4" class="f-green"/>
+<path d="M560 230 H584 V354 H606" class="e" marker-end="url(#ah)"/>
+<rect x="608" y="320" width="172" height="68" rx="12" class="card"/>
+<g transform="translate(624 332) scale(0.85)"><path class="f-mint" d="M5 0h18a3 3 0 0 1 2.7 1.7L28 7v12a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V7l2.3-5.3A3 3 0 0 1 5 0ZM3.2 8.5v10.3h21.6V8.5h-5.6a5.2 5.2 0 0 1-10.4 0Z"/></g>
+<text x="656" y="350" class="t" style="font-size:13px;font-weight:600">Workbasket C</text>
+<rect x="624" y="364" width="22" height="12" rx="4" class="f-amber"/>
+<rect x="652" y="364" width="22" height="12" rx="4" class="f-green"/>
+<path d="M780 130 H818" class="e-mint" marker-end="url(#ah-mint)"/>
+<circle cx="852" cy="130" r="30" class="mint"/>
+<g transform="translate(852 132) scale(1.0)"><circle cx="0" cy="-9" r="8" class="f-mint"/><path class="f-mint" d="M-15 15a15 13 0 0 1 30 0v2h-30Z"/></g>
+<text x="852" y="186" text-anchor="middle" class="m" style="font-size:12px">works on the</text>
+<text x="852" y="202" text-anchor="middle" class="m" style="font-size:12px">most urgent</text>
+<text x="852" y="218" text-anchor="middle" class="m" style="font-size:12px">task first</text>
+<text x="612" y="448" class="m" style="font-size:12px">Priority</text>
+<rect x="668" y="437" width="18" height="12" rx="4" class="f-rose"/><text x="692" y="448" class="m" style="font-size:12px">high</text>
+<rect x="736" y="437" width="18" height="12" rx="4" class="f-amber"/><text x="760" y="448" class="m" style="font-size:12px">medium</text>
+<rect x="820" y="437" width="18" height="12" rx="4" class="f-green"/><text x="844" y="448" class="m" style="font-size:12px">low</text>
+</svg>

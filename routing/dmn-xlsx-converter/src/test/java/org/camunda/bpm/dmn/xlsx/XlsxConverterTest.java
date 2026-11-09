@@ -55,10 +55,9 @@ class XlsxConverterTest {
   void should_ThrowXlsxConversionException_When_InputIsMalformed() {
     XlsxConverter converter = new XlsxConverter();
 
-    assertThatThrownBy(
-            () ->
-                converter.convert(
-                    new ByteArrayInputStream("not an xlsx".getBytes(StandardCharsets.UTF_8))))
+    assertThatThrownBy(() ->
+            converter.convert(
+                new ByteArrayInputStream("not an xlsx".getBytes(StandardCharsets.UTF_8))))
         .isExactlyInstanceOf(XlsxConversionException.class)
         .hasMessageContaining("Could not load XLSX")
         .hasCauseInstanceOf(Docx4JException.class);
@@ -72,9 +71,7 @@ class XlsxConverterTest {
     wordPackage.save(outputStream);
 
     assertThatThrownBy(
-            () ->
-                new XlsxConverter()
-                    .convert(new ByteArrayInputStream(outputStream.toByteArray())))
+            () -> new XlsxConverter().convert(new ByteArrayInputStream(outputStream.toByteArray())))
         .isExactlyInstanceOf(XlsxConversionException.class)
         .hasMessageContaining("not an XLSX");
   }
@@ -86,10 +83,9 @@ class XlsxConverterTest {
     SpreadsheetMLPackage spreadsheetPackage = SpreadsheetMLPackage.createPackage();
     spreadsheetPackage.save(emptyWorkbook.toFile());
 
-    assertThatThrownBy(
-            () ->
-                new XlsxConverter()
-                    .convert(new ByteArrayInputStream(Files.readAllBytes(emptyWorkbook))))
+    assertThatThrownBy(() ->
+            new XlsxConverter()
+                .convert(new ByteArrayInputStream(Files.readAllBytes(emptyWorkbook))))
         .isExactlyInstanceOf(XlsxConversionException.class)
         .hasMessageContaining("does not contain any worksheets");
   }
@@ -122,8 +118,7 @@ class XlsxConverterTest {
   @Test
   void should_ConvertWorksheetWithoutSharedStrings_WhenCellsContainNumbers() throws Exception {
     DmnModelInstance result =
-        new XlsxConverter()
-            .convert(new ByteArrayInputStream(createWorkbookWithoutSharedStrings()));
+        new XlsxConverter().convert(new ByteArrayInputStream(createWorkbookWithoutSharedStrings()));
 
     Decision decision =
         result.getDefinitions().getChildElementsByType(Decision.class).iterator().next();

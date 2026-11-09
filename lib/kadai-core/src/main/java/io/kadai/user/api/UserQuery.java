@@ -21,14 +21,12 @@ package io.kadai.user.api;
 import io.kadai.common.api.BaseQuery;
 import io.kadai.user.api.models.UserSummary;
 
-/**
- * The UserQuery allows for a custom search across all {@linkplain UserSummary Users}.
- */
+/** The UserQuery allows for a custom search across all {@linkplain UserSummary Users}. */
 public interface UserQuery extends BaseQuery<UserSummary, UserQueryColumnName> {
 
   /**
-   * Selects only {@linkplain UserSummary Users} which have an {@linkplain
-   * UserSummary#getId() id} equal to any of the passed values.
+   * Selects only {@linkplain UserSummary Users} which have an {@linkplain UserSummary#getId() id}
+   * equal to any of the passed values.
    *
    * @param ids the values of interest
    * @return this query
@@ -54,8 +52,8 @@ public interface UserQuery extends BaseQuery<UserSummary, UserQueryColumnName> {
   UserQuery orderByLastName(SortDirection sortDirection);
 
   /**
-   * Selects only {@linkplain UserSummary Users} which have a {@linkplain
-   * UserSummary#getOrgLevel1() orgLevel1} equal to any of the passed values.
+   * Selects only {@linkplain UserSummary Users} which have a {@linkplain UserSummary#getOrgLevel1()
+   * orgLevel1} equal to any of the passed values.
    *
    * @param orgLevel1s the values of interest
    * @return this query
@@ -72,8 +70,8 @@ public interface UserQuery extends BaseQuery<UserSummary, UserQueryColumnName> {
   UserQuery orderByOrgLevel1(SortDirection sortDirection);
 
   /**
-   * Selects only {@linkplain UserSummary Users} which have a {@linkplain
-   * UserSummary#getOrgLevel2() orgLevel2} equal to any of the passed values.
+   * Selects only {@linkplain UserSummary Users} which have a {@linkplain UserSummary#getOrgLevel2()
+   * orgLevel2} equal to any of the passed values.
    *
    * @param orgLevel2s the values of interest
    * @return this query
@@ -90,8 +88,8 @@ public interface UserQuery extends BaseQuery<UserSummary, UserQueryColumnName> {
   UserQuery orderByOrgLevel2(SortDirection sortDirection);
 
   /**
-   * Selects only {@linkplain UserSummary Users} which have a {@linkplain
-   * UserSummary#getOrgLevel3() orgLevel3} equal to any of the passed values.
+   * Selects only {@linkplain UserSummary Users} which have a {@linkplain UserSummary#getOrgLevel3()
+   * orgLevel3} equal to any of the passed values.
    *
    * @param orgLevel3s the values of interest
    * @return this query
@@ -108,8 +106,8 @@ public interface UserQuery extends BaseQuery<UserSummary, UserQueryColumnName> {
   UserQuery orderByOrgLevel3(SortDirection sortDirection);
 
   /**
-   * Selects only {@linkplain UserSummary Users} which have a {@linkplain
-   * UserSummary#getOrgLevel4() orgLevel4} equal to any of the passed values.
+   * Selects only {@linkplain UserSummary Users} which have a {@linkplain UserSummary#getOrgLevel4()
+   * orgLevel4} equal to any of the passed values.
    *
    * @param orgLevel4s the values of interest
    * @return this query

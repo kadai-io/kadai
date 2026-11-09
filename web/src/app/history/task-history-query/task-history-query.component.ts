@@ -19,16 +19,16 @@
 import { AfterViewInit, Component, inject, signal, viewChild } from '@angular/core';
 import { outputToObservable } from '@angular/core/rxjs-interop';
 import { Direction, Sorting, TaskHistoryQuerySortParameter } from 'app/shared/models/sorting';
-import { TaskHistoryEventData } from '../../shared/models/task-history-event';
-import { TaskHistoryQueryService } from '../services/task-history-query/task-history-query.service';
-import { Page } from '../../shared/models/page';
+import { TaskHistoryEventData } from 'app/shared/models/task-history-event';
+import { TaskHistoryQueryService } from 'app/history/services/task-history-query/task-history-query.service';
+import { Page } from 'app/shared/models/page';
 import { MatSort, MatSortHeader, Sort } from '@angular/material/sort';
-import { QueryPagingParameter } from '../../shared/models/query-paging-parameter';
-import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { PaginationComponent } from 'app/shared/components/pagination/pagination.component';
 import { merge } from 'rxjs';
 import { startWith, switchMap, tap } from 'rxjs/operators';
-import { RequestInProgressService } from '../../shared/services/request-in-progress/request-in-progress.service';
-import { Pair } from '../../shared/models/pair';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { Pair } from 'app/shared/models/pair';
 import {
   MatCell,
   MatCellDef,

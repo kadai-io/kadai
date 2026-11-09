@@ -44,28 +44,27 @@ class PojoTest {
       new ClassFileImporter()
           .importPackages("io.kadai").stream()
               .filter(javaClass -> javaClass.tryGetMethod("equals", Object.class).isPresent())
-              .filter(
-                  javaClass ->
-                      !javaClass.getSimpleName().equals("TaskHistoryEvent")
-                          && !javaClass.getSimpleName().equals("WorkbasketHistoryEvent")
-                          && !javaClass.getSimpleName().equals("ClassificationHistoryEvent")
-                          && !javaClass.getSimpleName().equals("ComparableVersion")
-                          && !javaClass.getSimpleName().equals("StringItem")
-                          && !javaClass.getSimpleName().equals("BigIntegerItem")
-                          && !javaClass.getSimpleName().equals("IntItem")
-                          && !javaClass.getSimpleName().equals("LongItem")
-                          // These are records, they have a getter per definition
-                          && !javaClass.getSimpleName().equals("DurationPrioHolder")
-                          && !javaClass.getSimpleName().equals("CustomHoliday")
-                          && !javaClass.getSimpleName().equals("TaskPatch")
-                          && !javaClass.getSimpleName().equals("DomainFixtures")
-                          && !javaClass.getSimpleName().equals("GenerationSummary")
-                          && !javaClass.getSimpleName().equals("TaskGenerationEnvironment")
-                          && !javaClass.getSimpleName().equals("PreparedUserRefreshInput")
-                          && !javaClass.getSimpleName().equals("UserDatabaseSnapshot")
-                          && !javaClass.getSimpleName().equals("UserRefreshPlan")
-                          && !javaClass.getSimpleName().equals("UserRefreshResult")
-                          && !javaClass.getSimpleName().equals("UserRefreshState"))
+              .filter(javaClass ->
+                  !javaClass.getSimpleName().equals("TaskHistoryEvent")
+                      && !javaClass.getSimpleName().equals("WorkbasketHistoryEvent")
+                      && !javaClass.getSimpleName().equals("ClassificationHistoryEvent")
+                      && !javaClass.getSimpleName().equals("ComparableVersion")
+                      && !javaClass.getSimpleName().equals("StringItem")
+                      && !javaClass.getSimpleName().equals("BigIntegerItem")
+                      && !javaClass.getSimpleName().equals("IntItem")
+                      && !javaClass.getSimpleName().equals("LongItem")
+                      // These are records, they have a getter per definition
+                      && !javaClass.getSimpleName().equals("DurationPrioHolder")
+                      && !javaClass.getSimpleName().equals("CustomHoliday")
+                      && !javaClass.getSimpleName().equals("TaskPatch")
+                      && !javaClass.getSimpleName().equals("DomainFixtures")
+                      && !javaClass.getSimpleName().equals("GenerationSummary")
+                      && !javaClass.getSimpleName().equals("TaskGenerationEnvironment")
+                      && !javaClass.getSimpleName().equals("PreparedUserRefreshInput")
+                      && !javaClass.getSimpleName().equals("UserDatabaseSnapshot")
+                      && !javaClass.getSimpleName().equals("UserRefreshPlan")
+                      && !javaClass.getSimpleName().equals("UserRefreshResult")
+                      && !javaClass.getSimpleName().equals("UserRefreshState"))
               .map(JavaClass::reflect)
               .toList();
 
@@ -77,51 +76,45 @@ class PojoTest {
   @TestFactory
   Stream<DynamicTest> equalsContract() {
     return POJO_CLASSES.stream()
-        .map(
-            cl ->
-                DynamicTest.dynamicTest(
-                    "Check Hash and Equals for " + cl.getSimpleName(),
-                    () -> verifyHashAndEquals(cl)));
+        .map(cl ->
+            DynamicTest.dynamicTest(
+                "Check Hash and Equals for " + cl.getSimpleName(), () -> verifyHashAndEquals(cl)));
   }
 
   @TestFactory
   Stream<DynamicTest> validateGetters() {
     return POJO_CLASSES.stream()
-        .map(
-            cl ->
-                DynamicTest.dynamicTest(
-                    "Check Getter exist for " + cl.getSimpleName(),
-                    () -> validateWithRules(cl, new GetterMustExistRule())));
+        .map(cl ->
+            DynamicTest.dynamicTest(
+                "Check Getter exist for " + cl.getSimpleName(),
+                () -> validateWithRules(cl, new GetterMustExistRule())));
   }
 
   @TestFactory
   Stream<DynamicTest> validateSetters() {
     return POJO_CLASSES.stream()
-        .map(
-            cl ->
-                DynamicTest.dynamicTest(
-                    "Check Setter for " + cl.getSimpleName(),
-                    () -> validateWithRules(cl, new SetterMustExistRule())));
+        .map(cl ->
+            DynamicTest.dynamicTest(
+                "Check Setter for " + cl.getSimpleName(),
+                () -> validateWithRules(cl, new SetterMustExistRule())));
   }
 
   @TestFactory
   Stream<DynamicTest> validateNoStaticExceptFinalFields() {
     return POJO_CLASSES.stream()
-        .map(
-            cl ->
-                DynamicTest.dynamicTest(
-                    "Check static fields for " + cl.getSimpleName(),
-                    () -> validateWithRules(cl, new NoStaticExceptFinalRule())));
+        .map(cl ->
+            DynamicTest.dynamicTest(
+                "Check static fields for " + cl.getSimpleName(),
+                () -> validateWithRules(cl, new NoStaticExceptFinalRule())));
   }
 
   @TestFactory
   Stream<DynamicTest> validateNoPublicFields() {
     return POJO_CLASSES.stream()
-        .map(
-            cl ->
-                DynamicTest.dynamicTest(
-                    "Check public fields for " + cl.getSimpleName(),
-                    () -> validateWithRules(cl, new NoPublicFieldsRule())));
+        .map(cl ->
+            DynamicTest.dynamicTest(
+                "Check public fields for " + cl.getSimpleName(),
+                () -> validateWithRules(cl, new NoPublicFieldsRule())));
   }
 
   private void validateWithRules(Class<?> cl, Rule... rules) {
