@@ -67,7 +67,7 @@ describe('ClassificationDetailsComponent', () => {
   let component: ClassificationDetailsComponent;
   let store: Store;
   let actions$: Observable<any>;
-        
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationDetailsComponent],

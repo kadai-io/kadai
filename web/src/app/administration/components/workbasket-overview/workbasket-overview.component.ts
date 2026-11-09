@@ -24,7 +24,11 @@ import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { filter, take, takeUntil } from 'rxjs/operators';
 import { WorkbasketAndAction, WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
 
-import { CreateWorkbasket, SelectWorkbasket, DeselectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import {
+  CreateWorkbasket,
+  SelectWorkbasket,
+  DeselectWorkbasket
+} from 'app/shared/store/workbasket-store/workbasket.actions';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketListComponent } from 'app/administration/components/workbasket-list/workbasket-list.component';
 

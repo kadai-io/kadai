@@ -34,7 +34,6 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-
 @Component({ template: '' })
 class BlankRouteComponent {}
 
