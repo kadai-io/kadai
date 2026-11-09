@@ -95,44 +95,47 @@ export class AppComponent implements OnInit, OnDestroy {
       }
     });
 
-    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(() => this.syncDomainWithUrl());
-
-    this.store
-      .select(DomainSelectors.selectedDomain)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe(() => this.syncDomainWithUrl());
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(() => this.adoptDomainFromUrl());
 
     this.router.events
       .pipe(
         filter((event): event is NavigationEnd => event instanceof NavigationEnd),
         takeUntil(this.destroy$)
       )
-      .subscribe(() => this.syncDomainWithUrl());
+      .subscribe(() => {
+        this.adoptDomainFromUrl();
+        queueMicrotask(() => this.writeDomainToUrl());
+      });
   }
 
-  private syncDomainWithUrl(): void {
-    if (this.router.getCurrentNavigation() !== null) {
+  private adoptDomainFromUrl(): void {
+    const fromUrl = this.route.snapshot.queryParams[DOMAIN_QUERY_PARAM];
+    const offered = this.store.selectSnapshot(DomainSelectors.domains);
+
+    if (fromUrl === undefined || !offered.includes(fromUrl)) {
       return;
     }
+    if (fromUrl !== this.store.selectSnapshot(DomainSelectors.selectedDomain)) {
+      this.store.dispatch(new SelectDomain(fromUrl));
+    }
+  }
 
+  private writeDomainToUrl(): void {
     const fromUrl = this.route.snapshot.queryParams[DOMAIN_QUERY_PARAM];
     const offered = this.store.selectSnapshot(DomainSelectors.domains);
     const selected = this.store.selectSnapshot(DomainSelectors.selectedDomain);
 
     if (fromUrl !== undefined && offered.includes(fromUrl)) {
-      if (fromUrl !== selected) {
-        this.store.dispatch(new SelectDomain(fromUrl));
-      }
       return;
     }
-
-    if (selected !== undefined && fromUrl !== selected) {
-      this.router.navigate([], {
-        queryParams: { [DOMAIN_QUERY_PARAM]: selected },
-        queryParamsHandling: 'merge',
-        replaceUrl: true
-      });
+    if (selected === undefined || fromUrl === selected) {
+      return;
     }
+    this.router.navigate([], {
+      queryParams: { [DOMAIN_QUERY_PARAM]: selected },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
   }
 
   async logout(): Promise<void> {

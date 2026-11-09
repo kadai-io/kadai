@@ -161,14 +161,15 @@ describe('AppComponent', () => {
     expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBeUndefined();
   });
 
-  it('should rewrite the url when it carries a domain the backend does not offer', () => {
+  it('should rewrite the url when it carries a domain the backend does not offer', async () => {
     const store = TestBed.inject(Store);
     store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
+    queryParams$.next({ domain: 'DOMAIN_GONE' });
     const router = TestBed.inject(Router);
-    vi.spyOn(router, 'getCurrentNavigation').mockReturnValue(null);
     const navigate = vi.spyOn(router, 'navigate');
 
-    queryParams$.next({ domain: 'DOMAIN_GONE' });
+    await router.navigateByUrl('/');
+    await Promise.resolve();
 
     expect(navigate).toHaveBeenCalledWith([], {
       queryParams: { domain: 'DOMAIN_A' },
@@ -177,11 +178,27 @@ describe('AppComponent', () => {
     });
   });
 
-  it('should not touch the url while a navigation is in flight', () => {
+  it('should add the selected domain to a url that carries none', async () => {
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
+    queryParams$.next({});
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate');
+
+    await router.navigateByUrl('/');
+    await Promise.resolve();
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'DOMAIN_A' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  });
+
+  it('should not touch the url before the navigation ends', () => {
     const store = TestBed.inject(Store);
     store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
     const router = TestBed.inject(Router);
-    vi.spyOn(router, 'getCurrentNavigation').mockReturnValue({} as any);
     const navigate = vi.spyOn(router, 'navigate');
 
     queryParams$.next({ domain: 'DOMAIN_GONE' });
