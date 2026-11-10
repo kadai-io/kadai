@@ -55,8 +55,6 @@
                 <mat-icon class="task-details__icon--aquamarine">open_in_new</mat-icon>
                 <span> Open </span>
               </button>
-            }
-            @if (currentId() != 'new-task') {
               <button (click)="deleteTask()"
                       class="task-details__button--secondary"
                       mat-menu-item matTooltip="Delete Task">

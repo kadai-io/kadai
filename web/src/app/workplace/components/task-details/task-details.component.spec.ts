@@ -741,6 +741,24 @@ describe('TaskDetailsComponent - DOM interaction', () => {
     }
     expect(component).toBeTruthy();
   });
+
+  it('should hide open and delete on a task that is not saved yet', () => {
+    document.querySelectorAll('.cdk-overlay-container').forEach((container) => container.remove());
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    fixture.detectChanges();
+    component.currentId.set('new-task');
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('button[mattooltip="More actions"]').click();
+    fixture.detectChanges();
+
+    expect(document.querySelector('button[mattooltip="Close Task"]')).toBeTruthy();
+    expect(document.querySelector('button[mattooltip="Open Task to work on it"]')).toBeNull();
+    expect(document.querySelector('button[mattooltip="Delete Task"]')).toBeNull();
+  });
 });
 
 describe('TaskDetailsComponent - redirect when no workbasket and new-task', () => {
