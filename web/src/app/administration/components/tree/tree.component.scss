@@ -25,9 +25,15 @@
 :host ::ng-deep .node-wrapper {
   height: var(--tree-node-height);
   align-items: center;
-  overflow: hidden;
 }
 
 :host ::ng-deep .node-content-wrapper {
   white-space: nowrap;
+  max-width: 100%;
+}
+
+.tree__node-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }

@@ -56,9 +56,7 @@ import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.compon
 import { MatTooltip } from '@angular/material/tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-// The virtual scroll places nodes by arithmetic rather than by measuring, so a row that does not match
-// this height shifts the last entries out of the rendered window. The stylesheet reads the same value.
-export const TREE_NODE_HEIGHT_PX = 32;
+export const TREE_NODE_HEIGHT_PX = 36;
 
 @Component({
   selector: 'kadai-administration-tree',
@@ -97,6 +95,14 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
       }
     },
     useVirtualScroll: true,
+    // default value of dropSlotHeight is 2
+    // this parameter is used not as intended, but to increase the width buffer of the tree element
+    // for scrolling so that there is enough space to display the last elements of the tree
+    //
+    // important: Tested in Firefox, where the bug appears, and in Chrome, Brave and Edge, where
+    // it does not. Opera is Blink too, so it should behave like the latter. Safari is WebKit and wasn't checked.
+
+    dropSlotHeight: 2,
     nodeHeight: TREE_NODE_HEIGHT_PX,
     scrollOnActivate: false,
     levelPadding: 20,

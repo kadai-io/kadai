@@ -18,7 +18,7 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { KadaiTreeComponent, TREE_NODE_HEIGHT_PX } from './tree.component';
+import { KadaiTreeComponent } from './tree.component';
 import { provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
 import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
@@ -102,8 +102,14 @@ describe('KadaiTreeComponent', () => {
     httpController.match(() => true).forEach((req) => req.flush(''));
   });
 
-  it('should tell the virtual scroll the node height it renders', () => {
-    expect(component.options.nodeHeight).toBe(TREE_NODE_HEIGHT_PX);
+  it('should impose on the rows the same height it tells the virtual scroll', () => {
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.style.getPropertyValue('--tree-node-height')).toBe(`${component.options.nodeHeight}px`);
+  });
+
+  it('should reserve a scroll buffer on top of the row height', () => {
+    expect(component.options.dropSlotHeight).toBe(2);
   });
 
   it('should create the component', () => {

@@ -42,6 +42,7 @@ export default defineConfig({
       apiAuth: 'Basic YWRtaW46YWRtaW4=',
       dropdownWait: 80,
       testValueClassificationSelectionName: 'L10303',
+      testValueLastClassificationKey: 'T6310',
       testValueClassifications: 'CY-TEST-CLASSIFICATIONS',
       testValueWorkbasketSelectionName: 'basxet0',
       testValueWorkbaskets: 'CY-TEST-WORKBASKETS'

@@ -101,4 +101,41 @@ describe('KADAI Classifications', () => {
 
     cy.get('#classification-application-entry-point').should('have.value', Cypress.expose('testValueClassifications'));
   });
+
+  it('should show the last classification of a scrolled list and let it be selected', () => {
+    cy.visit(Cypress.expose('appUrl') + Cypress.expose('adminUrl') + '/classifications');
+    cy.verifyPageLoad('/classifications');
+
+    cy.get('tree-node').should('have.length.greaterThan', 10);
+    cy.get('tree-viewport').scrollTo('bottom');
+
+    cy.get('tree-viewport').then(($viewport) => {
+      const viewportBottom = $viewport[0].getBoundingClientRect().bottom;
+
+      cy.contains('tree-node', Cypress.expose('testValueLastClassificationKey')).should(($node) => {
+        expect($node[0].getBoundingClientRect().bottom).to.be.at.most(viewportBottom);
+      });
+    });
+
+    cy.contains('tree-node', Cypress.expose('testValueLastClassificationKey')).click();
+    cy.get('#classification-key').should('have.value', Cypress.expose('testValueLastClassificationKey'));
+  });
+
+  it('should keep every classification row on one line', () => {
+    cy.visit(Cypress.expose('appUrl') + Cypress.expose('adminUrl') + '/classifications');
+    cy.verifyPageLoad('/classifications');
+
+    cy.window().then((win) => {
+      cy.get('kadai-administration-tree').then(($tree) => {
+        const rowHeight = parseInt(win.getComputedStyle($tree[0]).getPropertyValue('--tree-node-height'), 10);
+        expect(rowHeight).to.be.greaterThan(0);
+
+        cy.get('.tree__node-text')
+          .should('have.length.greaterThan', 0)
+          .each(($text) => {
+            expect($text[0].getBoundingClientRect().height).to.be.at.most(rowHeight);
+          });
+      });
+    });
+  });
 });
