@@ -405,6 +405,15 @@ describe('TaskDetailsComponent', () => {
     expect(undoBtn).toBeTruthy();
   });
 
+  it('should offer undo changes on a task that is not saved yet', () => {
+    component.task.set(mockTask);
+    component.requestInProgress.set(false);
+    component.currentId.set('new-task');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]')).toBeTruthy();
+  });
+
   it('should not render task container when task is null', () => {
     (taskServiceSpy.getTask as ReturnType<typeof vi.fn>).mockReturnValueOnce(new Subject<Task>().asObservable());
     store.reset({
@@ -953,30 +962,6 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     fixture.detectChanges();
     const badge = fixture.nativeElement.querySelector('.task-details__badge-message');
     expect(badge).toBeTruthy();
-  });
-
-  it('should not show undo button when currentId is new-task (covers @if (currentId != new-task) false branch)', () => {
-    fixture = TestBed.createComponent(TaskDetailsComponent);
-    component = fixture.componentInstance;
-    component.task.set({ ...mockTaskHtml });
-    component.requestInProgress.set(false);
-    component.currentId.set('new-task');
-    store.dispatch(new SelectTask(component.task()));
-    fixture.detectChanges();
-    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
-    expect(undoBtn).toBeNull();
-  });
-
-  it('should show undo button when currentId is not new-task (covers @if (currentId != new-task) true branch)', () => {
-    fixture = TestBed.createComponent(TaskDetailsComponent);
-    component = fixture.componentInstance;
-    component.task.set({ ...mockTaskHtml });
-    component.requestInProgress.set(false);
-    component.currentId.set('task-id-1');
-    store.dispatch(new SelectTask(component.task()));
-    fixture.detectChanges();
-    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
-    expect(undoBtn).toBeTruthy();
   });
 
   it('should call toggleFormValidation toggle when save button is clicked', () => {

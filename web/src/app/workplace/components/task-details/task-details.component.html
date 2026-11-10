@@ -36,15 +36,12 @@
             <span> Save </span>
             <mat-icon>save</mat-icon>
           </button>
-          <!-- TODO: delete ngIf when introducing workbasket store -->
-          @if (currentId() != 'new-task') {
-            <button (click)="resetTask()"
-                    class="task-details__button--secondary"
-                    mat-stroked-button matTooltip="Undo changes">
-              <mat-icon class="task-details__icon--aquamarine">undo</mat-icon>
-              <span> Undo changes </span>
-            </button>
-          }
+          <button (click)="resetTask()"
+                  class="task-details__button--secondary"
+                  mat-stroked-button matTooltip="Undo changes">
+            <mat-icon class="task-details__icon--aquamarine">undo</mat-icon>
+            <span> Undo changes </span>
+          </button>
           <button [matMenuTriggerFor]="buttonMenu" class="task-details__button--secondary"
                   mat-stroked-button
                   matTooltip="More actions" style="height: 37px; top: 1px;">
