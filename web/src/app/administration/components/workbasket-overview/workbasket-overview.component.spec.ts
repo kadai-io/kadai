@@ -18,26 +18,28 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketOverviewComponent } from './workbasket-overview.component';
-import { DebugElement } from '@angular/core';
+import { Component, DebugElement } from '@angular/core';
 import { Actions, ofActionCompleted, ofActionDispatched, provideStore, Store } from '@ngxs/store';
-import { Observable, of } from 'rxjs';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { Observable, of, firstValueFrom } from 'rxjs';
 import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { CreateWorkbasket, SelectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
-import { take } from 'rxjs/operators';
 import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { beforeEach, describe, expect, it } from 'vitest';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
+@Component({ template: '' })
+class BlankRouteComponent {}
 
 const mockActivatedRoute = {
   url: of([{ path: 'foobar' }]),
   firstChild: {
-    params: of({
-      id: 'new-workbasket'
-    })
+    snapshot: { params: { id: 'new-workbasket' } }
   }
 };
 
@@ -49,10 +51,13 @@ describe('WorkbasketOverviewComponent', () => {
   let actions$: Observable<any>;
 
   beforeEach(async () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'new-workbasket' } };
     await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState, EngineConfigurationState]),
+        provideRouter([{ path: '**', component: BlankRouteComponent }]),
+        provideStore([WorkbasketState, FilterState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideNoopAnimations(),
         {
           provide: ActivatedRoute,
@@ -69,6 +74,14 @@ describe('WorkbasketOverviewComponent', () => {
     store = TestBed.inject(Store);
     store.reset({
       ...store.snapshot(),
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
+      workbasket: {
+        ...store.snapshot().workbasket,
+        availableDistributionTargets: { workbaskets: [], _links: {} }
+      }
+    });
+    store.reset({
+      ...store.snapshot(),
       engineConfiguration: engineConfigurationMock
     });
     actions$ = TestBed.inject(Actions);
@@ -83,13 +96,24 @@ describe('WorkbasketOverviewComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-list')).toBeTruthy();
   });
 
-  it('should display details when params id exists', async () => {
-    actions$.pipe(ofActionCompleted(CreateWorkbasket), take(1)).subscribe(() => {
-      expect(component.routerParams.id).toMatch('new-workbasket');
-      expect(component.showDetail).toBeTruthy();
-      expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
+  it('should read the route again after each navigation', async () => {
+    mockActivatedRoute.firstChild.snapshot = { params: { id: 'WBI:99' } };
+    store.reset({
+      ...store.snapshot(),
+      workbasket: { ...store.snapshot().workbasket, selectedWorkbasket: undefined }
     });
-    component.ngOnInit();
+    let isActionDispatched = false;
+    actions$.pipe(ofActionDispatched(SelectWorkbasket)).subscribe(() => (isActionDispatched = true));
+
+    await TestBed.inject(Router).navigateByUrl('/kadai/administration/workbaskets');
+
+    expect(isActionDispatched).toBe(true);
+  });
+
+  it('should display details when params id exists', () => {
+    expect(component.routerParams.id).toMatch('new-workbasket');
+    expect(component.showDetail()).toBe(true);
+    expect(debugElement.nativeElement.querySelector('kadai-administration-workbasket-details')).toBeTruthy();
   });
 
   it('should not display workbasket-details', () => {
@@ -200,7 +224,7 @@ describe('WorkbasketOverviewComponent', () => {
 const mockActivatedRouteAlternativeId = {
   url: of([{ path: 'foobar' }]),
   firstChild: {
-    params: of({ id: '101' })
+    snapshot: { params: { id: '101' } }
   }
 };
 
@@ -214,7 +238,9 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     await TestBed.configureTestingModule({
       imports: [WorkbasketOverviewComponent],
       providers: [
-        provideStore([WorkbasketState, FilterState]),
+        provideRouter([{ path: '**', component: BlankRouteComponent }]),
+        provideStore([WorkbasketState, FilterState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: ActivatedRoute, useValue: mockActivatedRouteAlternativeId },
 
         provideHttpClientTesting()
@@ -223,6 +249,14 @@ describe('WorkbasketOverviewComponent Alternative Params ID', () => {
     fixture = TestBed.createComponent(WorkbasketOverviewComponent);
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({
+      ...store.snapshot(),
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' },
+      workbasket: {
+        ...store.snapshot().workbasket,
+        availableDistributionTargets: { workbaskets: [], _links: {} }
+      }
+    });
     actions$ = TestBed.inject(Actions);
     fixture.detectChanges();
   });

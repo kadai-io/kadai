@@ -17,7 +17,11 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, viewChild } from '@angular/core';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { Store } from '@ngxs/store';
+import { DomainSelectors } from './shared/store/domain-store/domain.selectors';
+import { SelectDomain } from './shared/store/domain-store/domain.actions';
+import { DOMAIN_QUERY_PARAM } from './shared/store/domain-store/domain.state';
 import { firstValueFrom, of, Subject } from 'rxjs';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
@@ -27,7 +31,7 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { WindowRefService } from 'app/shared/services/window/window.service';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { MatSidenav, MatSidenavContainer, MatSidenavContent } from '@angular/material/sidenav';
-import { catchError, map, takeUntil } from 'rxjs/operators';
+import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { UserInformationComponent } from './shared/components/user-information/user-information.component';
@@ -71,6 +75,8 @@ export class AppComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   public sidenav = viewChild<MatSidenav>('sidenav');
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private store = inject(Store);
   private orientationService = inject(OrientationService);
   private sidenavService = inject(SidenavService);
   private kadaiEngineService = inject(KadaiEngineService);
@@ -87,6 +93,48 @@ export class AppComponent implements OnInit, OnDestroy {
       if (event instanceof NavigationEnd) {
         this.selectedRouteService.selectRoute(event);
       }
+    });
+
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(() => this.adoptDomainFromUrl());
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => {
+        this.adoptDomainFromUrl();
+        queueMicrotask(() => this.writeDomainToUrl());
+      });
+  }
+
+  private adoptDomainFromUrl(): void {
+    const fromUrl = this.route.snapshot.queryParams[DOMAIN_QUERY_PARAM];
+    const offered = this.store.selectSnapshot(DomainSelectors.domains);
+
+    if (fromUrl === undefined || !offered.includes(fromUrl)) {
+      return;
+    }
+    if (fromUrl !== this.store.selectSnapshot(DomainSelectors.selectedDomain)) {
+      this.store.dispatch(new SelectDomain(fromUrl));
+    }
+  }
+
+  private writeDomainToUrl(): void {
+    const fromUrl = this.route.snapshot.queryParams[DOMAIN_QUERY_PARAM];
+    const offered = this.store.selectSnapshot(DomainSelectors.domains);
+    const selected = this.store.selectSnapshot(DomainSelectors.selectedDomain);
+
+    if (fromUrl !== undefined && offered.includes(fromUrl)) {
+      return;
+    }
+    if (selected === undefined || fromUrl === selected) {
+      return;
+    }
+    this.router.navigate([], {
+      queryParams: { [DOMAIN_QUERY_PARAM]: selected },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
     });
   }
 

@@ -77,7 +77,7 @@ describe('WorkbasketInformationComponent', () => {
       providers: [
         { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
         provideStore([EngineConfigurationState, WorkbasketState]),
-        provideRouter([]),
+        provideRouter([{ path: '**', children: [] }]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
         { provide: AccessIdsService, useValue: accessIdsServiceMock },
 

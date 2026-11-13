@@ -22,6 +22,9 @@ import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { expandDown } from 'app/shared/animations/expand.animation';
 import { Store } from '@ngxs/store';
+import { Router } from '@angular/router';
+import { WORKBASKETS_ROUTE } from 'app/shared/util/administration-routes';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { ACTION } from 'app/shared/models/action';
 import { CreateWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
 import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
@@ -52,6 +55,7 @@ export class WorkbasketListToolbarComponent {
   isExpanded = false;
   action = toSignal(inject(Store).select(WorkbasketSelectors.workbasketActiveAction), { requireSync: true });
   private store = inject(Store);
+  private router = inject(Router);
   private workbasketService = inject(WorkbasketService);
 
   sorting(sort: Sorting<WorkbasketQuerySortParameter>) {
@@ -59,9 +63,17 @@ export class WorkbasketListToolbarComponent {
   }
 
   addWorkbasket() {
-    if (this.action() !== ACTION.CREATE) {
-      this.store.dispatch(new CreateWorkbasket());
+    if (this.action() === ACTION.CREATE) {
+      return;
     }
+    if (this.action() === ACTION.COPY) {
+      this.store.dispatch(new CreateWorkbasket(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
+      return;
+    }
+    this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   onClickFilter() {

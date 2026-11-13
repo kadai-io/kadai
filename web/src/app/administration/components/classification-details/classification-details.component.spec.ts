@@ -17,11 +17,11 @@
  */
 
 import { DebugElement } from '@angular/core';
+import { provideRouter } from '@angular/router';
 import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { EMPTY, firstValueFrom, Observable, of } from 'rxjs';
 import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
@@ -40,6 +40,8 @@ import {
 import { By } from '@angular/platform-browser';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 
 const classificationServiceSpy: Partial<ClassificationsService> = {
   getClassification: vi.fn().mockReturnValue(EMPTY),
@@ -51,11 +53,6 @@ const classificationServiceSpy: Partial<ClassificationsService> = {
 
 const classificationCategoriesServiceSpy: Partial<ClassificationCategoriesService> = {
   getCustomisation: vi.fn().mockReturnValue(EMPTY)
-};
-
-const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-  getSelectedDomain: vi.fn().mockReturnValue(of('A'))
 };
 
 const notificationServiceSpy: Partial<NotificationService> = {
@@ -75,12 +72,13 @@ describe('ClassificationDetailsComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationDetailsComponent],
       providers: [
+        provideRouter([{ path: '**', children: [] }]),
+        provideStore([ClassificationState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
-        provideStore([ClassificationState, EngineConfigurationState]),
         provideHttpClientTesting(),
         { provide: ClassificationsService, useValue: classificationServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy },
-        { provide: DomainService, useValue: domainServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }
       ]
     }).compileComponents();
@@ -92,6 +90,7 @@ describe('ClassificationDetailsComponent', () => {
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
+      domain: { domains: ['A', 'B'], selectedDomain: 'A' },
       classification: classificationStateMock,
       engineConfiguration: engineConfigurationMock
     });
@@ -351,16 +350,16 @@ describe('ClassificationDetailsComponent', () => {
     expect(component.classification()!['custom4']).toBe(newValue);
   });
 
-  it('should hide Valid-in-Domain checkbox when masterDomainSelected returns true', () => {
-    (domainServiceSpy.getSelectedDomainValue as any).mockReturnValue('');
+  it('should hide Valid-in-Domain checkbox when the master domain is selected', () => {
+    store.reset({ ...store.snapshot(), domain: { domains: ['', 'A'], selectedDomain: '' } });
     const lf = TestBed.createComponent(ClassificationDetailsComponent);
     lf.detectChanges();
     const checkbox = lf.nativeElement.querySelector('.detailed-fields__domain-checkbox');
     expect(checkbox).toBeFalsy();
   });
 
-  it('should show Valid-in-Domain checkbox when masterDomainSelected returns false', () => {
-    (domainServiceSpy.getSelectedDomainValue as any).mockReturnValue('A');
+  it('should show Valid-in-Domain checkbox when a regular domain is selected', () => {
+    store.reset({ ...store.snapshot(), domain: { domains: ['', 'A'], selectedDomain: 'A' } });
     const lf = TestBed.createComponent(ClassificationDetailsComponent);
     lf.detectChanges();
     const checkbox = lf.nativeElement.querySelector('.detailed-fields__domain-checkbox');

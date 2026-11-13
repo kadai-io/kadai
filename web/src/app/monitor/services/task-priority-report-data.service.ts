@@ -18,12 +18,12 @@
 
 import { inject, Injectable } from '@angular/core';
 import { combineLatest, Observable, of } from 'rxjs';
-import { catchError, finalize, map, switchMap } from 'rxjs/operators';
+import { catchError, filter, finalize, map, switchMap } from 'rxjs/operators';
 import { Store } from '@ngxs/store';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { MonitorService } from 'app/monitor/services/monitor.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { TaskPriorityReportFilterStateService } from './task-priority-report-filter-state.service';
@@ -35,7 +35,7 @@ import { PriorityInterval } from 'app/monitor/models/priority-interval';
 @Injectable({ providedIn: 'root' })
 export class TaskPriorityReportDataService {
   private readonly store = inject(Store);
-  private readonly domainService = inject(DomainService);
+
   private readonly monitorService = inject(MonitorService);
   private readonly requestInProgressService = inject(RequestInProgressService);
   private readonly filterState = inject(TaskPriorityReportFilterStateService);
@@ -49,7 +49,9 @@ export class TaskPriorityReportDataService {
 
     return combineLatest([
       this.store.select(SettingsSelectors.getSettings),
-      this.domainService.getSelectedDomain(),
+      this.store
+        .select(DomainSelectors.selectedDomain)
+        .pipe(filter((domain): domain is string => domain !== undefined)),
       keyStream$,
       this.activeQuery$
     ]).pipe(

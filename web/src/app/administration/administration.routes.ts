@@ -17,17 +17,36 @@
  */
 
 import { inject } from '@angular/core';
-import { Routes } from '@angular/router';
+import { CanActivateFn, Routes, Router } from '@angular/router';
 
 import { catchError, map } from 'rxjs/operators';
 import { of } from 'rxjs';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { Store } from '@ngxs/store';
+import { FetchDomains } from '../shared/store/domain-store/domain.actions';
+import { DOMAIN_QUERY_PARAM, MASTER_DOMAIN } from '../shared/store/domain-store/domain.state';
+import { DomainSelectors } from '../shared/store/domain-store/domain.selectors';
 
-const domainGuard = () => {
-  const domainService = inject(DomainService);
+const domainGuard: CanActivateFn = (route, state) => {
+  const store = inject(Store);
+  const router = inject(Router);
 
-  return domainService.getDomains().pipe(
-    map(() => true),
+  return store.dispatch(new FetchDomains(false, route.queryParams[DOMAIN_QUERY_PARAM])).pipe(
+    map(() => {
+      if (state.url.includes('classifications')) {
+        return true;
+      }
+      const requested = route.queryParams[DOMAIN_QUERY_PARAM] ?? store.selectSnapshot(DomainSelectors.selectedDomain);
+      if (requested !== MASTER_DOMAIN) {
+        return true;
+      }
+      const realDomain = store.selectSnapshot(DomainSelectors.domains).find((domain) => domain !== MASTER_DOMAIN);
+      if (realDomain === undefined) {
+        return true;
+      }
+      const target = router.parseUrl(state.url);
+      target.queryParams = { ...target.queryParams, [DOMAIN_QUERY_PARAM]: realDomain };
+      return target;
+    }),
     catchError(() => {
       return of(false);
     })

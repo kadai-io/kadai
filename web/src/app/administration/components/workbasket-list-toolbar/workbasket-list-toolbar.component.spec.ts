@@ -20,21 +20,18 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { WorkbasketListToolbarComponent } from './workbasket-list-toolbar.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { DomainState } from '../../../shared/store/domain-store/domain.state';
+import { WORKBASKETS_ROUTE } from '../../../shared/util/administration-routes';
+import { RuntimeConfigService } from '../../../shared/services/runtime-config/runtime-config.service';
 import { Observable, of } from 'rxjs';
 import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { CreateWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
 import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { ACTION } from 'app/shared/models/action';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { FilterState } from 'app/shared/store/filter-store/filter.state';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-
-const domainServiceMock: Partial<DomainService> = {
-  getDomains: vi.fn().mockResolvedValue(''),
-  getSelectedDomain: vi.fn().mockReturnValue(of('A'))
-};
 
 describe('WorkbasketListToolbarComponent', () => {
   let fixture: ComponentFixture<WorkbasketListToolbarComponent>;
@@ -48,11 +45,8 @@ describe('WorkbasketListToolbarComponent', () => {
       imports: [WorkbasketListToolbarComponent],
       providers: [
         provideRouter([]),
-        provideStore([WorkbasketState, FilterState]),
-        {
-          provide: DomainService,
-          useValue: domainServiceMock
-        },
+        provideStore([WorkbasketState, FilterState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
         provideHttpClientTesting()
       ]
@@ -62,6 +56,7 @@ describe('WorkbasketListToolbarComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     actions$ = TestBed.inject(Actions);
     store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
     fixture.detectChanges();
@@ -71,11 +66,25 @@ describe('WorkbasketListToolbarComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should dispatch CreateWorkbasket when addWorkbasket is called', async () => {
+  it('should navigate to the new workbasket url when addWorkbasket is called', () => {
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.READ } });
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
+    component.addWorkbasket();
+
+    expect(navigate).toHaveBeenCalledWith([WORKBASKETS_ROUTE, { outlets: { detail: ['new-workbasket'] } }], {
+      queryParams: { tab: null },
+      queryParamsHandling: 'merge'
+    });
+  });
+
+  it('should start a fresh workbasket while a copy is open, where the url cannot change', () => {
     store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, action: ACTION.COPY } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(CreateWorkbasket)).subscribe(() => (actionDispatched = true));
+
     component.addWorkbasket();
+
     expect(actionDispatched).toBe(true);
   });
 

@@ -17,6 +17,8 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { CLASSIFICATIONS_ROUTE } from 'app/shared/util/administration-routes';
+import { Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
@@ -26,11 +28,11 @@ import { ImportExportService } from 'app/administration/services/import-export.s
 import { KadaiType } from 'app/shared/models/kadai-type';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
-import { AsyncPipe, Location } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { ClassificationCategoryImages } from 'app/shared/models/customisation';
 
-import { CreateClassification, GetClassifications } from 'app/shared/store/classification-store/classification.actions';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { GetClassifications } from 'app/shared/store/classification-store/classification.actions';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { ClassificationSummary } from 'app/shared/models/classification-summary';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { Pair } from 'app/shared/models/pair';
@@ -83,11 +85,10 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
   );
   destroy$ = new Subject<void>();
   classifications = signal<ClassificationSummary[]>([]);
-  private location = inject(Location);
   private importExportService = inject(ImportExportService);
-  private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private store = inject(Store);
+  private router = inject(Router);
   private ngxsActions$ = inject(Actions);
 
   constructor() {
@@ -112,7 +113,7 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
       });
 
     this.classificationTypeSelected$.pipe(takeUntil(this.destroy$)).subscribe(() => {
-      this.store.dispatch(new GetClassifications());
+      this.refreshClassifications();
       this.selectedCategory.set('');
     });
 
@@ -120,21 +121,30 @@ export class ClassificationListComponent implements OnInit, OnDestroy {
       .getImportingFinished()
       .pipe(takeUntil(this.destroy$))
       .subscribe(() => {
-        this.store.dispatch(new GetClassifications());
+        this.refreshClassifications();
       });
 
-    // needed, so that the list updates, when domain gets changed (could be placed anywhere and should be removed, when domain is in store)
-    this.domainService
-      .getSelectedDomain()
+    this.store
+      .select(DomainSelectors.selectedDomain)
       .pipe(takeUntil(this.destroy$))
       .subscribe((domain) => {
-        this.store.dispatch(GetClassifications);
+        if (domain !== undefined) {
+          this.store.dispatch(new GetClassifications(domain));
+        }
       });
   }
 
+  private refreshClassifications(): void {
+    const domain = this.store.selectSnapshot(DomainSelectors.selectedDomain);
+    if (domain !== undefined) {
+      this.store.dispatch(new GetClassifications(domain));
+    }
+  }
+
   addClassification() {
-    this.store.dispatch(new CreateClassification());
-    this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications/new-classification'));
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['new-classification'] } }], {
+      queryParamsHandling: 'merge'
+    });
   }
 
   getCategoryIcon(category: string): Observable<Pair<string, string>> {

@@ -17,10 +17,11 @@
  */
 
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { Observable, Subject } from 'rxjs';
 import { Store } from '@ngxs/store';
-import { takeUntil } from 'rxjs/operators';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
+import { filter, takeUntil } from 'rxjs/operators';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import {
   CreateClassification,
@@ -47,30 +48,50 @@ export class ClassificationOverviewComponent implements OnInit, OnDestroy {
   );
   routerParams: any;
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private store = inject(Store);
   private destroy$ = new Subject<void>();
 
   ngOnInit() {
-    if (this.route.firstChild) {
-      this.route.firstChild.params.pipe(takeUntil(this.destroy$)).subscribe((params) => {
-        this.routerParams = params;
-
-        if (this.routerParams.id) {
-          this.store
-            .dispatch(new SelectClassification(this.routerParams.id))
-            .subscribe(() => this.store.dispatch(new GetClassifications()));
-        } else {
-          this.store.dispatch(new DeselectClassification());
-        }
-        if (this.routerParams.id && this.routerParams.id.indexOf('new-classification') !== -1) {
-          this.store.dispatch(new CreateClassification());
-        }
-      });
-    }
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(() => this.applyDetailRoute());
+    this.applyDetailRoute();
 
     this.selectedClassification$.pipe(takeUntil(this.destroy$)).subscribe((selectedClassification) => {
       this.showDetail.set(!!selectedClassification);
     });
+  }
+
+  private applyDetailRoute(): void {
+    const id = this.route.firstChild?.snapshot.params['id'];
+    this.routerParams = { id };
+
+    if (!id) {
+      this.store.dispatch(new DeselectClassification());
+      return;
+    }
+
+    const selected = this.store.selectSnapshot(ClassificationSelectors.selectedClassification);
+
+    if (id.indexOf('new-classification') !== -1) {
+      if (selected === undefined || selected.classificationId !== undefined) {
+        this.store.dispatch(new CreateClassification(this.store.selectSnapshot(DomainSelectors.selectedDomain)));
+      }
+      return;
+    }
+
+    if (selected?.classificationId !== id) {
+      this.store.dispatch(new SelectClassification(id)).subscribe(() => {
+        const domain = this.store.selectSnapshot(DomainSelectors.selectedDomain);
+        if (domain !== undefined) {
+          this.store.dispatch(new GetClassifications(domain));
+        }
+      });
+    }
   }
 
   ngOnDestroy() {

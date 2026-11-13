@@ -17,6 +17,11 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ActivatedRoute, Router } from '@angular/router';
+import { provideStore, Store } from '@ngxs/store';
+import { DomainState } from './shared/store/domain-store/domain.state';
+import { DomainSelectors } from './shared/store/domain-store/domain.selectors';
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { AppComponent } from './app.component';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -25,10 +30,8 @@ import { KadaiEngineService } from './shared/services/kadai-engine/kadai-engine.
 import { RequestInProgressService } from './shared/services/request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from './shared/services/selected-route/selected-route';
 import { SidenavService } from './shared/services/sidenav/sidenav.service';
-import { of, Subject, throwError } from 'rxjs';
 import { OrientationService } from './shared/services/orientation/orientation.service';
 import { WindowRefService } from './shared/services/window/window.service';
-import { Router } from '@angular/router';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { RuntimeConfigService } from './shared/services/runtime-config/runtime-config.service';
 import { signal } from '@angular/core';
@@ -80,7 +83,11 @@ describe('AppComponent', () => {
     nativeWindow: { location: { href: '' } }
   };
 
+  let queryParams$: BehaviorSubject<Record<string, string>>;
+
   beforeEach(async () => {
+    queryParams$ = new BehaviorSubject<Record<string, string>>({});
+
     vi.clearAllMocks();
     kadaiEngineServiceMock.logout.mockReturnValue(of(undefined));
     windowRefServiceMock.nativeWindow.location.href = '';
@@ -96,7 +103,19 @@ describe('AppComponent', () => {
         { provide: OrientationService, useValue: orientationServiceMock },
         { provide: WindowRefService, useValue: windowRefServiceMock },
         provideNoopAnimations(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideStore([DomainState]),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            queryParams: queryParams$.asObservable(),
+            snapshot: {
+              get queryParams() {
+                return queryParams$.value;
+              }
+            }
+          }
+        }
       ]
     }).compileComponents();
 
@@ -110,6 +129,81 @@ describe('AppComponent', () => {
   afterEach(() => {
     httpController.match(() => true).forEach((req) => req.flush(''));
     vi.restoreAllMocks();
+  });
+
+  const offerDomains = (domains: string[]) => {
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains, selectedDomain: undefined } });
+    return store;
+  };
+
+  it('should select the domain the url asks for', () => {
+    const store = offerDomains(['DOMAIN_A', 'DOMAIN_B']);
+
+    queryParams$.next({ domain: 'DOMAIN_B' });
+
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('DOMAIN_B');
+  });
+
+  it('should select the master domain when the url carries an empty domain', () => {
+    const store = offerDomains(['DOMAIN_A', '']);
+
+    queryParams$.next({ domain: '' });
+
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBe('');
+  });
+
+  it('should ignore a domain the backend does not offer', () => {
+    const store = offerDomains(['DOMAIN_A']);
+
+    queryParams$.next({ domain: 'DOMAIN_GONE' });
+
+    expect(store.selectSnapshot(DomainSelectors.selectedDomain)).toBeUndefined();
+  });
+
+  it('should rewrite the url when it carries a domain the backend does not offer', async () => {
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
+    queryParams$.next({ domain: 'DOMAIN_GONE' });
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate');
+
+    await router.navigateByUrl('/');
+    await Promise.resolve();
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'DOMAIN_A' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  });
+
+  it('should add the selected domain to a url that carries none', async () => {
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
+    queryParams$.next({});
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate');
+
+    await router.navigateByUrl('/');
+    await Promise.resolve();
+
+    expect(navigate).toHaveBeenCalledWith([], {
+      queryParams: { domain: 'DOMAIN_A' },
+      queryParamsHandling: 'merge',
+      replaceUrl: true
+    });
+  });
+
+  it('should not touch the url before the navigation ends', () => {
+    const store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A'], selectedDomain: 'DOMAIN_A' } });
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigate');
+
+    queryParams$.next({ domain: 'DOMAIN_GONE' });
+
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('should create', () => {

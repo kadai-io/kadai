@@ -25,7 +25,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { TaskPriorityReportDataService } from './task-priority-report-data.service';
 import { TaskPriorityReportFilterStateService } from './task-priority-report-filter-state.service';
 import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
 import { MonitorService } from 'app/monitor/services/monitor.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { SettingMembers } from 'app/settings/components/Settings/expected-members';
@@ -68,7 +68,6 @@ describe('TaskPriorityReportDataService', () => {
 
   let mockMonitorService: Partial<MonitorService>;
   let mockRequestInProgressService: { beginRequest: ReturnType<typeof vi.fn>; endRequest: ReturnType<typeof vi.fn> };
-  let mockDomainService: Partial<DomainService>;
 
   beforeEach(() => {
     settingsSubject$ = new BehaviorSubject<Settings | undefined>(mockSettings);
@@ -82,12 +81,11 @@ describe('TaskPriorityReportDataService', () => {
         if (selector === SettingsSelectors.getSettings) {
           return settingsSubject$.asObservable();
         }
+        if (selector === DomainSelectors.selectedDomain) {
+          return domainSubject$.asObservable();
+        }
         return of(undefined);
       })
-    };
-
-    mockDomainService = {
-      getSelectedDomain: vi.fn().mockReturnValue(domainSubject$.asObservable())
     };
 
     mockMonitorService = {
@@ -109,7 +107,6 @@ describe('TaskPriorityReportDataService', () => {
       providers: [
         TaskPriorityReportDataService,
         { provide: Store, useValue: mockStore },
-        { provide: DomainService, useValue: mockDomainService },
         { provide: MonitorService, useValue: mockMonitorService },
         { provide: RequestInProgressService, useValue: mockRequestInProgressService },
         { provide: TaskPriorityReportFilterStateService, useValue: mockFilterStateService }

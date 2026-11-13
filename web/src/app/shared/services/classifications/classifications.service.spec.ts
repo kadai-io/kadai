@@ -22,7 +22,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
 import { ClassificationsService } from './classifications.service';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { Classification } from 'app/shared/models/classification';
 
 describe('ClassificationsService', () => {
@@ -30,11 +29,6 @@ describe('ClassificationsService', () => {
   let httpMock: HttpTestingController;
 
   const runtimeConfigServiceMock = { kadaiRestUrl: 'http://test' };
-
-  const mockDomainService = {
-    getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-    domainChangedComplete: vi.fn()
-  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -44,8 +38,7 @@ describe('ClassificationsService', () => {
         ClassificationsService,
 
         provideHttpClientTesting(),
-        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock },
-        { provide: DomainService, useValue: mockDomainService }
+        { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock }
       ]
     });
 
