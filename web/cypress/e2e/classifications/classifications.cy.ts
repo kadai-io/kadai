@@ -121,6 +121,15 @@ describe('KADAI Classifications', () => {
     cy.get('#classification-key').should('have.value', Cypress.expose('testValueLastClassificationKey'));
   });
 
+  it('should truncate long classification names instead of scrolling sideways', () => {
+    cy.visit(Cypress.expose('appUrl') + Cypress.expose('adminUrl') + '/classifications');
+    cy.verifyPageLoad('/classifications');
+
+    cy.get('tree-viewport').should(($viewport) => {
+      expect($viewport[0].scrollWidth).to.be.at.most($viewport[0].clientWidth);
+    });
+  });
+
   it('should keep every classification row on one line', () => {
     cy.visit(Cypress.expose('appUrl') + Cypress.expose('adminUrl') + '/classifications');
     cy.verifyPageLoad('/classifications');

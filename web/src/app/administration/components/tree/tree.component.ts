@@ -95,14 +95,9 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
       }
     },
     useVirtualScroll: true,
-    // default value of dropSlotHeight is 2
-    // this parameter is used not as intended, but to increase the width buffer of the tree element
-    // for scrolling so that there is enough space to display the last elements of the tree
-    //
-    // important: Tested in Firefox, where the bug appears, and in Chrome, Brave and Edge, where
-    // it does not. Opera is Blink too, so it should behave like the latter. Safari is WebKit and wasn't checked.
-
-    dropSlotHeight: 2,
+    // the virtual scroll reserves 0.75px more per row than the stylesheet renders: without that slack
+    // the last classification is cut off in Firefox (Chrome, Brave, Edge are fine; Safari was not tested)
+    dropSlotHeight: 0.75,
     nodeHeight: TREE_NODE_HEIGHT_PX,
     scrollOnActivate: false,
     levelPadding: 20,
