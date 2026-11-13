@@ -34,16 +34,18 @@
   [options]="options"
 >
   <ng-template #treeNodeTemplate let-index="index" let-node>
-    <span class="tree__svg-icon">
-      @if (node.data.category) {
-        <svg-icon [src]="getCategoryIcon(node.data.category).left"
-                  matTooltip="{{ getCategoryIcon(node.data.category).right }}"
-        />
-      }
+    <span [title]="node.data.key + ' - ' + node.data.name" class="tree__node-text">
+      <span class="tree__svg-icon">
+        @if (node.data.category) {
+          <svg-icon [src]="getCategoryIcon(node.data.category).left"
+                    matTooltip="{{ getCategoryIcon(node.data.category).right }}"
+          />
+        }
+      </span>
+      <span>
+        <strong>{{ node.data.key }}</strong>
+      </span>
+      <span> - {{ node.data.name }}</span>
     </span>
-    <span>
-      <strong>{{ node.data.key }}</strong>
-    </span>
-    <span> - {{ node.data.name }}</span>
   </ng-template>
 </tree-root>

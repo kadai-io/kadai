@@ -102,6 +102,16 @@ describe('KadaiTreeComponent', () => {
     httpController.match(() => true).forEach((req) => req.flush(''));
   });
 
+  it('should impose on the rows the same height it tells the virtual scroll', () => {
+    const host = fixture.nativeElement as HTMLElement;
+
+    expect(host.style.getPropertyValue('--tree-node-height')).toBe(`${component.options.nodeHeight}px`);
+  });
+
+  it('should reserve a scroll buffer on top of the row height', () => {
+    expect(component.options.dropSlotHeight).toBeGreaterThan(0);
+  });
+
   it('should create the component', () => {
     expect(component).toBeTruthy();
   });

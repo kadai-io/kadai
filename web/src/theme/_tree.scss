@@ -24,7 +24,7 @@ tree-viewport {
   height: calc(100vh - 225px);
 
   & > div {
-    display: inline-block;
+    width: 100%;
   }
 }
 
@@ -35,7 +35,6 @@ tree-node-expander {
       content: 'add';
     }
 
-    top: 2px;
     @extend .blue;
     background: white none;
     color: colors.$blue-green;
