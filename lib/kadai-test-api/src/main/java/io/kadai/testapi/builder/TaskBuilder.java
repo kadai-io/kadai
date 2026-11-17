@@ -210,17 +210,9 @@ public class TaskBuilder implements SummaryEntityBuilder<TaskSummary, Task, Task
     return this;
   }
 
-  public TaskBuilder numberOfComments(Integer numberOfComments) {
-    if (numberOfComments != null) {
-      testTask.setNumberOfCommentsIgnoreFreeze(numberOfComments);
-      if (numberOfComments != 0) {
-        testTask.freezeNumberOfComments();
-      } else {
-        testTask.unfreezeNumberOfComments();
-      }
-    } else {
-      testTask.unfreezeNumberOfComments();
-    }
+  public TaskBuilder numberOfComments(int numberOfComments) {
+    testTask.setNumberOfCommentsIgnoreFreeze(numberOfComments);
+    testTask.freezeNumberOfComments();
     return this;
   }
 
