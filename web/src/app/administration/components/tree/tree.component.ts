@@ -56,14 +56,11 @@ import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.compon
 import { MatTooltip } from '@angular/material/tooltip';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-export const TREE_NODE_HEIGHT_PX = 36;
-
 @Component({
   selector: 'kadai-administration-tree',
   templateUrl: './tree.component.html',
   styleUrls: ['./tree.component.scss'],
-  imports: [TreeModule, SvgIconComponent, MatTooltip],
-  host: { '[style.--tree-node-height]': 'nodeHeight' }
+  imports: [TreeModule, SvgIconComponent, MatTooltip]
 })
 export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
   treeNodes = signal<TreeNodeModel[] | undefined>(undefined);
@@ -71,7 +68,6 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
     requireSync: true
   });
   emptyTreeNodes = signal(false);
-  nodeHeight = `${TREE_NODE_HEIGHT_PX}px`;
   filter = signal('');
   category = signal('');
   selectNodeId = signal<string | undefined>(undefined);
@@ -95,10 +91,6 @@ export class KadaiTreeComponent implements AfterViewInit, AfterViewChecked, OnDe
       }
     },
     useVirtualScroll: true,
-    // the virtual scroll reserves 0.75px more per row than the stylesheet renders: without that slack
-    // the last classification is cut off in Firefox (Chrome, Brave, Edge are fine; Safari was not tested)
-    dropSlotHeight: 0.75,
-    nodeHeight: TREE_NODE_HEIGHT_PX,
     scrollOnActivate: false,
     levelPadding: 20,
     allowDrag: true,

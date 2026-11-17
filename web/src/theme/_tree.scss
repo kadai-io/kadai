@@ -21,10 +21,10 @@
 @use 'site';
 
 tree-viewport {
-  height: calc(100vh - 225px);
+  height: calc(100vh - 245px);
 
   & > div {
-    width: 100%;
+    display: block;
   }
 }
 
@@ -62,6 +62,8 @@ tree-node-expander .toggle-children-wrapper-expanded {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 16px;
   margin: 0 14px;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .node-wrapper {
