@@ -17,9 +17,8 @@ public interface CreateTaskPostprocessor {
    * <p>This SPI is executed within the same transaction staple as {@linkplain
    * TaskService#createTask(Task)}.
    *
-   * <p>This SPI is executed with the same {@linkplain UserPrincipal}
-   * and {@linkplain GroupPrincipal} as in {@linkplain
-   * TaskService#createTask(Task)}.
+   * <p>This SPI is executed with the same {@linkplain UserPrincipal} and {@linkplain
+   * GroupPrincipal} as in {@linkplain TaskService#createTask(Task)}.
    *
    * @param createdTask the {@linkplain Task} to postprocess
    * @return the postprocessed {@linkplain Task} - must not be null

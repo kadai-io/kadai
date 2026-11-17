@@ -18,7 +18,6 @@
 
 package io.kadai.task.rest;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -309,14 +308,13 @@ class TaskCommentControllerIntTest {
 
   @Test
   void should_CreateTaskCommentForMultipleTasks_When_TasksAreExisting() {
-    List<String> taskIds = List.of(
-            "TKI:000000000000000000000000000000000001",
-            "TKI:000000000000000000000000000000000004"
-    );
-    String textField = "check for test "
-            + "should_CreateTaskCommentForMultipleTasks_When_TasksAreExisting()";
+    List<String> taskIds =
+        List.of(
+            "TKI:000000000000000000000000000000000001", "TKI:000000000000000000000000000000000004");
+    String textField =
+        "check for test " + "should_CreateTaskCommentForMultipleTasks_When_TasksAreExisting()";
     TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel(taskIds, textField);
+        new TasksCommentBatchRepresentationModel(taskIds, textField);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
@@ -331,8 +329,7 @@ class TaskCommentControllerIntTest {
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
 
-    Map<String, ErrorCode> errors =
-            Objects.requireNonNull(response.getBody()).getTasksWithErrors();
+    Map<String, ErrorCode> errors = Objects.requireNonNull(response.getBody()).getTasksWithErrors();
 
     assertThat(errors).isEmpty();
 
@@ -353,21 +350,21 @@ class TaskCommentControllerIntTest {
 
       List<TaskCommentRepresentationModel> comments = new ArrayList<>(body.getContent());
 
-      assertThat(comments)
-              .anyMatch(c -> textField.equals(c.getTextField()));
+      assertThat(comments).anyMatch(c -> textField.equals(c.getTextField()));
     }
   }
 
   @Test
   void should_PartiallyCreateTaskComments_When_SomeTasksDoNotExist() {
-    List<String> taskIds = List.of(
-            "TKI:000000000000000000000000000000000001",  // valid
-            "TKI:400000000000000000000000000000000004"  // invalid
-    );
-    String textField = "check for "
-            + "test should_PartiallyCreateTaskComments_When_SomeTasksDoNotExist()";
+    List<String> taskIds =
+        List.of(
+            "TKI:000000000000000000000000000000000001", // valid
+            "TKI:400000000000000000000000000000000004" // invalid
+            );
+    String textField =
+        "check for " + "test should_PartiallyCreateTaskComments_When_SomeTasksDoNotExist()";
     TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel(taskIds, textField);
+        new TasksCommentBatchRepresentationModel(taskIds, textField);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
@@ -386,15 +383,13 @@ class TaskCommentControllerIntTest {
     assertThat(responseBody).isNotNull();
 
     @SuppressWarnings("unchecked")
-    Map<String, Map<String, Object>> tasksWithErrors = (Map<String, Map<String, Object>>)
-            responseBody.get("tasksWithErrors");
+    Map<String, Map<String, Object>> tasksWithErrors =
+        (Map<String, Map<String, Object>>) responseBody.get("tasksWithErrors");
 
-    assertThat(tasksWithErrors)
-            .hasSize(1)
-            .containsKey("TKI:400000000000000000000000000000000004");
+    assertThat(tasksWithErrors).hasSize(1).containsKey("TKI:400000000000000000000000000000000004");
 
-    Map<String, Object> errorDetails = tasksWithErrors
-            .get("TKI:400000000000000000000000000000000004");
+    Map<String, Object> errorDetails =
+        tasksWithErrors.get("TKI:400000000000000000000000000000000004");
     assertThat(errorDetails).containsEntry("key", "TASK_NOT_FOUND");
 
     String taskId = "TKI:000000000000000000000000000000000001";
@@ -414,15 +409,14 @@ class TaskCommentControllerIntTest {
 
     List<TaskCommentRepresentationModel> comments = new ArrayList<>(body.getContent());
 
-    assertThat(comments)
-            .anyMatch(c -> textField.equals(c.getTextField()));
+    assertThat(comments).anyMatch(c -> textField.equals(c.getTextField()));
   }
 
   @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TaskIdsAreNull() {
     String textField = "newly created task comment for multiple tasks";
     TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel(null, textField);
+        new TasksCommentBatchRepresentationModel(null, textField);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
@@ -437,19 +431,18 @@ class TaskCommentControllerIntTest {
                 .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
-            .isInstanceOf(HttpStatusCodeException.class)
-            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TextFieldIsNull() {
-    List<String> taskIds = List.of(
-            "TKI:000000000000000000000000000000000001",
-            "TKI:000000000000000000000000000000000004"
-    );
+    List<String> taskIds =
+        List.of(
+            "TKI:000000000000000000000000000000000001", "TKI:000000000000000000000000000000000004");
     TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel(taskIds, null);
+        new TasksCommentBatchRepresentationModel(taskIds, null);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
@@ -464,20 +457,19 @@ class TaskCommentControllerIntTest {
                 .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
-            .isInstanceOf(HttpStatusCodeException.class)
-            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test
   void should_FailToCreateTaskCommentsForMultipleTasks_When_TextIsEmpty() {
-    List<String> taskIds = List.of(
-            "TKI:000000000000000000000000000000000001",
-            "TKI:000000000000000000000000000000000004"
-    );
+    List<String> taskIds =
+        List.of(
+            "TKI:000000000000000000000000000000000001", "TKI:000000000000000000000000000000000004");
     String emptyText = "";
     TasksCommentBatchRepresentationModel request =
-            new TasksCommentBatchRepresentationModel(taskIds, emptyText);
+        new TasksCommentBatchRepresentationModel(taskIds, emptyText);
 
     String url = restHelper.toUrl(RestEndpoints.URL_TASKS_COMMENTS);
 
@@ -492,9 +484,9 @@ class TaskCommentControllerIntTest {
                 .toEntity(BulkOperationResultsRepresentationModel.class);
 
     assertThatThrownBy(httpCall)
-            .isInstanceOf(HttpStatusCodeException.class)
-            .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+        .isInstanceOf(HttpStatusCodeException.class)
+        .extracting(ex -> ((HttpStatusCodeException) ex).getStatusCode())
+        .isEqualTo(HttpStatus.BAD_REQUEST);
   }
 
   @Test

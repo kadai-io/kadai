@@ -59,12 +59,11 @@ public class ActuatorSecurityConfiguration {
   @Order(1)
   public SecurityFilterChain actuatorSecurityFilterChain(HttpSecurity http) {
     http.securityMatcher(EndpointRequest.toAnyEndpoint())
-        .authorizeHttpRequests(
-            auth ->
-                auth.requestMatchers(EndpointRequest.to(HealthEndpoint.class))
-                    .permitAll()
-                    .anyRequest()
-                    .authenticated())
+        .authorizeHttpRequests(auth ->
+            auth.requestMatchers(EndpointRequest.to(HealthEndpoint.class))
+                .permitAll()
+                .anyRequest()
+                .authenticated())
         .httpBasic(withDefaults());
     return http.build();
   }

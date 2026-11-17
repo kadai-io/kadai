@@ -16,10 +16,15 @@
  *
  */
 
-import { saveAs } from 'file-saver-es';
-
 export class BlobGenerator {
   public static saveFile(object: Object, fileName: string) {
-    saveAs(new Blob([JSON.stringify(object, null, 2)], { type: 'application/json;charset=UTF-8' }), fileName);
+    const blob = new Blob([JSON.stringify(object, null, 2)], { type: 'application/json;charset=UTF-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.click();
+    // revoke after the click has been handled, otherwise some browsers cancel the download
+    setTimeout(() => URL.revokeObjectURL(url));
   }
 }

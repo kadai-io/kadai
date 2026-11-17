@@ -186,7 +186,7 @@ public interface TaskCommentApi {
             required = true)
       },
       responses = {
-        @ApiResponse(responseCode = "204", content = @Content(schema = @Schema())),
+        @ApiResponse(responseCode = "204", content = @Content(schema = @Schema)),
         @ApiResponse(
             responseCode = "400",
             description = "INVALID_ARGUMENT",
@@ -269,17 +269,18 @@ public interface TaskCommentApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "taskCommentId": \
-                          "TCI:000000000000000000000000000000000000",
-                            "taskId": \
-                          "TKI:000000000000000000000000000000000000",
-                            "textField": "updated text in textfield",
-                            "creator": "user-1-1",
-                            "creatorFullName": "Mustermann, Max",
-                            "created": "2017-01-29T15:55:00Z",
-                            "modified": "2018-01-30T15:55:00Z"
-                          }"""))),
+                                  {
+                                    "taskCommentId": \
+                                  "TCI:000000000000000000000000000000000000",
+                                    "taskId": \
+                                  "TKI:000000000000000000000000000000000000",
+                                    "textField": "updated text in textfield",
+                                    "creator": "user-1-1",
+                                    "creatorFullName": "Mustermann, Max",
+                                    "created": "2017-01-29T15:55:00Z",
+                                    "modified": "2018-01-30T15:55:00Z"
+                                  }\
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -372,11 +373,12 @@ public interface TaskCommentApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "taskId": \
-                          "TKI:000000000000000000000000000000000000",
-                            "textField": "some text in textfield"
-                          }"""))),
+                                  {
+                                    "taskId": \
+                                  "TKI:000000000000000000000000000000000000",
+                                    "textField": "some text in textfield"
+                                  }\
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "201",
@@ -416,66 +418,65 @@ public interface TaskCommentApi {
    *
    * @title Create a Task Comment for multiple Tasks
    * @param tasksCommentBatchRepresentationModel list of Task IDs and the comment text
-   * @return HTTP 200 with a {@link BulkOperationResultsRepresentationModel} containing the IDs
-   *         that failed with their error codes; the list is empty if all comments were
-   *         created successfully. Otherwise, an appropriate error status (e.g. 400).
+   * @return HTTP 200 with a {@link BulkOperationResultsRepresentationModel} containing the IDs that
+   *     failed with their error codes; the list is empty if all comments were created successfully.
+   *     Otherwise, an appropriate error status (e.g. 400).
    */
   @Operation(
-            summary = "Create Task Comments for multiple Tasks",
-            description = "Creates the same comment for all provided task IDs. "
-                      + "Returns 200 on success with a map of failed task IDs to their error codes."
-                      + "Returns 400 if taskIds or text are null/empty. "
-                      + "Other 4xx/5xx codes are possible.",
-        requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                required = true,
-                description = "Payload with the list of Task IDs and the comment text",
-                content = @Content(
-                        schema = @Schema(implementation =
-                                TasksCommentBatchRepresentationModel.class),
-                        examples = @ExampleObject(
-                                value = """
-            {
-              "taskIds": [
-                "TKI:000000000000000000000000000000000001",
-                "TKI:400000000000000000000000000000000004"
-              ],
-              "textField": "This is a comment for multiple tasks"
-            }
-            """
-                        )
-                )
-        ),
-        responses = {
-            @ApiResponse(
-                    responseCode = "200",
-                    description = "Map of Task IDs to error codes where comment creation failed",
-                    content = @Content(
-                            mediaType = MediaType.APPLICATION_JSON_VALUE,
-                            schema = @Schema(implementation =
-                                    BulkOperationResultsRepresentationModel.class),
-                            examples = @ExampleObject(
-                                name    = "batchResponseExample",
-                                summary = "Failed Task IDs with error codes",
-                                value   = """
-                                        {
-                                        "tasksWithErrors": {
-                                          "TKI:400000000000000000000000000000000004": {
-                                            "key": "TASK_NOT_FOUND",
-                                            "messageVariables": {
-                                              "taskId": "TKI:400000000000000000000000000000000004"
-                                            }
-                                          }
-                                        }
+      summary = "Create Task Comments for multiple Tasks",
+      description =
+          "Creates the same comment for all provided task IDs. "
+              + "Returns 200 on success with a map of failed task IDs to their error codes."
+              + "Returns 400 if taskIds or text are null/empty. "
+              + "Other 4xx/5xx codes are possible.",
+      requestBody =
+          @io.swagger.v3.oas.annotations.parameters.RequestBody(
+              required = true,
+              description = "Payload with the list of Task IDs and the comment text",
+              content =
+                  @Content(
+                      schema = @Schema(implementation = TasksCommentBatchRepresentationModel.class),
+                      examples =
+                          @ExampleObject(
+                              value =
+                                  """
+                                  {
+                                    "taskIds": [
+                                      "TKI:000000000000000000000000000000000001",
+                                      "TKI:400000000000000000000000000000000004"
+                                    ],
+                                    "textField": "This is a comment for multiple tasks"
+                                  }
+                                  """))),
+      responses = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Map of Task IDs to error codes where comment creation failed",
+            content =
+                @Content(
+                    mediaType = MediaType.APPLICATION_JSON_VALUE,
+                    schema =
+                        @Schema(implementation = BulkOperationResultsRepresentationModel.class),
+                    examples =
+                        @ExampleObject(
+                            name = "batchResponseExample",
+                            summary = "Failed Task IDs with error codes",
+                            value =
+                                """
+                                  {
+                                  "tasksWithErrors": {
+                                    "TKI:400000000000000000000000000000000004": {
+                                      "key": "TASK_NOT_FOUND",
+                                      "messageVariables": {
+                                        "taskId": "TKI:400000000000000000000000000000000004"
                                       }
-                                      """
-                            )
-                    )
-                )
-        }
-  )
+                                    }
+                                  }
+                                }
+                                """)))
+      })
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENTS)
   @Transactional(rollbackFor = Exception.class)
   ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
-        @RequestBody TasksCommentBatchRepresentationModel
-                tasksCommentBatchRepresentationModel);
+      @RequestBody TasksCommentBatchRepresentationModel tasksCommentBatchRepresentationModel);
 }

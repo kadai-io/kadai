@@ -38,31 +38,29 @@ class CreateHistoryEventOnWorkbasketMarkedForDeletionAccTest extends AbstractAcc
   void should_CreateWorkbasketMarkedForDeletionHistoryEvent_When_WorkbasketIsMarkedForDeletion()
       throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String workbasketId = "WBI:100000000000000000000000000000000004";
+        CheckedRunnable.rethrowing(() -> {
+          final String workbasketId = "WBI:100000000000000000000000000000000004";
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          List<WorkbasketHistoryEvent> events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              workbasketService.deleteWorkbasket(workbasketId);
+          workbasketService.deleteWorkbasket(workbasketId);
 
-              events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String eventWorkbasketId = events.get(0).getWorkbasketId();
+          String eventType = events.get(0).getEventType();
+          String eventWorkbasketId = events.get(0).getWorkbasketId();
 
-              assertThat(eventType)
-                  .isEqualTo(WorkbasketHistoryEventType.MARKED_FOR_DELETION.getName());
-              assertThat(eventWorkbasketId).isEqualTo(workbasketId);
-              assertThat(events.get(0).getUserId()).isEqualTo("user-1-1");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.MARKED_FOR_DELETION.getName());
+          assertThat(eventWorkbasketId).isEqualTo(workbasketId);
+          assertThat(events.get(0).getUserId()).isEqualTo("user-1-1");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "user-1-1");
   }
 }

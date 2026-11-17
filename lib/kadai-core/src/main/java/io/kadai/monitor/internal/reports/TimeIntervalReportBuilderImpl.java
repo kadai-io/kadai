@@ -638,13 +638,12 @@ abstract class TimeIntervalReportBuilderImpl<
     WorkingDaysToDaysReportConverter instance =
         WorkingDaysToDaysReportConverter.initialize(columnHeaders, workingTimeCalculator);
     return selectedItems.stream()
-        .map(
-            s ->
-                new SelectedItem(
-                    s.getKey(),
-                    s.getSubKey(),
-                    Collections.min(instance.convertWorkingDaysToDays(s.getLowerAgeLimit())),
-                    Collections.max(instance.convertWorkingDaysToDays(s.getUpperAgeLimit()))))
+        .map(s ->
+            new SelectedItem(
+                s.getKey(),
+                s.getSubKey(),
+                Collections.min(instance.convertWorkingDaysToDays(s.getLowerAgeLimit())),
+                Collections.max(instance.convertWorkingDaysToDays(s.getUpperAgeLimit()))))
         .toList();
   }
 

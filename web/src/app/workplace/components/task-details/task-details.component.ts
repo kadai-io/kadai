@@ -26,22 +26,22 @@ import { RequestInProgressService } from 'app/shared/services/request-in-progres
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { takeUntil } from 'rxjs/operators';
-import { trimObject } from '../../../shared/util/form-trimmer';
+import { trimObject } from 'app/shared/util/form-trimmer';
 
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
-import { TaskInformationComponent } from '../task-information/task-information.component';
-import { TaskStatusDetailsComponent } from '../task-status-details/task-status-details.component';
-import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
-import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
+import { TaskInformationComponent } from 'app/workplace/components/task-information/task-information.component';
+import { TaskStatusDetailsComponent } from 'app/workplace/components/task-status-details/task-status-details.component';
+import { TaskCustomFieldsComponent } from 'app/workplace/components/task-custom-fields/task-custom-fields.component';
+import { TaskAttributeValueComponent } from 'app/workplace/components/task-attribute-value/task-attribute-value.component';
 import { Store } from '@ngxs/store';
-import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
-import { CreateTask, DeleteTask, GetTask, SelectTask, UpdateTask } from '../../../shared/store/task-store/task.actions';
+import { TaskSelectors } from 'app/shared/store/task-store/task.selectors';
+import { CreateTask, DeleteTask, GetTask, SelectTask, UpdateTask } from 'app/shared/store/task-store/task.actions';
 
 @Component({
   selector: 'kadai-task-details',

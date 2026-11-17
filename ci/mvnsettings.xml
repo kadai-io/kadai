@@ -18,6 +18,10 @@
       <id>central</id>
       <username>${env.MAVEN_USERNAME}</username>
       <password>${env.MAVEN_PASSWORD}</password>
+      <!-- Maven 3.10+ requires explicitly authorized origins for publishing credentials. -->
+      <repositoryOrigins>
+        <repositoryOrigin>https://central.sonatype.com</repositoryOrigin>
+      </repositoryOrigins>
     </server>
   </servers>
 </settings>

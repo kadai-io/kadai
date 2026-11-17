@@ -41,38 +41,36 @@ class CreateHistoryEventOnClassificationDeletionAccTest extends AbstractAccTest 
   void should_CreateClassificationDeletedHistoryEvent_When_ClassificationIsDeleted()
       throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String classificationId = "CLI:200000000000000000000000000000000015";
+        CheckedRunnable.rethrowing(() -> {
+          final String classificationId = "CLI:200000000000000000000000000000000015";
 
-              List<ClassificationHistoryEvent> events =
-                  classificationHistoryService
-                      .createClassificationHistoryQuery()
-                      .classificationIdIn(classificationId)
-                      .list();
+          List<ClassificationHistoryEvent> events =
+              classificationHistoryService
+                  .createClassificationHistoryQuery()
+                  .classificationIdIn(classificationId)
+                  .list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              classificationService.deleteClassification(classificationId);
+          classificationService.deleteClassification(classificationId);
 
-              events =
-                  classificationHistoryService
-                      .createClassificationHistoryQuery()
-                      .classificationIdIn(classificationId)
-                      .list();
-              assertThat(events).hasSize(1);
+          events =
+              classificationHistoryService
+                  .createClassificationHistoryQuery()
+                  .classificationIdIn(classificationId)
+                  .list();
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType).isEqualTo(ClassificationHistoryEventType.DELETED.getName());
-              assertThat(details)
-                  .contains("\"oldValue\":\"CLI:200000000000000000000000000000000015\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-4-2");
-              assertThat(events.get(0).getProxyAccessId())
-                  .isEqualTo("cn=business-admins,cn=groups,ou=test,o=kadai");
-            }),
+          assertThat(eventType).isEqualTo(ClassificationHistoryEventType.DELETED.getName());
+          assertThat(details).contains("\"oldValue\":\"CLI:200000000000000000000000000000000015\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-4-2");
+          assertThat(events.get(0).getProxyAccessId())
+              .isEqualTo("cn=business-admins,cn=groups,ou=test,o=kadai");
+        }),
         KadaiRole.BUSINESS_ADMIN,
         "user-4-2");
   }

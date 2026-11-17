@@ -63,13 +63,12 @@ public class DmnValidatorManager {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug("Sending DmnModelInstance to DmnValidators: {}", dmnModelInstanceToValidate);
     }
-    serviceLoader.forEach(
-        dmnValidator -> {
-          try {
-            dmnValidator.validate(dmnModelInstanceToValidate);
-          } catch (Exception e) {
-            throw new SystemException("Caught exception while validating dmnModelInstance", e);
-          }
-        });
+    serviceLoader.forEach(dmnValidator -> {
+      try {
+        dmnValidator.validate(dmnModelInstanceToValidate);
+      } catch (Exception e) {
+        throw new SystemException("Caught exception while validating dmnModelInstance", e);
+      }
+    });
   }
 }

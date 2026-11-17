@@ -68,10 +68,8 @@ class KadaiDependencyInjectionExtensionTest {
   @KadaiInject ConfigurationServiceImpl configurationServiceImpl;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
   @KadaiInject WorkingTimeCalculatorImpl workingTimeCalculatorImpl;
-  @KadaiInject
-  CurrentUserContext currentUserContext;
-  @KadaiInject
-  CurrentUserContextImpl currentUserContextImpl;
+  @KadaiInject CurrentUserContext currentUserContext;
+  @KadaiInject CurrentUserContextImpl currentUserContextImpl;
   @KadaiInject ConfigurationMapper configurationMapper;
   @KadaiInject UserService userService;
   @KadaiInject UserServiceImpl userServiceImpl;

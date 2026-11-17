@@ -22,20 +22,19 @@ import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { By } from '@angular/platform-browser';
 import { Observable, of } from 'rxjs';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { DeselectWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
-import { WorkbasketQueryFilterParameter } from '../../../shared/models/workbasket-query-filter-parameter';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
+import { DeselectWorkbasket, SelectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { selectedWorkbasketMock } from 'app/shared/store/mock-data/mock-store';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ImportExportService } from '../../services/import-export.service';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
+import { ImportExportService } from 'app/administration/services/import-export.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
@@ -67,7 +66,6 @@ describe('WorkbasketListComponent', () => {
         provideRouter([]),
 
         provideHttpClientTesting(),
-        provideAngularSvgIcon(),
         {
           provide: WorkbasketService,
           useValue: workbasketServiceMock

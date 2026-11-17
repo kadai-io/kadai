@@ -87,13 +87,12 @@ class QueryTasksListValuesAccTest extends AbstractAccTest {
     void should_ReturnColumnValues_When_ListValuesForColumnIsInvoked() {
       SoftAssertions softly = new SoftAssertions();
       Arrays.stream(TaskQueryColumnName.values())
-          .forEach(
-              columnName ->
-                  softly
-                      .assertThatCode(
-                          () -> TASK_SERVICE.createTaskQuery().listValues(columnName, ASCENDING))
-                      .describedAs("Column is not working " + columnName)
-                      .doesNotThrowAnyException());
+          .forEach(columnName ->
+              softly
+                  .assertThatCode(
+                      () -> TASK_SERVICE.createTaskQuery().listValues(columnName, ASCENDING))
+                  .describedAs("Column is not working " + columnName)
+                  .doesNotThrowAnyException());
       softly.assertAll();
     }
 

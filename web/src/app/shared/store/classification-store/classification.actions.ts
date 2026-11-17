@@ -16,7 +16,7 @@
  *
  */
 
-import { Classification } from '../../models/classification';
+import { Classification } from 'app/shared/models/classification';
 
 export class SetSelectedClassificationType {
   static readonly type = '[Classification-Selected Type] Set selected classification type';

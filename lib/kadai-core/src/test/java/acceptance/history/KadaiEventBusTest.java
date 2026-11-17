@@ -236,12 +236,10 @@ class KadaiEventBusTest extends AbstractAccTest {
     kadaiEngine.runAs(() -> eventBus.dispatchAll(events), KadaiRole.ADMIN, "roberto");
 
     assertThat(events)
-        .allSatisfy(
-            event -> {
-              assertThat(event.getUserId()).isEqualTo("roberto");
-              assertThat(event.getProxyAccessId())
-                  .isEqualTo("uid=admin,cn=users,ou=test,o=kadai");
-            });
+        .allSatisfy(event -> {
+          assertThat(event.getUserId()).isEqualTo("roberto");
+          assertThat(event.getProxyAccessId()).isEqualTo("uid=admin,cn=users,ou=test,o=kadai");
+        });
   }
 
   private static class TaskHistoryEventConsumer implements KadaiEventConsumer<TaskHistoryEvent> {

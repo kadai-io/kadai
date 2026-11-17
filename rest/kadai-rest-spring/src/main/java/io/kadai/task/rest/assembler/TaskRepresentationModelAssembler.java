@@ -301,11 +301,10 @@ public class TaskRepresentationModelAssembler
       throws InvalidArgumentException {
 
     if (customAttributes.stream()
-        .anyMatch(
-            customAttribute ->
-                customAttribute.getKey() == null
-                    || customAttribute.getKey().isEmpty()
-                    || customAttribute.getValue() == null)) {
+        .anyMatch(customAttribute ->
+            customAttribute.getKey() == null
+                || customAttribute.getKey().isEmpty()
+                || customAttribute.getValue() == null)) {
       throw new InvalidArgumentException(
           "Format of custom attributes is not valid. Please provide the following format: "
               + "\"customAttributes\": [{\"key\": \"someKey\",\"value\": \"someValue\"},{...}])");

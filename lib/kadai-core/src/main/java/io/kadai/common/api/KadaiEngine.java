@@ -310,11 +310,10 @@ public interface KadaiEngine {
    * @see #runAs(Supplier, KadaiRole, String)
    */
   default void runAsAdmin(Runnable runnable) {
-    runAsAdmin(
-        () -> {
-          runnable.run();
-          return null;
-        });
+    runAsAdmin(() -> {
+      runnable.run();
+      return null;
+    });
   }
 
   /**

@@ -43,25 +43,25 @@ import org.junit.jupiter.api.extension.ExtendWith;
  * </ul>
  *
  * <p>Usage may look like:
- * <pre>
- *   {@code
- *     @KadaiIntegrationTest
- *     class MyTestClass implements KadaiEngineConfigurationModifier {
- *       @KadaiInject InternalKadaiEngine internalKadaiEngine;
  *
- *       @Override
- *       public KadaiConfiguration.Builder modify(KadaiConfiguration.Builder builder) {
- *         return builder.foo();
- *       }
+ * <pre>{@code
+ * @KadaiIntegrationTest
+ * class MyTestClass implements KadaiEngineConfigurationModifier {
+ *   @KadaiInject InternalKadaiEngine internalKadaiEngine;
  *
- *       @Test
- *       @WithAccessId(user = "bar")
- *       void myTest() {
- *         internalKadaiEngine.baz(...);
- *       }
- *     }
+ *   @Override
+ *   public KadaiConfiguration.Builder modify(KadaiConfiguration.Builder builder) {
+ *     return builder.foo();
  *   }
- * </pre>
+ *
+ *   @Test
+ *   @WithAccessId(user = "bar")
+ *   void myTest() {
+ *     internalKadaiEngine.baz(...);
+ *   }
+ * }
+ *
+ * }</pre>
  */
 @ExtendWith({
   // ORDER IS IMPORTANT!

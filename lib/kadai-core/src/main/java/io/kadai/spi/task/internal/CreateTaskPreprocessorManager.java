@@ -50,9 +50,8 @@ public class CreateTaskPreprocessorManager {
           LogSanitizer.stripLineBreakingChars(taskToProcess));
     }
     createTaskPreprocessors.forEach(
-        CheckedConsumer.wrapping(
-            createTaskPreprocessor ->
-                createTaskPreprocessor.processTaskBeforeCreation(taskToProcess)));
+        CheckedConsumer.wrapping(createTaskPreprocessor ->
+            createTaskPreprocessor.processTaskBeforeCreation(taskToProcess)));
     return taskToProcess;
   }
 

@@ -18,12 +18,12 @@
 
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ReportData } from 'app/monitor/models/report-data';
-import { MonitorService } from '../../services/monitor.service';
+import { MonitorService } from 'app/monitor/services/monitor.service';
 import { takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { ReportTableComponent } from '../report-table/report-table.component';
+import { ReportTableComponent } from 'app/monitor/components/report-table/report-table.component';
 import { BaseChartDirective } from 'ng2-charts';
 import { DatePipe } from '@angular/common';
 

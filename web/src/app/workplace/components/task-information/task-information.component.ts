@@ -33,19 +33,18 @@ import { Task } from 'app/workplace/models/task';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Observable, Subject } from 'rxjs';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
-import { Classification } from '../../../shared/models/classification';
-import { TasksCustomisation } from '../../../shared/models/customisation';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
+import { Classification } from 'app/shared/models/classification';
+import { TasksCustomisation } from 'app/shared/models/customisation';
 import { filter, take, takeUntil } from 'rxjs/operators';
-import { AccessId } from '../../../shared/models/access-id';
 import { AsyncPipe } from '@angular/common';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { FieldErrorDisplayComponent } from '../../../shared/components/field-error-display/field-error-display.component';
-import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
+import { FieldErrorDisplayComponent } from 'app/shared/components/field-error-display/field-error-display.component';
+import { TypeAheadComponent } from 'app/shared/components/type-ahead/type-ahead.component';
 import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import {
   MatDatepicker,
@@ -96,7 +95,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   requestInProgress = signal(false);
   classifications = signal<Classification[]>([]);
   isClassificationEmpty!: boolean;
-  isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length';
   tasksCustomisation$: Observable<TasksCustomisation | undefined> = inject(Store).select(
     EngineConfigurationSelectors.tasksCustomisation
@@ -139,12 +137,6 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
     this.isClassificationEmpty = false;
   }
 
-  onSelectedOwner(owner: AccessId) {
-    if (owner?.accessId) {
-      this.task()!.owner = owner.accessId;
-    }
-  }
-
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();
@@ -183,7 +175,7 @@ export class TaskInformationComponent implements OnInit, OnDestroy {
   private checkAndEmitValidity(formGroup: any) {
     const ownerControl = formGroup.controls['task.owner'];
 
-    if (formGroup.valid && !this.isClassificationEmpty && this.isOwnerValid) {
+    if (formGroup.valid && !this.isClassificationEmpty) {
       this.formValid.emit(true);
     } else {
       if (ownerControl?.hasError('invalidAccessId') || ownerControl?.hasError('accessIdLookupError')) {

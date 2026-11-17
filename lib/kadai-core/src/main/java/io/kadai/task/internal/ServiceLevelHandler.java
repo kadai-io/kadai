@@ -123,73 +123,93 @@ class ServiceLevelHandler {
     return bulkLog;
   }
 
-  // TODO: Is it worth splitting the logic of this method into two separate methods one for
-  //  creating new task the other for updating a task.
   TaskImpl updatePrioPlannedDueOfTask(TaskImpl newTaskImpl, TaskImpl oldTaskImpl)
       throws ServiceLevelViolationException {
-    boolean onlyPriority = false;
-    if (newTaskImpl.getClassificationSummary() == null
-        || newTaskImpl.getClassificationSummary().getServiceLevel() == null) {
-      // TODO this should never be the case
-      setPlannedDueOnMissingServiceLevel(newTaskImpl);
-      onlyPriority = true;
+    validateClassificationState(newTaskImpl);
+    if (oldTaskImpl == null) {
+      return updatePrioPlannedDueOnTaskCreation(newTaskImpl);
     }
+    return updatePrioPlannedDueOnTaskUpdate(newTaskImpl, oldTaskImpl);
+  }
 
+  private TaskImpl updatePrioPlannedDueOnTaskCreation(TaskImpl newTaskImpl)
+      throws ServiceLevelViolationException {
+    DurationPrioHolder durationPrioHolder = determineTaskPrioDurationAndSetPriority(newTaskImpl);
+    if (newTaskImpl.getPlanned() == null && newTaskImpl.getDue() == null) {
+      newTaskImpl.setPlanned(Instant.now());
+    }
+    return updatePlannedDueOnCreationOfNewTask(newTaskImpl, durationPrioHolder.duration());
+  }
+
+  private TaskImpl updatePrioPlannedDueOnTaskUpdate(TaskImpl newTaskImpl, TaskImpl oldTaskImpl)
+      throws ServiceLevelViolationException {
+    preserveScheduleWhenNoDatesWereProvided(newTaskImpl, oldTaskImpl);
     if (isPriorityAndDurationAlreadyCorrect(newTaskImpl, oldTaskImpl)) {
       return newTaskImpl;
     }
 
-    if (newTaskImpl.getPlanned() == null && newTaskImpl.getDue() == null) {
-      // TODO bitte oldTaskImpl berücksichtigen
-      newTaskImpl.setPlanned(Instant.now());
-    }
-
-    DurationPrioHolder durationPrioHolder = determineTaskPrioDuration(newTaskImpl, onlyPriority);
-    if (newTaskImpl.isManualPriorityActive()) {
-      newTaskImpl.setPriority(newTaskImpl.getManualPriority());
-    } else {
-      newTaskImpl.setPriority(durationPrioHolder.priority());
-    }
-    if (onlyPriority) {
-      return newTaskImpl;
-    }
-
-    // creation of new task
-    if (oldTaskImpl == null) {
-      return updatePlannedDueOnCreationOfNewTask(newTaskImpl, durationPrioHolder.duration());
-    } else {
-      return updatePlannedDueOnTaskUpdate(
-          newTaskImpl, oldTaskImpl, durationPrioHolder.duration());
-    }
+    DurationPrioHolder durationPrioHolder = determineTaskPrioDurationAndSetPriority(newTaskImpl);
+    return updatePlannedDueOnTaskUpdate(newTaskImpl, oldTaskImpl, durationPrioHolder.duration());
   }
 
-  private DurationPrioHolder determineTaskPrioDuration(TaskImpl newTaskImpl, boolean onlyPriority) {
+  private DurationPrioHolder determineTaskPrioDurationAndSetPriority(TaskImpl task) {
+    DurationPrioHolder durationPrioHolder = determineTaskPrioDuration(task);
+    if (task.isManualPriorityActive()) {
+      task.setPriority(task.getManualPriority());
+    } else {
+      task.setPriority(durationPrioHolder.priority());
+    }
+    return durationPrioHolder;
+  }
+
+  private DurationPrioHolder determineTaskPrioDuration(TaskImpl newTaskImpl) {
     Set<ClassificationSummary> classificationsInvolved =
         getClassificationsReferencedByATask(newTaskImpl);
 
-    List<ClassificationWithServiceLevelResolved> resolvedClassifications = new ArrayList<>();
-    if (onlyPriority) {
-      for (ClassificationSummary c : classificationsInvolved) {
-        resolvedClassifications.add(
-            new ClassificationWithServiceLevelResolved(c.getId(), MAX_DURATION, 0));
-      }
-    } else {
-      resolvedClassifications =
-          resolveDurationsInClassifications(new ArrayList<>(classificationsInvolved));
-    }
-
-    return getFinalPrioDurationOfTask(resolvedClassifications, onlyPriority);
+    List<ClassificationWithServiceLevelResolved> resolvedClassifications =
+        resolveDurationsInClassifications(new ArrayList<>(classificationsInvolved));
+    return getFinalPrioDurationOfTask(resolvedClassifications);
   }
 
-  private void setPlannedDueOnMissingServiceLevel(TaskImpl task) {
-    Instant now = Instant.now();
-    if (task.getDue() == null && task.getPlanned() == null) {
-      task.setDue(now);
-      task.setPlanned(now);
-    } else if (task.getDue() == null) {
-      task.setDue(task.getPlanned());
+  private void validateClassificationState(TaskImpl task) {
+    requireClassificationWithServiceLevel(task.getClassificationSummary(), "task");
+    for (Attachment attachment : task.getAttachments()) {
+      requireClassificationWithServiceLevel(attachment.getClassificationSummary(), "attachment");
+    }
+  }
+
+  private void requireClassificationWithServiceLevel(
+      ClassificationSummary classificationSummary, String classificationSource) {
+    Objects.requireNonNull(
+        classificationSummary,
+        "ServiceLevelHandler requires a classification summary for the " + classificationSource);
+    String serviceLevel =
+        Objects.requireNonNull(
+            classificationSummary.getServiceLevel(),
+            "ServiceLevelHandler requires a service level for the "
+                + classificationSource
+                + " classification");
+    if (serviceLevel.isEmpty()) {
+      throw new IllegalStateException(
+          "ServiceLevelHandler requires a non-empty service level for the "
+              + classificationSource
+              + " classification");
+    }
+  }
+
+  private void preserveScheduleWhenNoDatesWereProvided(TaskImpl newTaskImpl, TaskImpl oldTaskImpl) {
+    if (newTaskImpl.getPlanned() != null || newTaskImpl.getDue() != null) {
+      return;
+    }
+
+    if (oldTaskImpl.getPlanned() != null) {
+      newTaskImpl.setPlanned(oldTaskImpl.getPlanned());
+      newTaskImpl.setDue(oldTaskImpl.getDue());
+    } else if (oldTaskImpl.getDue() != null) {
+      newTaskImpl.setDue(oldTaskImpl.getDue());
     } else {
-      task.setPlanned(task.getDue());
+      throw new IllegalStateException(
+          "A persisted task must have a planned or due timestamp when it is updated");
     }
   }
 
@@ -201,13 +221,12 @@ class ServiceLevelHandler {
         getPriorityToTasksIdsMap(existingTasks, attachments, allInvolvedClassifications);
     TaskImpl referenceTask = new TaskImpl();
     referenceTask.setModified(Instant.now());
-    priorityToTaskIdsMap.forEach(
-        (prio, taskIdList) -> {
-          referenceTask.setPriority(prio);
-          if (!taskIdList.isEmpty()) {
-            taskMapper.updatePriorityOfTasks(taskIdList, referenceTask);
-          }
-        });
+    priorityToTaskIdsMap.forEach((prio, taskIdList) -> {
+      referenceTask.setPriority(prio);
+      if (!taskIdList.isEmpty()) {
+        taskMapper.updatePriorityOfTasks(taskIdList, referenceTask);
+      }
+    });
   }
 
   private Map<Integer, List<String>> getPriorityToTasksIdsMap(
@@ -224,12 +243,11 @@ class ServiceLevelHandler {
         getTaskIdToClassificationsMap(existingTasks, attachments);
     List<TaskIdPriority> taskIdPriorities =
         existingTasks.stream()
-            .map(
-                t ->
-                    new TaskIdPriority(
-                        t.getTaskId(),
-                        determinePriorityForATask(
-                            t, classificationIdToPriorityMap, taskIdToClassificationIdsMap)))
+            .map(t ->
+                new TaskIdPriority(
+                    t.getTaskId(),
+                    determinePriorityForATask(
+                        t, classificationIdToPriorityMap, taskIdToClassificationIdsMap)))
             .toList();
     return taskIdPriorities.stream()
         .collect(
@@ -242,13 +260,22 @@ class ServiceLevelHandler {
       MinimalTaskSummary minimalTaskSummary,
       Map<String, Integer> classificationIdToPriorityMap,
       Map<String, Set<String>> taskIdToClassificationIdsMap) {
-    // TODO this should allow negative Priorities just like #getFinalPrioDurationOfTask
-    int actualPriority = 0;
-    for (String classificationId :
-        taskIdToClassificationIdsMap.get(minimalTaskSummary.getTaskId())) {
-      int prio = classificationIdToPriorityMap.get(classificationId);
-      if (prio > actualPriority) {
-        actualPriority = prio;
+    Set<String> classificationIds =
+        taskIdToClassificationIdsMap.get(minimalTaskSummary.getTaskId());
+    if (classificationIds == null || classificationIds.isEmpty()) {
+      throw new IllegalStateException(
+          "A task must reference at least one classification when its priority is refreshed");
+    }
+
+    int actualPriority = Integer.MIN_VALUE;
+    for (String classificationId : classificationIds) {
+      Integer priority = classificationIdToPriorityMap.get(classificationId);
+      if (priority == null) {
+        throw new IllegalStateException(
+            "Could not resolve classification " + classificationId + " when refreshing priority");
+      }
+      if (priority > actualPriority) {
+        actualPriority = priority;
       }
     }
     return actualPriority;
@@ -267,11 +294,7 @@ class ServiceLevelHandler {
   private TaskImpl updatePlannedDueOnTaskUpdate(
       TaskImpl newTaskImpl, TaskImpl oldTaskImpl, Duration duration)
       throws ServiceLevelViolationException {
-    // TODO pull this one out and in updatePlannedDueOnCreationOfNewTask, too.
-    if (!kadaiEngine.getEngine().getConfiguration().isEnforceServiceLevel()
-        && newTaskImpl.getDue() != null
-        && newTaskImpl.getPlanned() != null) {
-
+    if (shouldKeepExplicitPlannedAndDue(newTaskImpl)) {
       return newTaskImpl;
     }
 
@@ -400,9 +423,7 @@ class ServiceLevelHandler {
 
   private TaskImpl updatePlannedDueOnCreationOfNewTask(TaskImpl newTask, Duration duration)
       throws ServiceLevelViolationException {
-    if (!kadaiEngine.getEngine().getConfiguration().isEnforceServiceLevel()
-        && newTask.getDue() != null
-        && newTask.getPlanned() != null) {
+    if (shouldKeepExplicitPlannedAndDue(newTask)) {
       return newTask;
     }
     if (newTask.getDue() != null) {
@@ -419,13 +440,18 @@ class ServiceLevelHandler {
     return newTask;
   }
 
+  private boolean shouldKeepExplicitPlannedAndDue(Task task) {
+    return !kadaiEngine.getEngine().getConfiguration().isEnforceServiceLevel()
+        && task.getDue() != null
+        && task.getPlanned() != null;
+  }
+
   private BulkLog updateDuePropertyOfAffectedTasks(
       Map<InstantDurationHolder, List<TaskDuration>> tasksPerPlannedAndDuration) {
     BulkLog bulkLog = new BulkLog();
-    tasksPerPlannedAndDuration.forEach(
-        (instDurHld, taskDurationList) ->
-            bulkLog.addAllErrors(
-                updateDuePropertyOfTasksWithIdenticalDueDate(instDurHld, taskDurationList)));
+    tasksPerPlannedAndDuration.forEach((instDurHld, taskDurationList) ->
+        bulkLog.addAllErrors(
+            updateDuePropertyOfTasksWithIdenticalDueDate(instDurHld, taskDurationList)));
     return bulkLog;
   }
 
@@ -452,14 +478,13 @@ class ServiceLevelHandler {
     referenceTask.setPlanned(planned);
     referenceTask.setModified(Instant.now());
 
-    taskIdsByDueDuration.forEach(
-        (duration, taskIds) -> {
-          referenceTask.setDue(calculateDue(planned, duration));
-          Pair<List<MinimalTaskSummary>, BulkLog> existingAndAuthorizedTasks =
-              taskServiceImpl.getMinimalTaskSummaries(taskIds);
-          bulkLog.addAllErrors(existingAndAuthorizedTasks.getRight());
-          taskMapper.updateTaskDueDates(existingAndAuthorizedTasks.getLeft(), referenceTask);
-        });
+    taskIdsByDueDuration.forEach((duration, taskIds) -> {
+      referenceTask.setDue(calculateDue(planned, duration));
+      Pair<List<MinimalTaskSummary>, BulkLog> existingAndAuthorizedTasks =
+          taskServiceImpl.getMinimalTaskSummaries(taskIds);
+      bulkLog.addAllErrors(existingAndAuthorizedTasks.getRight());
+      taskMapper.updateTaskDueDates(existingAndAuthorizedTasks.getLeft(), referenceTask);
+    });
 
     return bulkLog;
   }
@@ -610,12 +635,12 @@ class ServiceLevelHandler {
   }
 
   private DurationPrioHolder getFinalPrioDurationOfTask(
-      List<ClassificationWithServiceLevelResolved> cl, boolean onlyPriority) {
+      List<ClassificationWithServiceLevelResolved> cl) {
     Duration duration = MAX_DURATION;
     int priority = Integer.MIN_VALUE;
     for (ClassificationWithServiceLevelResolved classification : cl) {
       Duration actualDuration = classification.getDurationFromClassification();
-      if (!onlyPriority && duration.compareTo(actualDuration) > 0) {
+      if (duration.compareTo(actualDuration) > 0) {
         duration = actualDuration;
       }
       if (classification.getPriority() > priority) {
@@ -640,19 +665,13 @@ class ServiceLevelHandler {
     if (oldTaskImpl == null) {
       return false;
     }
-    // TODO Do we need to compare Key and Id or could we simply compare ClassificationSummary only?
-    final boolean isClassificationKeyChanged =
-        !Objects.equals(newTaskImpl.getClassificationKey(), oldTaskImpl.getClassificationKey());
-    final boolean isClassificationIdChanged =
-        !Objects.equals(newTaskImpl.getClassificationId(), oldTaskImpl.getClassificationId());
-
     final boolean isManualPriorityChanged =
         newTaskImpl.getManualPriority() != oldTaskImpl.getManualPriority();
 
-    return oldTaskImpl.getPlanned().equals(newTaskImpl.getPlanned())
-        && oldTaskImpl.getDue().equals(newTaskImpl.getDue())
-        && !isClassificationKeyChanged
-        && !isClassificationIdChanged
+    return Objects.equals(oldTaskImpl.getPlanned(), newTaskImpl.getPlanned())
+        && Objects.equals(oldTaskImpl.getDue(), newTaskImpl.getDue())
+        && Objects.equals(
+            oldTaskImpl.getClassificationSummary(), newTaskImpl.getClassificationSummary())
         && !isManualPriorityChanged
         && areAttachmentsUnchanged(newTaskImpl, oldTaskImpl);
   }
@@ -685,8 +704,7 @@ class ServiceLevelHandler {
 
   static class BulkLog extends BulkOperationResults<String, KadaiException> {}
 
-  record DurationPrioHolder(Duration duration, int priority) {
-  }
+  record DurationPrioHolder(Duration duration, int priority) {}
 
   private static final class TaskDuration {
 

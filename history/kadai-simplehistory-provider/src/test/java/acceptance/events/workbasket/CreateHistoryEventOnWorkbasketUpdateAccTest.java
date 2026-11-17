@@ -44,50 +44,49 @@ class CreateHistoryEventOnWorkbasketUpdateAccTest extends AbstractAccTest {
   @Test
   void should_CreateWorkbasketUpdatedHistoryEvent_When_WorkbasketIsUpdated() throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              Workbasket workbasket = workbasketService.getWorkbasket("GPK_KSC", "DOMAIN_A");
+        CheckedRunnable.rethrowing(() -> {
+          Workbasket workbasket = workbasketService.getWorkbasket("GPK_KSC", "DOMAIN_A");
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(workbasket.getId())
-                      .list();
+          List<WorkbasketHistoryEvent> events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(workbasket.getId())
+                  .list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              workbasket.setName("new name");
-              workbasket.setDescription("new description");
-              workbasket.setType(WorkbasketType.TOPIC);
-              workbasket.setOrgLevel1("new level 1");
-              workbasket.setOrgLevel2("new level 2");
-              workbasket.setOrgLevel3("new level 3");
-              workbasket.setOrgLevel4("new level 4");
-              workbasket.setCustomField(WorkbasketCustomField.CUSTOM_1, "new custom 1");
-              workbasket.setCustomField(WorkbasketCustomField.CUSTOM_2, "new custom 2");
-              workbasket.setCustomField(WorkbasketCustomField.CUSTOM_3, "new custom 3");
-              workbasket.setCustomField(WorkbasketCustomField.CUSTOM_4, "new custom 4");
-              workbasket.setDescription("new description");
-              workbasketService.updateWorkbasket(workbasket);
+          workbasket.setName("new name");
+          workbasket.setDescription("new description");
+          workbasket.setType(WorkbasketType.TOPIC);
+          workbasket.setOrgLevel1("new level 1");
+          workbasket.setOrgLevel2("new level 2");
+          workbasket.setOrgLevel3("new level 3");
+          workbasket.setOrgLevel4("new level 4");
+          workbasket.setCustomField(WorkbasketCustomField.CUSTOM_1, "new custom 1");
+          workbasket.setCustomField(WorkbasketCustomField.CUSTOM_2, "new custom 2");
+          workbasket.setCustomField(WorkbasketCustomField.CUSTOM_3, "new custom 3");
+          workbasket.setCustomField(WorkbasketCustomField.CUSTOM_4, "new custom 4");
+          workbasket.setDescription("new description");
+          workbasketService.updateWorkbasket(workbasket);
 
-              events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(workbasket.getId())
-                      .list();
+          events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(workbasket.getId())
+                  .list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.UPDATED.getName());
-              assertThat(details).contains("\"new level 1\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-8-8");
-              assertThat(events.get(0).getProxyAccessId())
-                  .isEqualTo("cn=business-admins,cn=groups,ou=test,o=kadai");
-            }),
+          assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.UPDATED.getName());
+          assertThat(details).contains("\"new level 1\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-8-8");
+          assertThat(events.get(0).getProxyAccessId())
+              .isEqualTo("cn=business-admins,cn=groups,ou=test,o=kadai");
+        }),
         KadaiRole.BUSINESS_ADMIN,
         "user-8-8");
   }

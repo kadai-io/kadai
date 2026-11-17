@@ -48,9 +48,8 @@ public class TaskEndstatePreprocessorManager {
       LOGGER.debug("Sending task to TaskEndstatePreprocessor providers: {}", taskToProcess);
     }
     taskEndstatePreprocessors.forEach(
-        CheckedConsumer.wrapping(
-            taskEndstatePreprocessor ->
-                taskEndstatePreprocessor.processTaskBeforeEndstate(taskToProcess)));
+        CheckedConsumer.wrapping(taskEndstatePreprocessor ->
+            taskEndstatePreprocessor.processTaskBeforeEndstate(taskToProcess)));
     return taskToProcess;
   }
 }

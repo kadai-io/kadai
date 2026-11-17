@@ -16,7 +16,7 @@
  *
  */
 
-import { Settings } from '../../../settings/models/settings';
+import { Settings } from 'app/settings/models/settings';
 
 export class RetrieveSettings {
   static readonly type = '[Settings] Get settings from backend';

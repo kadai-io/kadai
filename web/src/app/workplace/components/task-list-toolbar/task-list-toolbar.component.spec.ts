@@ -24,22 +24,23 @@ import { provideStore, Store } from '@ngxs/store';
 import { By } from '@angular/platform-browser';
 
 import { TaskListToolbarComponent } from './task-list-toolbar.component';
-import { SearchType } from '../../models/search';
-import { SelectTask, SetPage } from '../../../shared/store/task-store/task.actions';
-import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
-import { WorkplaceState } from '../../../shared/store/workplace-store/workplace.state';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { SetTaskFilter } from '../../../shared/store/filter-store/filter.actions';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
-import { TaskService } from '../../services/task.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
-import { UserInfo } from '../../../shared/models/user-info';
-import { selectedWorkbasketMock } from '../../../shared/store/mock-data/mock-store';
-import { Task } from '../../models/task';
-import { ObjectReference } from '../../models/object-reference';
-import { Direction, TaskQuerySortParameter } from '../../../shared/models/sorting';
+import { SearchType } from 'app/workplace/models/search';
+import { SelectTask, SetPage } from 'app/shared/store/task-store/task.actions';
+import { TaskWorkflowState } from 'app/shared/store/task-store/task.state';
+import { WorkplaceState } from 'app/shared/store/workplace-store/workplace.state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { SetTaskFilter } from 'app/shared/store/filter-store/filter.actions';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
+import { TaskService } from 'app/workplace/services/task.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { UserInfo } from 'app/shared/models/user-info';
+import { selectedWorkbasketMock } from 'app/shared/store/mock-data/mock-store';
+import { Task } from 'app/workplace/models/task';
+import { ObjectReference } from 'app/workplace/models/object-reference';
+import { Direction, TaskQuerySortParameter } from 'app/shared/models/sorting';
+import { signal } from '@angular/core';
 
 const mockWorkbasket = selectedWorkbasketMock;
 const mockTask = new Task('TKI:001', new ObjectReference(), mockWorkbasket);
@@ -51,7 +52,7 @@ describe('TaskListToolbarComponent', () => {
   let workbasketServiceMock: Partial<WorkbasketService>;
   let routerMock: Partial<Router>;
   let queryParams$: Subject<any>;
-  let kadaiEngineServiceMock: Partial<KadaiEngineService>;
+  let currentUserInfoSignal: ReturnType<typeof signal<UserInfo | undefined>>;
 
   beforeEach(async () => {
     workbasketServiceMock = {
@@ -64,8 +65,11 @@ describe('TaskListToolbarComponent', () => {
     };
 
     queryParams$ = new Subject();
+    currentUserInfoSignal = signal<UserInfo | undefined>(new UserInfo('no-match-user', [], []));
 
-    kadaiEngineServiceMock = { currentUserInfo: new UserInfo('no-match-user', [], []) };
+    const kadaiEngineServiceMock = {
+      currentUserInfo: currentUserInfoSignal.asReadonly()
+    };
 
     await TestBed.configureTestingModule({
       imports: [TaskListToolbarComponent],
@@ -91,7 +95,7 @@ describe('TaskListToolbarComponent', () => {
 
   describe('ngOnInit', () => {
     it('selects the workbasket matching the current user and dispatches SelectWorkbasket', () => {
-      TestBed.inject(KadaiEngineService).currentUserInfo = new UserInfo(mockWorkbasket.key ?? '', [], []);
+      currentUserInfoSignal.set(new UserInfo(mockWorkbasket.key ?? '', [], []));
 
       component.ngOnInit();
       queryParams$.next({});
@@ -137,7 +141,7 @@ describe('TaskListToolbarComponent', () => {
     it('skips a nameless workbasket and falls back to empty name/id for the matched user workbasket', () => {
       const namelessWorkbasket = { ...mockWorkbasket, name: undefined, workbasketId: undefined, key: 'no-name' };
       (workbasketServiceMock.getAllWorkBaskets as any).mockReturnValue(of({ workbaskets: [namelessWorkbasket] }));
-      TestBed.inject(KadaiEngineService).currentUserInfo = new UserInfo('no-name', [], []);
+      currentUserInfoSignal.set(new UserInfo('no-name', [], []));
 
       component.ngOnInit();
       queryParams$.next({});
@@ -172,7 +176,7 @@ describe('TaskListToolbarComponent', () => {
     });
 
     it('applies the previously selected workbasket name/id when returning to the workbaskets tab', () => {
-      TestBed.inject(KadaiEngineService).currentUserInfo = new UserInfo(mockWorkbasket.key ?? '', [], []);
+      currentUserInfoSignal.set(new UserInfo(mockWorkbasket.key ?? '', [], []));
       component.ngOnInit();
       queryParams$.next({});
 

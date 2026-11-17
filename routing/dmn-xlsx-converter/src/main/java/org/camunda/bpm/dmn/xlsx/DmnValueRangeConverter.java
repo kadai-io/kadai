@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.camunda.bpm.dmn.xlsx;
 
 import java.util.regex.Pattern;
@@ -32,7 +31,8 @@ public class DmnValueRangeConverter implements CellContentHandler {
 
   public static final Pattern RANGE_REGEX =
       Pattern.compile(
-          "[\\[\\]](?:[0-9.]+|(?:date and time\\(.+\\)))\\.\\.(?:[0-9.]+|(?:date and time\\(.+\\)))[\\[\\]]");
+          "[\\[\\]](?:[0-9.]+|(?:date and time\\(.+\\)))\\.\\.(?:[0-9.]+|(?:date and"
+              + " time\\(.+\\)))[\\[\\]]");
 
   @Override
   public boolean canConvert(SpreadsheetCell cell, Spreadsheet context) {

@@ -28,37 +28,30 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { filter, map, takeUntil } from 'rxjs/operators';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import {
-  CustomField,
-  CustomFields,
-  getCustomFields,
-  WorkbasketsCustomisation
-} from '../../../shared/models/customisation';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { CustomField, CustomFields, getCustomFields, WorkbasketsCustomisation } from 'app/shared/models/customisation';
 import {
   MarkWorkbasketForDeletion,
   OnButtonPressed,
   RemoveDistributionTarget,
   SaveNewWorkbasket,
   UpdateWorkbasket
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
-import { ButtonAction } from '../../models/button-action';
-import { AccessId } from '../../../shared/models/access-id';
-import { cloneDeep } from 'lodash-es';
-import { trimForm } from '../../../shared/util/form-trimmer';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
+import { ButtonAction } from 'app/administration/models/button-action';
+import { trimForm } from 'app/shared/util/form-trimmer';
 import { AsyncPipe } from '@angular/common';
 import { MatDivider } from '@angular/material/divider';
 import { MatError, MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { FieldErrorDisplayComponent } from '../../../shared/components/field-error-display/field-error-display.component';
-import { TypeAheadComponent } from '../../../shared/components/type-ahead/type-ahead.component';
+import { FieldErrorDisplayComponent } from 'app/shared/components/field-error-display/field-error-display.component';
+import { TypeAheadComponent } from 'app/shared/components/type-ahead/type-ahead.component';
 import { MatSelect, MatSelectTrigger } from '@angular/material/select';
-import { IconTypeComponent } from '../type-icon/icon-type.component';
+import { IconTypeComponent } from 'app/administration/components/type-icon/icon-type.component';
 import { MatOption } from '@angular/material/core';
 import { CdkTextareaAutosize } from '@angular/cdk/text-field';
-import { MapValuesPipe } from '../../../shared/pipes/map-values.pipe';
-import { RemoveNoneTypePipe } from '../../../shared/pipes/remove-empty-type.pipe';
+import { MapValuesPipe } from 'app/shared/pipes/map-values.pipe';
+import { RemoveNoneTypePipe } from 'app/shared/pipes/remove-empty-type.pipe';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { OverflowFeedbackDirective } from 'app/shared/directives/overflow-feedback.directive';
 import { FormFieldSubmitDirective } from 'app/shared/directives/form-field-submit.directive';
@@ -98,7 +91,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
   workbasketForm = viewChild<NgForm>('WorkbasketForm');
   workbasketClone!: Workbasket;
   allTypes!: Map<WorkbasketType, string>;
-  isOwnerValid: boolean = true;
   readonly lengthError = 'You have reached the maximum length for this field';
   customFields$!: Observable<CustomField[]>;
   destroy$ = new Subject<void>();
@@ -182,11 +174,9 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       const ownerControl = form.form.controls['workbasket.owner'];
       const isOwnerInvalid = ownerControl?.hasError('invalidAccessId') || ownerControl?.hasError('accessIdLookupError');
 
-      const isOwnerValidCombined = this.lookupField() ? this.isOwnerValid : !isOwnerInvalid;
-
-      if (form.valid && isOwnerValidCombined) {
+      if (form.valid) {
         this.onSave();
-      } else if (isOwnerInvalid || (this.lookupField() && !this.isOwnerValid)) {
+      } else if (isOwnerInvalid) {
         form.control.markAllAsTouched();
         this.notificationService.showError('OWNER_NOT_VALID', { owner: 'owner' });
       } else {
@@ -229,7 +219,7 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
       if (!workbasket._links) return;
       this.store.dispatch(new UpdateWorkbasket(workbasket._links.self.href, workbasket)).subscribe(() => {
         this.requestInProgressService.setRequestInProgress(false);
-        this.workbasketClone = cloneDeep(workbasket);
+        this.workbasketClone = structuredClone(workbasket);
       });
     }
   }
@@ -267,12 +257,6 @@ export class WorkbasketInformationComponent implements OnInit, OnDestroy {
     this.store.dispatch(new MarkWorkbasketForDeletion(wb._links.self.href)).subscribe(() => {
       this.afterRequest();
     });
-  }
-
-  onSelectedOwner(owner: AccessId) {
-    const wb = this.workbasket();
-    if (!wb) return;
-    wb.owner = owner.accessId;
   }
 
   get ownerErrorMessage(): string {

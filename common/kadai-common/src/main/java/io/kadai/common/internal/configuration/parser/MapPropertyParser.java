@@ -58,25 +58,24 @@ public class MapPropertyParser implements PropertyParser<Map<?, ?>> {
     Map<?, ?> mapFromProperties =
         properties.keySet().stream()
             .filter(it -> it.startsWith(propertyPrefix))
-            .map(
-                it -> {
-                  // Keys of the map entry is everything after the propertyKey + "."
-                  String rawKey = it.substring(propertyPrefix.length());
-                  // key is always present. filter guarantees that.
-                  @SuppressWarnings("OptionalGetWithoutIsPresent")
-                  Object key =
-                      PropertyParser.getPropertyParser(keyClass)
-                          .parse(rawKey, separator, actualTypeArguments[0])
-                          .get();
+            .map(it -> {
+              // Keys of the map entry is everything after the propertyKey + "."
+              String rawKey = it.substring(propertyPrefix.length());
+              // key is always present. filter guarantees that.
+              @SuppressWarnings("OptionalGetWithoutIsPresent")
+              Object key =
+                  PropertyParser.getPropertyParser(keyClass)
+                      .parse(rawKey, separator, actualTypeArguments[0])
+                      .get();
 
-                  // Value of the map entry is the value from the property
-                  String rawValue = properties.get(it);
-                  Optional<?> value =
-                      PropertyParser.getPropertyParser(valueClass)
-                          .parse(rawValue, separator, actualTypeArguments[1]);
+              // Value of the map entry is the value from the property
+              String rawValue = properties.get(it);
+              Optional<?> value =
+                  PropertyParser.getPropertyParser(valueClass)
+                      .parse(rawValue, separator, actualTypeArguments[1]);
 
-                  return value.map(o -> Pair.of(key, o)).orElse(null);
-                })
+              return value.map(o -> Pair.of(key, o)).orElse(null);
+            })
             .filter(Objects::nonNull)
             .collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 

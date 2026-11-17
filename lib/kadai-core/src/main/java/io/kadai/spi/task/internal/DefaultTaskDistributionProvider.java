@@ -49,9 +49,8 @@ public class DefaultTaskDistributionProvider implements TaskDistributionProvider
 
     int workbasketCount = workbasketIds.size();
     IntStream.range(0, taskIds.size())
-        .forEach(
-            i ->
-                distributedTaskIds.get(workbasketIds.get(i % workbasketCount)).add(taskIds.get(i)));
+        .forEach(i ->
+            distributedTaskIds.get(workbasketIds.get(i % workbasketCount)).add(taskIds.get(i)));
 
     return distributedTaskIds;
   }

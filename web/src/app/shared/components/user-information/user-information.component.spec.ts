@@ -20,12 +20,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { DebugElement } from '@angular/core';
 import { UserInformationComponent } from './user-information.component';
 import { By } from '@angular/platform-browser';
-import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
-import { KadaiEngineServiceMock } from '../../services/kadai-engine/kadai-engine.mock.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { KadaiEngineServiceMock } from 'app/shared/services/kadai-engine/kadai-engine.mock.service';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 describe('UserInformationComponent', () => {
   let component: UserInformationComponent;
@@ -41,8 +40,7 @@ describe('UserInformationComponent', () => {
           useClass: KadaiEngineServiceMock
         },
         provideAnimationsAsync(),
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
   });
@@ -65,5 +63,19 @@ describe('UserInformationComponent', () => {
     expect(button).toBeTruthy();
     button.click();
     expect(component.showRoles).toBe(true);
+  });
+
+  it('should render user id and roles of the current user', () => {
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Logged as: userid');
+    expect(component.roles()).toBe('[admin]');
+  });
+
+  it('should not render user info when no user is logged in', () => {
+    (TestBed.inject(KadaiEngineService) as unknown as KadaiEngineServiceMock).setCurrentUserInfo(undefined);
+    fixture.detectChanges();
+
+    expect(debugElement.query(By.css('.user-info'))).toBeNull();
+    expect(component.roles()).toBe('');
   });
 });

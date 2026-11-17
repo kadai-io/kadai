@@ -19,7 +19,9 @@
 package io.kadai.user.internal;
 
 import io.kadai.user.api.models.User;
+import io.kadai.user.internal.models.UserAttributeRow;
 import io.kadai.user.internal.models.UserImpl;
+import io.kadai.workbasket.api.WorkbasketPermission;
 import java.util.List;
 import java.util.Set;
 import org.apache.ibatis.annotations.DeleteProvider;
@@ -53,11 +55,6 @@ public interface UserMapper {
   UserImpl findById(String id);
 
   @Result(property = "id", column = "USER_ID")
-  @Result(property = "groups", column = "USER_ID", many = @Many(select = "findGroupsById"))
-  @Result(
-      property = "permissions",
-      column = "USER_ID",
-      many = @Many(select = "findPermissionsById"))
   @Result(property = "firstName", column = "FIRST_NAME")
   @Result(property = "lastName", column = "LAST_NAME")
   @Result(property = "fullName", column = "FULL_NAME")
@@ -73,11 +70,59 @@ public interface UserMapper {
   @SelectProvider(type = UserMapperSqlProvider.class, method = "findByIds")
   List<UserImpl> findByIds(@Param("ids") Set<String> ids);
 
+  /**
+   * Flat refresh snapshot. Deliberately has no membership mappings.
+   *
+   * @return all scalar user rows
+   */
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findAllUsersForRefresh")
+  @Result(property = "id", column = "USER_ID")
+  @Result(property = "firstName", column = "FIRST_NAME")
+  @Result(property = "lastName", column = "LAST_NAME")
+  @Result(property = "fullName", column = "FULL_NAME")
+  @Result(property = "longName", column = "LONG_NAME")
+  @Result(property = "email", column = "E_MAIL")
+  @Result(property = "phone", column = "PHONE")
+  @Result(property = "mobilePhone", column = "MOBILE_PHONE")
+  @Result(property = "orgLevel4", column = "ORG_LEVEL_4")
+  @Result(property = "orgLevel3", column = "ORG_LEVEL_3")
+  @Result(property = "orgLevel2", column = "ORG_LEVEL_2")
+  @Result(property = "orgLevel1", column = "ORG_LEVEL_1")
+  @Result(property = "data", column = "DATA")
+  List<UserImpl> findAllUsersForRefresh();
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findAllGroupsForRefresh")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "accessId", column = "ACCESS_ID")
+  List<UserAccessIdRow> findAllGroupsForRefresh();
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findAllPermissionsForRefresh")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "accessId", column = "ACCESS_ID")
+  List<UserAccessIdRow> findAllPermissionsForRefresh();
+
   @SelectProvider(type = UserMapperSqlProvider.class, method = "findGroupsById")
   Set<String> findGroupsById(String id);
 
   @SelectProvider(type = UserMapperSqlProvider.class, method = "findPermissionsById")
   Set<String> findPermissionsById(String id);
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findGroupsByIds")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "attributeValue", column = "ATTRIBUTE_VALUE")
+  List<UserAttributeRow> findGroupsByIds(@Param("ids") Set<String> ids);
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findPermissionsByIds")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "attributeValue", column = "ATTRIBUTE_VALUE")
+  List<UserAttributeRow> findPermissionsByIds(@Param("ids") Set<String> ids);
+
+  @SelectProvider(type = UserMapperSqlProvider.class, method = "findDomainsByIds")
+  @Result(property = "userId", column = "USER_ID")
+  @Result(property = "attributeValue", column = "ATTRIBUTE_VALUE")
+  List<UserAttributeRow> findDomainsByIds(
+      @Param("ids") Set<String> ids,
+      @Param("permissions") List<WorkbasketPermission> permissions);
 
   @InsertProvider(type = UserMapperSqlProvider.class, method = "insert")
   void insert(User user);

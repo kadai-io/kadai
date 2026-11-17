@@ -60,8 +60,7 @@ public class RoutingTarget {
       return false;
     }
     RoutingTarget other = (RoutingTarget) obj;
-    return Objects.equals(workbasketId, other.workbasketId)
-        && Objects.equals(owner, other.owner);
+    return Objects.equals(workbasketId, other.workbasketId) && Objects.equals(owner, other.owner);
   }
 
   @Override

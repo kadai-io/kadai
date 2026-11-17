@@ -16,14 +16,15 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { of } from 'rxjs';
+import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
 import { provideRouter, Router, Routes } from '@angular/router';
 import { Component } from '@angular/core';
 import { TaskListComponent } from './task-list.component';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Task } from '../../models/task';
-import { ObjectReference } from '../../models/object-reference';
+import { Task } from 'app/workplace/models/task';
+import { ObjectReference } from 'app/workplace/models/object-reference';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 
 @Component({
@@ -49,12 +50,17 @@ describe('TaskListComponent', () => {
   let fixture: ComponentFixture<TaskListComponent>;
   let router: Router;
 
-  const routes: Routes = [{ path: '*', component: DummyDetailComponent }];
+  const routes: Routes = [{ path: 'taskdetail/:id', component: DummyDetailComponent, outlet: 'detail' }];
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [TaskListComponent],
-      providers: [provideHttpClientTesting(), provideAngularSvgIcon(), provideRouter(routes), provideNoopAnimations()]
+      providers: [
+        { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
+        provideHttpClientTesting(),
+        provideRouter(routes),
+        provideNoopAnimations()
+      ]
     }).compileComponents();
 
     router = TestBed.inject(Router);
@@ -98,17 +104,24 @@ describe('TaskListComponent', () => {
     expect(options.length).toBe(2);
   });
 
-  it('selectTask should update selectedId', () => {
+  it('selectTask should update selectedId', async () => {
     fixture.detectChanges();
     component.selectTask('task-1');
     expect(component.selectedId()).toBe('task-1');
+    await fixture.whenStable();
   });
 
-  it('selectTask should navigate to task detail', () => {
+  it('selectTask should navigate to task detail', async () => {
     fixture.detectChanges();
     const navigateSpy = vi.spyOn(router, 'navigate');
     component.selectTask('task-1');
-    expect(navigateSpy).toHaveBeenCalled();
+
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [{ outlets: { detail: 'taskdetail/task-1' } }],
+      expect.objectContaining({ queryParamsHandling: 'merge' })
+    );
+
+    await fixture.whenStable();
   });
 
   it('should mark selected task with selectedId', () => {
@@ -134,7 +147,7 @@ describe('TaskListComponent', () => {
     expect(ownerEl).toBeNull();
   });
 
-  it('should call selectTask when a list option is clicked', () => {
+  it('should call selectTask when a list option is clicked', async () => {
     fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const selectSpy = vi.spyOn(component, 'selectTask');
@@ -142,22 +155,25 @@ describe('TaskListComponent', () => {
     expect(listOption).toBeTruthy();
     listOption.click();
     expect(selectSpy).toHaveBeenCalledWith('task-1');
+    await fixture.whenStable();
   });
 
-  it('should update selectedId when a list option is clicked', () => {
+  it('should update selectedId when a list option is clicked', async () => {
     fixture.componentRef.setInput('tasks', [mockTask, mockTaskNoOwner]);
     fixture.detectChanges();
     const listOptions = fixture.nativeElement.querySelectorAll('mat-list-option');
     listOptions[0].click();
     expect(component.selectedId()).toBe('task-1');
+    await fixture.whenStable();
   });
 
-  it('should navigate when a list option is clicked', () => {
+  it('should navigate when a list option is clicked', async () => {
     fixture.componentRef.setInput('tasks', [mockTask]);
     fixture.detectChanges();
     const navigateSpy = vi.spyOn(router, 'navigate');
     const listOption = fixture.nativeElement.querySelector('mat-list-option');
     listOption.click();
     expect(navigateSpy).toHaveBeenCalled();
+    await fixture.whenStable();
   });
 });

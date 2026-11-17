@@ -40,29 +40,28 @@ class CreateHistoryEventOnTaskCreationAccTest extends AbstractAccTest {
   @Test
   void should_CreateCreatedHistoryEvent_When_TaskIsCreated() throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              TaskImpl newTask =
-                  (TaskImpl) taskService.newTask("WBI:100000000000000000000000000000000006");
-              newTask.setClassificationKey("T2100");
-              ObjectReference objectReference =
-                  createObjectRef("COMPANY_A", "SYSTEM_A", "INSTANCE_A", "VNR", "1234567");
-              newTask.setPrimaryObjRef(objectReference);
-              taskService.createTask(newTask);
+        CheckedRunnable.rethrowing(() -> {
+          TaskImpl newTask =
+              (TaskImpl) taskService.newTask("WBI:100000000000000000000000000000000006");
+          newTask.setClassificationKey("T2100");
+          ObjectReference objectReference =
+              createObjectRef("COMPANY_A", "SYSTEM_A", "INSTANCE_A", "VNR", "1234567");
+          newTask.setPrimaryObjRef(objectReference);
+          taskService.createTask(newTask);
 
-              TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+          TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-              List<TaskHistoryEvent> events =
-                  taskHistoryQueryMapper.queryHistoryEvents(
-                      (TaskHistoryQueryImpl)
-                          taskHistoryService.createTaskHistoryQuery().taskIdIn(newTask.getId()));
+          List<TaskHistoryEvent> events =
+              taskHistoryQueryMapper.queryHistoryEvents(
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(newTask.getId()));
 
-              String eventType = events.get(0).getEventType();
+          String eventType = events.get(0).getEventType();
 
-              assertThat(eventType).isEqualTo(TaskHistoryEventType.CREATED.getName());
-              assertThat(events.get(0).getUserId()).isEqualTo("user-1-2");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType).isEqualTo(TaskHistoryEventType.CREATED.getName());
+          assertThat(events.get(0).getUserId()).isEqualTo("user-1-2");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         KadaiRole.ADMIN,
         "user-1-2");
   }

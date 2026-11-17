@@ -64,13 +64,13 @@ public class TaskCommentController implements TaskCommentApi {
   private final TaskService taskService;
   private final TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler;
   private final BulkOperationResultsRepresentationModelAssembler
-          bulkOperationResultsRepresentationModelAssembler;
+      bulkOperationResultsRepresentationModelAssembler;
 
   @Autowired
   TaskCommentController(
-          TaskService taskService,
-          TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler,
-          BulkOperationResultsRepresentationModelAssembler bulkOperationResultsRepModelAssembler) {
+      TaskService taskService,
+      TaskCommentRepresentationModelAssembler taskCommentRepresentationModelAssembler,
+      BulkOperationResultsRepresentationModelAssembler bulkOperationResultsRepModelAssembler) {
     this.taskService = taskService;
     this.taskCommentRepresentationModelAssembler = taskCommentRepresentationModelAssembler;
     this.bulkOperationResultsRepresentationModelAssembler = bulkOperationResultsRepModelAssembler;
@@ -181,15 +181,14 @@ public class TaskCommentController implements TaskCommentApi {
   @PostMapping(path = RestEndpoints.URL_TASKS_COMMENTS)
   @Transactional(rollbackFor = Exception.class)
   public ResponseEntity<BulkOperationResultsRepresentationModel> createTaskCommentsBatch(
-          @RequestBody TasksCommentBatchRepresentationModel requestModel)
-          throws InvalidArgumentException {
+      @RequestBody TasksCommentBatchRepresentationModel requestModel)
+      throws InvalidArgumentException {
 
     BulkOperationResults<String, KadaiException> errors =
-            taskService.createTaskCommentsBulk(requestModel.getTaskIds(),
-                    requestModel.getTextField());
+        taskService.createTaskCommentsBulk(requestModel.getTaskIds(), requestModel.getTextField());
 
     BulkOperationResultsRepresentationModel model =
-            bulkOperationResultsRepresentationModelAssembler.toModel(errors);
+        bulkOperationResultsRepresentationModelAssembler.toModel(errors);
 
     return ResponseEntity.ok(model);
   }

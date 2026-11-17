@@ -147,7 +147,7 @@ class TaskCommentServiceImpl {
   }
 
   public BulkOperationResults<String, KadaiException> createTaskCommentsBulk(
-          Collection<String> taskIds, String text) throws InvalidArgumentException {
+      Collection<String> taskIds, String text) throws InvalidArgumentException {
 
     if (taskIds == null) {
       throw new InvalidArgumentException("taskIds must not be null");
@@ -161,16 +161,17 @@ class TaskCommentServiceImpl {
       BulkOperationResults<String, KadaiException> errors = new BulkOperationResults<>();
       Instant now = Instant.now();
 
-      Set<String> existingTaskIds = taskMapper.findExistingTasks(taskIds, null).stream()
+      Set<String> existingTaskIds =
+          taskMapper.findExistingTasks(taskIds, null).stream()
               .map(MinimalTaskSummary::getTaskId)
               .collect(Collectors.toSet());
 
       taskIds.stream()
-              .filter(id -> !existingTaskIds.contains(id))
-              .forEach(id -> errors.addError(
-                      id, new TaskNotFoundException(id)));
+          .filter(id -> !existingTaskIds.contains(id))
+          .forEach(id -> errors.addError(id, new TaskNotFoundException(id)));
 
-      List<TaskCommentImpl> toInsert = existingTaskIds.stream()
+      List<TaskCommentImpl> toInsert =
+          existingTaskIds.stream()
               .map(id -> {
                 TaskCommentImpl comment = (TaskCommentImpl) newTaskComment(id);
                 comment.setTextField(text);

@@ -18,7 +18,7 @@
 
 import { Component, computed, input } from '@angular/core';
 import { WorkbasketType } from 'app/shared/models/workbasket-type';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({

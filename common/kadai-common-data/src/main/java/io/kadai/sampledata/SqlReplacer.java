@@ -73,15 +73,13 @@ final class SqlReplacer {
 
   static BufferedReader getScriptBufferedStream(String script) {
     return Optional.ofNullable(SampleDataGenerator.class.getResourceAsStream(script))
-        .map(
-            inputStream ->
-                new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)))
-        .orElseThrow(
-            () ->
-                new SystemException(
-                    String.format(
-                        "could not find sql script '%s' in the classpath of '%s'",
-                        script, SampleDataGenerator.class)));
+        .map(inputStream ->
+            new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8)))
+        .orElseThrow(() ->
+            new SystemException(
+                String.format(
+                    "could not find sql script '%s' in the classpath of '%s'",
+                    script, SampleDataGenerator.class)));
   }
 
   private static String replaceBooleanWithInteger(String sql) {

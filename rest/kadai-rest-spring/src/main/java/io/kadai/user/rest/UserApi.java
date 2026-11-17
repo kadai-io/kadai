@@ -112,8 +112,7 @@ public interface UserApi {
             content =
                 @Content(
                     mediaType = MediaTypes.HAL_JSON_VALUE,
-                    schema =
-                        @Schema(implementation = UserSummaryPagedRepresentationModel.class))),
+                    schema = @Schema(implementation = UserSummaryPagedRepresentationModel.class))),
         @ApiResponse(
             responseCode = "400",
             description = "INVALID_ARGUMENT",
@@ -151,14 +150,15 @@ public interface UserApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "userId": "user-10-2",
-                            "groups": [],
-                            "permissions": [],
-                            "domains": [],
-                            "firstName": "Hans",
-                            "lastName": "Georg"
-                          }"""))),
+                                  {
+                                    "userId": "user-10-2",
+                                    "groups": [],
+                                    "permissions": [],
+                                    "domains": [],
+                                    "firstName": "Hans",
+                                    "lastName": "Georg"
+                                  }\
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "201",
@@ -220,24 +220,25 @@ public interface UserApi {
                         @ExampleObject(
                             value =
                                 """
-                              {
-                                "userId": "teamlead-1",
-                                "groups": [],
-                                "permissions": [],
-                                "domains": ["DOMAIN_A"],
-                                "firstName": "new name",
-                                "lastName": "Toll",
-                                "fullName": "Toll, Titus",
-                                "longName": "Toll, Titus - (teamlead-1)",
-                                "email": "titus.toll@web.de",
-                                "phone": "040-2951854",
-                                "mobilePhone": "015637683197",
-                                "orgLevel4": "Envite",
-                                "orgLevel3": "BPM",
-                                "orgLevel2": "Human Workflow",
-                                "orgLevel1": "KADAI",
-                                "data": "xy"
-                              }""")
+                                {
+                                  "userId": "teamlead-1",
+                                  "groups": [],
+                                  "permissions": [],
+                                  "domains": ["DOMAIN_A"],
+                                  "firstName": "new name",
+                                  "lastName": "Toll",
+                                  "fullName": "Toll, Titus",
+                                  "longName": "Toll, Titus - (teamlead-1)",
+                                  "email": "titus.toll@web.de",
+                                  "phone": "040-2951854",
+                                  "mobilePhone": "015637683197",
+                                  "orgLevel4": "Envite",
+                                  "orgLevel3": "BPM",
+                                  "orgLevel2": "Human Workflow",
+                                  "orgLevel1": "KADAI",
+                                  "data": "xy"
+                                }\
+                                """)
                       })),
       responses = {
         @ApiResponse(
@@ -291,7 +292,7 @@ public interface UserApi {
         @ApiResponse(
             responseCode = "204",
             description = "User deleted",
-            content = @Content(schema = @Schema())),
+            content = @Content(schema = @Schema)),
         @ApiResponse(
             responseCode = "404",
             description = "USER_NOT_FOUND",

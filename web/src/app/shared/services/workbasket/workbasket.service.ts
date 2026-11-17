@@ -19,7 +19,6 @@
 import { Observable, Subject, throwError as observableThrowError } from 'rxjs';
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from 'environments/environment';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketAccessItems, WorkbasketAccessItemWrite } from 'app/shared/models/workbasket-access-items';
 import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
@@ -29,10 +28,11 @@ import { Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting
 
 import { DomainService } from 'app/shared/services/domain/domain.service';
 import { catchError, mergeMap, tap } from 'rxjs/operators';
-import { WorkbasketRepresentation } from '../../models/workbasket-representation';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { asUrlQueryString } from '../../util/query-parameters-v2';
+import { WorkbasketRepresentation } from 'app/shared/models/workbasket-representation';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 @Injectable({
   providedIn: 'root'
@@ -43,6 +43,7 @@ export class WorkbasketService {
   public workbasketActionToolbarExpanded = new Subject<boolean>();
   private httpClient = inject(HttpClient);
   private domainService = inject(DomainService);
+  private runtimeConfigService = inject(RuntimeConfigService);
   private workbasketSummaryRef: Observable<WorkbasketSummaryRepresentation> = new Observable();
 
   // #region "REST calls"
@@ -60,7 +61,7 @@ export class WorkbasketService {
     return this.domainService.getSelectedDomain().pipe(
       mergeMap((domain) => {
         this.workbasketSummaryRef = this.httpClient.get<WorkbasketSummaryRepresentation>(
-          `${environment.kadaiRestUrl}/v1/workbaskets${asUrlQueryString({
+          `${this.runtimeConfigService.kadaiRestUrl}/v1/workbaskets${asUrlQueryString({
             ...filterParameter,
             ...sortParameter,
             ...pagingParameter
@@ -76,19 +77,19 @@ export class WorkbasketService {
 
   // GET
   getWorkBasket(id: string): Observable<Workbasket> {
-    return this.httpClient.get<Workbasket>(`${environment.kadaiRestUrl}/v1/workbaskets/${id}`);
+    return this.httpClient.get<Workbasket>(`${this.runtimeConfigService.kadaiRestUrl}/v1/workbaskets/${id}`);
   }
 
   // GET
   getAllWorkBaskets(): Observable<WorkbasketRepresentation> {
     return this.httpClient.get<WorkbasketRepresentation>(
-      `${environment.kadaiRestUrl}/v1/workbaskets?required-permission=OPEN`
+      `${this.runtimeConfigService.kadaiRestUrl}/v1/workbaskets?required-permission=OPEN`
     );
   }
 
   // POST
   createWorkbasket(workbasket: Workbasket): Observable<Workbasket> {
-    return this.httpClient.post<Workbasket>(`${environment.kadaiRestUrl}/v1/workbaskets`, workbasket);
+    return this.httpClient.post<Workbasket>(`${this.runtimeConfigService.kadaiRestUrl}/v1/workbaskets`, workbasket);
   }
 
   // PUT

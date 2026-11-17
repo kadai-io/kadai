@@ -40,31 +40,29 @@ class CreateHistoryEventOnWorkbasketDeletionAccTest extends AbstractAccTest {
   @Test
   void should_CreateWorkbasketDeletedHistoryEvent_When_WorkbasketIsDeleted() throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String workbasketId = "WBI:100000000000000000000000000000000008";
+        CheckedRunnable.rethrowing(() -> {
+          final String workbasketId = "WBI:100000000000000000000000000000000008";
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          List<WorkbasketHistoryEvent> events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              workbasketService.deleteWorkbasket(workbasketId);
+          workbasketService.deleteWorkbasket(workbasketId);
 
-              events =
-                  historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
-              assertThat(events).hasSize(1);
+          events =
+              historyService.createWorkbasketHistoryQuery().workbasketIdIn(workbasketId).list();
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.DELETED.getName());
-              assertThat(details)
-                  .contains("\"oldValue\":\"WBI:100000000000000000000000000000000008\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-7-8");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType).isEqualTo(WorkbasketHistoryEventType.DELETED.getName());
+          assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000008\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-7-8");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "user-7-8");
   }
 }

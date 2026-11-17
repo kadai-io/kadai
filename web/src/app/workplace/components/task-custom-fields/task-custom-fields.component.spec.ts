@@ -19,7 +19,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { TaskCustomFieldsComponent } from './task-custom-fields.component';
-import { Task } from '../../models/task';
+import { Task } from 'app/workplace/models/task';
 
 describe('TaskCustomFieldsComponent', () => {
   let component: TaskCustomFieldsComponent;

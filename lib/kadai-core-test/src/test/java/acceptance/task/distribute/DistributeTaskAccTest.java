@@ -459,9 +459,8 @@ class DistributeTaskAccTest {
     String nonExistingStrategy = "NoExistingStrategy";
     String workbasketSummary1Id = workbasketSummary1.getId();
 
-    assertThatThrownBy(
-            () ->
-                taskService.distributeWithStrategy(workbasketSummary1Id, nonExistingStrategy, null))
+    assertThatThrownBy(() ->
+            taskService.distributeWithStrategy(workbasketSummary1Id, nonExistingStrategy, null))
         .isInstanceOf(InvalidArgumentException.class)
         .hasMessageContaining(
             "The distribution strategy '%s' does not exist.", nonExistingStrategy);
@@ -531,10 +530,9 @@ class DistributeTaskAccTest {
     String sourceWorkbasketId = workbasketSummary1.getId();
     List<String> nonExistingDestinationWorkbasket = List.of("NonExistingDestinationWorkbasket");
     List<String> taskIds = taskSummaries.subList(0, 2).stream().map(TaskSummary::getId).toList();
-    assertThatThrownBy(
-            () ->
-                taskService.distributeWithDestinations(
-                    sourceWorkbasketId, taskIds, nonExistingDestinationWorkbasket))
+    assertThatThrownBy(() ->
+            taskService.distributeWithDestinations(
+                sourceWorkbasketId, taskIds, nonExistingDestinationWorkbasket))
         .isInstanceOf(WorkbasketNotFoundException.class)
         .hasMessageContaining(
             String.format(

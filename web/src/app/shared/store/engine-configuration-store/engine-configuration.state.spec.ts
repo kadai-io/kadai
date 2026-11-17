@@ -22,8 +22,8 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { firstValueFrom, of } from 'rxjs';
 import { EngineConfigurationState } from './engine-configuration.state';
 import { EngineConfigurationSelectors } from './engine-configuration.selectors';
-import { ClassificationCategoriesService } from '../../services/classification-categories/classification-categories.service';
-import { Customisation } from '../../models/customisation';
+import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
+import { Customisation } from 'app/shared/models/customisation';
 
 describe('EngineConfigurationState', () => {
   let store: Store;

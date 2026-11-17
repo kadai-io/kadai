@@ -25,8 +25,8 @@ import io.kadai.workbasket.api.models.Workbasket;
 import java.util.Map;
 
 /**
- * This exception is thrown when a BeforeTransferTaskProvider denies the transfer of a
- * {@linkplain Task} to a destination {@linkplain Workbasket}.
+ * This exception is thrown when a BeforeTransferTaskProvider denies the transfer of a {@linkplain
+ * Task} to a destination {@linkplain Workbasket}.
  */
 public class TransferCheckException extends KadaiException {
 
@@ -66,5 +66,3 @@ public class TransferCheckException extends KadaiException {
     return destinationWorkbasketId;
   }
 }
-
-

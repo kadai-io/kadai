@@ -20,8 +20,8 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { KadaiDate } from 'app/shared/util/kadai.date';
 import { BlobGenerator } from 'app/shared/util/blob-generator';
-import { Classification } from '../../shared/models/classification';
-import { StartupService } from '../../shared/services/startup/startup.service';
+import { Classification } from 'app/shared/models/classification';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { take } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
@@ -30,10 +30,10 @@ import { Observable } from 'rxjs';
 })
 export class ClassificationDefinitionService {
   private httpClient = inject(HttpClient);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {
-    return this.startupService.getKadaiRestUrl() + '/v1/classification-definitions';
+    return this.runtimeConfigService.kadaiRestUrl + '/v1/classification-definitions';
   }
 
   // GET

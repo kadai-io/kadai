@@ -217,17 +217,15 @@ final class TaskTransferrer {
       applyTransferValuesForTask(task, destinationWorkbasket, owner, setTransferFlag);
       taskMapper.update(task);
 
-      eventPublisher.publishing(
-          () -> {
-            String details =
-                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
-            return new TaskTransferredEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                originWorkbasket.getId(),
-                destinationWorkbasket.getId(),
-                details);
-          });
+      eventPublisher.publishing(() -> {
+        String details = ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
+        return new TaskTransferredEvent(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+            task,
+            originWorkbasket.getId(),
+            destinationWorkbasket.getId(),
+            details);
+      });
       return task;
     } finally {
       kadaiEngine.returnConnection();
@@ -410,29 +408,26 @@ final class TaskTransferrer {
                 .collect(Collectors.toSet()),
             updateObject);
 
-        eventPublisher.publishingAll(
-            () ->
-                taskSummaries.stream()
-                    .map(
-                        oldSummary -> {
-                          TaskSummaryImpl newSummary = (TaskSummaryImpl) oldSummary.copy();
-                          newSummary.setId(oldSummary.getId());
-                          newSummary.setExternalId(oldSummary.getExternalId());
-                          applyTransferValuesForTask(
-                              newSummary, destinationWorkbasket, owner, setTransferFlag);
+        eventPublisher.publishingAll(() ->
+            taskSummaries.stream()
+                .map(oldSummary -> {
+                  TaskSummaryImpl newSummary = (TaskSummaryImpl) oldSummary.copy();
+                  newSummary.setId(oldSummary.getId());
+                  newSummary.setExternalId(oldSummary.getExternalId());
+                  applyTransferValuesForTask(
+                      newSummary, destinationWorkbasket, owner, setTransferFlag);
 
-                          String details =
-                              ObjectAttributeChangeDetector.determineChangesInAttributes(
-                                  oldSummary, newSummary);
-                          return new TaskTransferredEvent(
-                              IdGenerator.generateWithPrefix(
-                                  IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                              newSummary,
-                              oldSummary.getWorkbasketSummary().getId(),
-                              newSummary.getWorkbasketSummary().getId(),
-                              details);
-                        })
-                    .collect(toList()));
+                  String details =
+                      ObjectAttributeChangeDetector.determineChangesInAttributes(
+                          oldSummary, newSummary);
+                  return new TaskTransferredEvent(
+                      IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                      newSummary,
+                      oldSummary.getWorkbasketSummary().getId(),
+                      newSummary.getWorkbasketSummary().getId(),
+                      details);
+                })
+                .collect(toList()));
       }
     }
   }

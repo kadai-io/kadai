@@ -22,7 +22,7 @@ export const routes: Routes = [
   {
     path: 'tasks',
     loadComponent: () =>
-      import('../shared/components/master-and-detail/master-and-detail.component').then(
+      import('app/shared/components/master-and-detail/master-and-detail.component').then(
         (m) => m.MasterAndDetailComponent
       ),
     children: [

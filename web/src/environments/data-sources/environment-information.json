@@ -1,4 +1,5 @@
 {
   "kadaiRestUrl": "http://localhost:8080/kadai/api",
-  "kadaiLogoutUrl": "http://localhost:8080/kadai/logout"
+  "kadaiLogoutUrl": "http://localhost:8080/kadai/logout",
+  "kadaiLoginUrl": "http://localhost:8080/kadai/login"
 }

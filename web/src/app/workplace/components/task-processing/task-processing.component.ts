@@ -38,7 +38,7 @@ import {
   takeUntil
 } from 'rxjs';
 import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
@@ -53,8 +53,8 @@ import {
   GetTask,
   ReopenTask,
   TransferTask
-} from '../../../shared/store/task-store/task.actions';
-import { TaskSelectors } from '../../../shared/store/task-store/task.selectors';
+} from 'app/shared/store/task-store/task.actions';
+import { TaskSelectors } from 'app/shared/store/task-store/task.selectors';
 import { NotificationService } from 'app/shared/services/notifications/notification.service';
 import { Classification } from 'app/shared/models/classification';
 

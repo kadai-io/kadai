@@ -32,18 +32,16 @@ public class InputEntriesSanitizer {
   public static void sanitizeRegexInsideInputEntries(DmnModelInstance dmnModelInstance) {
     dmnModelInstance
         .getModelElementsByType(Rule.class)
-        .forEach(
-            rule ->
-                rule.getInputEntries()
-                    .forEach(
-                        inputEntry -> {
-                          Text input = inputEntry.getText();
-                          String inputTextContent = input.getTextContent();
-                          if (inputTextContent.contains("matches")
-                              || inputTextContent.contains("contains")) {
-                            input.setTextContent(inputTextContent.replaceAll("(^\")|(\"$)", ""));
-                          }
-                          inputEntry.setText(input);
-                        }));
+        .forEach(rule ->
+            rule.getInputEntries()
+                .forEach(inputEntry -> {
+                  Text input = inputEntry.getText();
+                  String inputTextContent = input.getTextContent();
+                  if (inputTextContent.contains("matches")
+                      || inputTextContent.contains("contains")) {
+                    input.setTextContent(inputTextContent.replaceAll("(^\")|(\"$)", ""));
+                  }
+                  inputEntry.setText(input);
+                }));
   }
 }

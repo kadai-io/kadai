@@ -40,8 +40,7 @@ interface SummaryEntityBuilder<SummaryEntityT, EntityT extends SummaryEntityT, S
   SummaryEntityT entityToSummary(EntityT entity);
 
   /**
-   * Builds the {@linkplain SummaryEntityT summary} for this builder and stores it in the
-   * database.
+   * Builds the {@linkplain SummaryEntityT summary} for this builder and stores it in the database.
    *
    * @param service the {@linkplain ServiceT service} storing the built summary
    * @return the stored summary
@@ -52,16 +51,14 @@ interface SummaryEntityBuilder<SummaryEntityT, EntityT extends SummaryEntityT, S
   }
 
   /**
-   * Builds the {@linkplain SummaryEntityT summary} for this builder and stores it in the
-   * database.
+   * Builds the {@linkplain SummaryEntityT summary} for this builder and stores it in the database.
    *
    * @param service the {@linkplain ServiceT service} storing the built summary
    * @param userId the {@linkplain User#getId() id} of the user to store the built summary as
    * @return the stored summary
    * @throws Exception if building or storing the summary fails
    */
-  default SummaryEntityT buildAndStoreAsSummary(ServiceT service, String userId)
-      throws Exception {
+  default SummaryEntityT buildAndStoreAsSummary(ServiceT service, String userId) throws Exception {
     return entityToSummary(buildAndStore(service, userId));
   }
 }

@@ -198,9 +198,7 @@ class GetTaskIdsOfWorkbasketReportAccTest extends AbstractReportAccTest {
                         "CLI:000000000000000000000000000000000003",
                         "CLI:000000000000000000000000000000000008")))
             .listTaskIdsForSelectedItems(
-                List.of(
-                    new SelectedItem(
-                        "USER-1-1", null, Integer.MIN_VALUE, Integer.MAX_VALUE)),
+                List.of(new SelectedItem("USER-1-1", null, Integer.MIN_VALUE, Integer.MAX_VALUE)),
                 TaskTimestamp.DUE);
 
     assertThat(ids)

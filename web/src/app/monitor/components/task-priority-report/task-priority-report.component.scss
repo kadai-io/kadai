@@ -79,3 +79,23 @@ mat-accordion {
     }
   }
 }
+
+.priority-row-0 {
+  color: var(--color-high-priority, inherit);
+  font-weight: 500;
+}
+
+.priority-row-1 {
+  color: var(--color-medium-priority, inherit);
+  font-weight: 500;
+}
+
+.priority-row-2 {
+  color: var(--color-low-priority, inherit);
+  font-weight: 500;
+}
+
+.priority-row-3 {
+  // total row
+  font-weight: bold;
+}

@@ -24,12 +24,10 @@ import io.kadai.task.api.models.Task;
 import io.kadai.workbasket.api.models.Workbasket;
 
 /**
- * The BeforeTransferTaskProvider allows to implement customized validation
- * logic before a {@linkplain Task} is transferred to a destination
- * {@linkplain Workbasket}.
+ * The BeforeTransferTaskProvider allows to implement customized validation logic before a
+ * {@linkplain Task} is transferred to a destination {@linkplain Workbasket}.
  *
- * <p>Implementations can deny the transfer by throwing a
- * {@linkplain TransferCheckException}.
+ * <p>Implementations can deny the transfer by throwing a {@linkplain TransferCheckException}.
  */
 public interface BeforeTransferTaskProvider extends KadaiInitializable {
 
@@ -52,5 +50,3 @@ public interface BeforeTransferTaskProvider extends KadaiInitializable {
   void checkTransferAllowed(Task task, Workbasket destinationWorkbasket)
       throws TransferCheckException;
 }
-
-

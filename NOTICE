@@ -328,10 +328,7 @@ common/taskana-common/src/test/java/pro/taskana/common/internal/workingtime/Work
 common/taskana-common/src/test/java/pro/taskana/common/internal/workingtime/WorkingTimeScheduleTest.java
 common/taskana-common/src/test/resources/META-INF/services/pro.taskana.common.internal.util.spi.ServiceProviderInterface
 common/taskana-common/src/test/resources/pro/taskana/common/internal/util/fileInClasspath.txt
-docker-databases/db2_11-5/Dockerfile
-docker-databases/db2_11-5/README.md
-docker-databases/db2_11-5/db2server.rsp
-docker-databases/db2_11-5/entrypoint.sh
+docker-databases/db2_12-1/Dockerfile
 docker-databases/docker-compose.yml
 docker-databases/postgres_14/Dockerfile
 docker-databases/prepare_db.bat

@@ -19,10 +19,10 @@
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
 import { inject, Injectable } from '@angular/core';
 import { RetrieveSettings, SetSettings } from './settings.actions';
-import { Settings } from '../../../settings/models/settings';
-import { SettingsService } from '../../../settings/services/settings-service';
+import { Settings } from 'app/settings/models/settings';
+import { SettingsService } from 'app/settings/services/settings-service';
 import { take } from 'rxjs/operators';
-import { NotificationService } from '../../services/notifications/notification.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
 
 @Injectable({
   providedIn: 'root'

@@ -17,8 +17,8 @@
  */
 
 import { Injectable } from '@angular/core';
-import { TreeNodeModel } from '../models/tree-node';
-import { Classification } from '../../shared/models/classification';
+import { TreeNodeModel } from 'app/administration/models/tree-node';
+import { Classification } from 'app/shared/models/classification';
 
 @Injectable({
   providedIn: 'root'

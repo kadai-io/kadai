@@ -22,24 +22,24 @@ import { Component, input, output } from '@angular/core';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { TaskDetailsComponent } from './task-details.component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { TaskService } from '../../services/task.service';
-import { MasterAndDetailService } from '../../../shared/services/master-and-detail/master-and-detail.service';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { TaskService } from 'app/workplace/services/task.service';
+import { MasterAndDetailService } from 'app/shared/services/master-and-detail/master-and-detail.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { EMPTY, of, Subject, throwError } from 'rxjs';
-import { Task } from '../../models/task';
-import { ObjectReference } from '../../models/object-reference';
+import { Task } from 'app/workplace/models/task';
+import { ObjectReference } from 'app/workplace/models/object-reference';
 import { provideStore, Store } from '@ngxs/store';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { engineConfigurationMock } from '../../../shared/store/mock-data/mock-store';
-import { TaskWorkflowState } from '../../../shared/store/task-store/task.state';
-import { SelectTask } from '../../../shared/store/task-store/task.actions';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
-import { TaskInformationComponent } from '../task-information/task-information.component';
-import { TaskStatusDetailsComponent } from '../task-status-details/task-status-details.component';
-import { TaskCustomFieldsComponent } from '../task-custom-fields/task-custom-fields.component';
-import { TaskAttributeValueComponent } from '../task-attribute-value/task-attribute-value.component';
-import { ClassificationsService } from '../../../shared/services/classifications/classifications.service';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
+import { TaskWorkflowState } from 'app/shared/store/task-store/task.state';
+import { SelectTask } from 'app/shared/store/task-store/task.actions';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { TaskInformationComponent } from 'app/workplace/components/task-information/task-information.component';
+import { TaskStatusDetailsComponent } from 'app/workplace/components/task-status-details/task-status-details.component';
+import { TaskCustomFieldsComponent } from 'app/workplace/components/task-custom-fields/task-custom-fields.component';
+import { TaskAttributeValueComponent } from 'app/workplace/components/task-attribute-value/task-attribute-value.component';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
 import { By } from '@angular/platform-browser';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -74,7 +74,7 @@ class StubTaskAttributeValueComponent {
 })
 class DummyDetailComponent {}
 
-const routes: Routes = [{ path: 'workplace/taskdetail/:id', component: DummyDetailComponent }];
+const routes: Routes = [{ path: 'task/:id', component: DummyDetailComponent, outlet: 'detail' }];
 
 describe('TaskDetailsComponent', () => {
   let component: TaskDetailsComponent;
@@ -313,18 +313,23 @@ describe('TaskDetailsComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should call deleteTaskConfirmation: delete task then navigate', () => {
+  it('should call deleteTaskConfirmation: delete task then navigate', async () => {
+    const navigateSpy = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     component.task.set(mockTask);
     component.currentId.set('task-id-1');
     component.deleteTaskConfirmation();
     expect(taskServiceSpy.deleteTask).toHaveBeenCalledWith(mockTask);
     expect(notificationServiceSpy.showSuccess).toHaveBeenCalledWith('TASK_DELETE', { taskName: mockTask.name });
+    expect(navigateSpy).toHaveBeenCalledWith(['kadai/workplace/tasks'], { queryParamsHandling: 'merge' });
+    await fixture.whenStable();
   });
 
-  it('should set task to undefined after deleteTaskConfirmation', () => {
+  it('should set task to undefined after deleteTaskConfirmation', async () => {
+    vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
     component.task.set(mockTask);
     component.deleteTaskConfirmation();
     expect(component.task()).toBeUndefined();
+    await fixture.whenStable();
   });
 
   it('should handle getTask for new-task correctly', () => {
@@ -371,9 +376,19 @@ describe('TaskDetailsComponent', () => {
     expect(requestInProgressServiceSpy.endRequest).toHaveBeenCalled();
   });
 
-  it('should navigate when openTask is called', () => {
+  it('should navigate to the processing view when openTask is called', async () => {
+    const router = TestBed.inject(Router);
+    const navigateSpy = vi.spyOn(router, 'navigate');
     component.currentId.set('task-id-1');
-    expect(() => component.openTask()).not.toThrow();
+
+    component.openTask();
+
+    expect(navigateSpy).toHaveBeenCalledWith(
+      [{ outlets: { detail: 'task/task-id-1' } }],
+      expect.objectContaining({ queryParamsHandling: 'merge' })
+    );
+
+    await fixture.whenStable();
   });
 
   it('should render task details when task is set and requestInProgress is false', () => {
@@ -388,6 +403,15 @@ describe('TaskDetailsComponent', () => {
     expect(badge).toBeNull();
     const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
     expect(undoBtn).toBeTruthy();
+  });
+
+  it('should offer undo changes on a task that is not saved yet', () => {
+    component.task.set(mockTask);
+    component.requestInProgress.set(false);
+    component.currentId.set('new-task');
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]')).toBeTruthy();
   });
 
   it('should not render task container when task is null', () => {
@@ -646,15 +670,18 @@ describe('TaskDetailsComponent - DOM interaction', () => {
     expect(backSpy).toHaveBeenCalled();
   });
 
-  it('should call openTask when openTask method is invoked', () => {
+  it('should call openTask when openTask method is invoked', async () => {
     fixture = TestBed.createComponent(TaskDetailsComponent);
     component = fixture.componentInstance;
     component.task.set({ ...mockTask });
     component.requestInProgress.set(false);
-    component.currentId.set('task-id-1');
     fixture.detectChanges();
+    component.currentId.set('task-id-1');
     const openSpy = vi.spyOn(component, 'openTask');
     component.openTask();
+
+    await fixture.whenStable();
+
     expect(openSpy).toHaveBeenCalled();
   });
 
@@ -713,6 +740,24 @@ describe('TaskDetailsComponent - DOM interaction', () => {
       fixture.detectChanges();
     }
     expect(component).toBeTruthy();
+  });
+
+  it('should hide open and delete on a task that is not saved yet', () => {
+    document.querySelectorAll('.cdk-overlay-container').forEach((container) => container.remove());
+    fixture = TestBed.createComponent(TaskDetailsComponent);
+    component = fixture.componentInstance;
+    component.task.set({ ...mockTask });
+    component.requestInProgress.set(false);
+    fixture.detectChanges();
+    component.currentId.set('new-task');
+    fixture.detectChanges();
+
+    fixture.nativeElement.querySelector('button[mattooltip="More actions"]').click();
+    fixture.detectChanges();
+
+    expect(document.querySelector('button[mattooltip="Close Task"]')).toBeTruthy();
+    expect(document.querySelector('button[mattooltip="Open Task to work on it"]')).toBeNull();
+    expect(document.querySelector('button[mattooltip="Delete Task"]')).toBeNull();
   });
 });
 
@@ -935,30 +980,6 @@ describe('TaskDetailsComponent - HTML template without overrideComponent', () =>
     fixture.detectChanges();
     const badge = fixture.nativeElement.querySelector('.task-details__badge-message');
     expect(badge).toBeTruthy();
-  });
-
-  it('should not show undo button when currentId is new-task (covers @if (currentId != new-task) false branch)', () => {
-    fixture = TestBed.createComponent(TaskDetailsComponent);
-    component = fixture.componentInstance;
-    component.task.set({ ...mockTaskHtml });
-    component.requestInProgress.set(false);
-    component.currentId.set('new-task');
-    store.dispatch(new SelectTask(component.task()));
-    fixture.detectChanges();
-    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
-    expect(undoBtn).toBeNull();
-  });
-
-  it('should show undo button when currentId is not new-task (covers @if (currentId != new-task) true branch)', () => {
-    fixture = TestBed.createComponent(TaskDetailsComponent);
-    component = fixture.componentInstance;
-    component.task.set({ ...mockTaskHtml });
-    component.requestInProgress.set(false);
-    component.currentId.set('task-id-1');
-    store.dispatch(new SelectTask(component.task()));
-    fixture.detectChanges();
-    const undoBtn = fixture.nativeElement.querySelector('button[mattooltip="Undo changes"]');
-    expect(undoBtn).toBeTruthy();
   });
 
   it('should call toggleFormValidation toggle when save button is clicked', () => {

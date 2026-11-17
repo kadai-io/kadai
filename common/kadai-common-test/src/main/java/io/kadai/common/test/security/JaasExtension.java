@@ -159,11 +159,10 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
       Store store = getMethodLevelStore(extensionContext);
       return (T)
           Stream.of(annotation.value())
-              .map(
-                  a -> {
-                    store.put(ACCESS_IDS_STORE_KEY, a);
-                    return wrapTestsInDynamicContainer.apply(a);
-                  });
+              .map(a -> {
+                store.put(ACCESS_IDS_STORE_KEY, a);
+                return wrapTestsInDynamicContainer.apply(a);
+              });
     }
 
     return extractAccessIdAndPerformInvocation(invocation, invocationContext.getExecutable());
@@ -247,14 +246,13 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
 
   private static void persistDynamicContainerChildren(
       Iterable<DynamicNode> nodes, Map<String, List<DynamicNode>> childrenMap) {
-    nodes.forEach(
-        node -> {
-          if (node instanceof DynamicContainer container) {
-            List<DynamicNode> children = container.getChildren().collect(Collectors.toList());
-            childrenMap.put(container.hashCode() + container.getDisplayName(), children);
-            persistDynamicContainerChildren(children, childrenMap);
-          }
-        });
+    nodes.forEach(node -> {
+      if (node instanceof DynamicContainer container) {
+        List<DynamicNode> children = container.getChildren().collect(Collectors.toList());
+        childrenMap.put(container.hashCode() + container.getDisplayName(), children);
+        persistDynamicContainerChildren(children, childrenMap);
+      }
+    });
   }
 
   private static DynamicNode duplicateDynamicNode(
@@ -322,11 +320,10 @@ public class JaasExtension implements InvocationInterceptor, TestTemplateInvocat
         .isPresent()) {
       parent = parent.flatMap(ExtensionContext::getParent);
     }
-    return parent.orElseThrow(
-        () ->
-            new JUnitException(
-                String.format(
-                    "Test '%s' does not have a parent method", extensionContext.getUniqueId())));
+    return parent.orElseThrow(() ->
+        new JUnitException(
+            String.format(
+                "Test '%s' does not have a parent method", extensionContext.getUniqueId())));
   }
 
   private static class JaasExtensionInvocationContext implements TestTemplateInvocationContext {

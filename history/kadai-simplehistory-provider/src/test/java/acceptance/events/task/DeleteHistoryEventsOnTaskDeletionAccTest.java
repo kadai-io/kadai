@@ -43,35 +43,34 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
   @Test
   void should_DeleteHistoryEvents_When_TaskIsDeletedWithHistoryDeletionEnabled() throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskid = "TKI:000000000000000000000000000000000036";
-              createKadaiEngineWithNewConfig(true);
+        CheckedRunnable.rethrowing(() -> {
+          final String taskid = "TKI:000000000000000000000000000000000036";
+          createKadaiEngineWithNewConfig(true);
 
-              TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+          TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-              List<TaskHistoryEvent> listEvents =
-                  taskHistoryQueryMapper.queryHistoryEvents(
-                      (TaskHistoryQueryImpl)
-                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskid));
-              assertThat(listEvents).hasSize(2);
+          List<TaskHistoryEvent> listEvents =
+              taskHistoryQueryMapper.queryHistoryEvents(
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskid));
+          assertThat(listEvents).hasSize(2);
 
-              taskService.deleteTask(taskid);
+          taskService.deleteTask(taskid);
 
-              // make sure the task got deleted
-              ThrowingCallable getDeletedTaskCall =
-                  () -> {
-                    taskService.getTask(taskid);
-                  };
+          // make sure the task got deleted
+          ThrowingCallable getDeletedTaskCall =
+              () -> {
+                taskService.getTask(taskid);
+              };
 
-              assertThatThrownBy(getDeletedTaskCall).isInstanceOf(TaskNotFoundException.class);
+          assertThatThrownBy(getDeletedTaskCall).isInstanceOf(TaskNotFoundException.class);
 
-              listEvents =
-                  taskHistoryQueryMapper.queryHistoryEvents(
-                      (TaskHistoryQueryImpl)
-                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskid));
-              assertThat(listEvents).isEmpty();
-            }),
+          listEvents =
+              taskHistoryQueryMapper.queryHistoryEvents(
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskid));
+          assertThat(listEvents).isEmpty();
+        }),
         "user-1-1");
   }
 
@@ -79,42 +78,41 @@ class DeleteHistoryEventsOnTaskDeletionAccTest extends AbstractAccTest {
   void should_DeleteHistoryEvents_When_TasksAreDeletedWithHistoryDeletionEnabled()
       throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskId_1 = "TKI:000000000000000000000000000000000037";
-              final String taskId_2 = "TKI:000000000000000000000000000000000038";
+        CheckedRunnable.rethrowing(() -> {
+          final String taskId_1 = "TKI:000000000000000000000000000000000037";
+          final String taskId_2 = "TKI:000000000000000000000000000000000038";
 
-              createKadaiEngineWithNewConfig(true);
+          createKadaiEngineWithNewConfig(true);
 
-              TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+          TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-              List<TaskHistoryEvent> listEvents =
-                  taskHistoryQueryMapper.queryHistoryEvents(
-                      (TaskHistoryQueryImpl)
-                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
-              assertThat(listEvents).hasSize(3);
+          List<TaskHistoryEvent> listEvents =
+              taskHistoryQueryMapper.queryHistoryEvents(
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
+          assertThat(listEvents).hasSize(3);
 
-              taskService.deleteTasks(List.of(taskId_1, taskId_2));
+          taskService.deleteTasks(List.of(taskId_1, taskId_2));
 
-              // make sure the tasks got deleted
-              ThrowingCallable getDeletedTaskCall =
-                  () -> {
-                    taskService.getTask(taskId_1);
-                  };
-              ThrowingCallable getDeletedTaskCall2 =
-                  () -> {
-                    taskService.getTask(taskId_2);
-                  };
+          // make sure the tasks got deleted
+          ThrowingCallable getDeletedTaskCall =
+              () -> {
+                taskService.getTask(taskId_1);
+              };
+          ThrowingCallable getDeletedTaskCall2 =
+              () -> {
+                taskService.getTask(taskId_2);
+              };
 
-              assertThatThrownBy(getDeletedTaskCall).isInstanceOf(TaskNotFoundException.class);
-              assertThatThrownBy(getDeletedTaskCall2).isInstanceOf(TaskNotFoundException.class);
+          assertThatThrownBy(getDeletedTaskCall).isInstanceOf(TaskNotFoundException.class);
+          assertThatThrownBy(getDeletedTaskCall2).isInstanceOf(TaskNotFoundException.class);
 
-              listEvents =
-                  taskHistoryQueryMapper.queryHistoryEvents(
-                      (TaskHistoryQueryImpl)
-                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
-              assertThat(listEvents).isEmpty();
-            }),
+          listEvents =
+              taskHistoryQueryMapper.queryHistoryEvents(
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId_1, taskId_2));
+          assertThat(listEvents).isEmpty();
+        }),
         KadaiRole.ADMIN,
         "user-1-7");
   }

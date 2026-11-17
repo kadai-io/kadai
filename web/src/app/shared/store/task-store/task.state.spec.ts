@@ -22,7 +22,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { firstValueFrom, of, throwError } from 'rxjs';
 
 import { TaskWorkflowState } from './task.state';
-import { FilterState } from '../filter-store/filter.state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import {
   CancelClaimTask,
   ClaimTask,
@@ -42,14 +42,14 @@ import {
   UpdateTask
 } from './task.actions';
 
-import { TaskService } from '../../../workplace/services/task.service';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { Task } from '../../../workplace/models/task';
-import { ObjectReference } from '../../../workplace/models/object-reference';
-import { SearchType } from '../../../workplace/models/search';
-import { Direction, TaskQuerySortParameter } from '../../models/sorting';
-import { selectedWorkbasketMock } from '../mock-data/mock-store';
+import { TaskService } from 'app/workplace/services/task.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { Task } from 'app/workplace/models/task';
+import { ObjectReference } from 'app/workplace/models/object-reference';
+import { SearchType } from 'app/workplace/models/search';
+import { Direction, TaskQuerySortParameter } from 'app/shared/models/sorting';
+import { selectedWorkbasketMock } from 'app/shared/store/mock-data/mock-store';
 
 const mockWorkbasket = selectedWorkbasketMock;
 

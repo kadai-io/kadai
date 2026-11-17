@@ -16,10 +16,10 @@
  *
  */
 
-import { Workbasket } from '../../models/workbasket';
-import { WorkbasketType } from '../../models/workbasket-type';
-import { ACTION } from '../../models/action';
-import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { WorkbasketType } from 'app/shared/models/workbasket-type';
+import { ACTION } from 'app/shared/models/action';
+import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 
 export const classificationStateMock = {
   classifications: [],

@@ -82,8 +82,7 @@ class UpdateClassificationWithWorkingDayCalculatorAccTest implements KadaiConfig
   @KadaiInject TaskService taskService;
   @KadaiInject WorkbasketService workbasketService;
   @KadaiInject WorkingTimeCalculator workingTimeCalculator;
-  @KadaiInject
-  CurrentUserContext currentUserContext;
+  @KadaiInject CurrentUserContext currentUserContext;
 
   @Override
   public Builder modify(Builder builder) {

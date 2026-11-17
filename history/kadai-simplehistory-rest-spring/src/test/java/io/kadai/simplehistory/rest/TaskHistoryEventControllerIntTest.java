@@ -18,7 +18,6 @@
 
 package io.kadai.simplehistory.rest;
 
-
 import static java.lang.String.CASE_INSENSITIVE_ORDER;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

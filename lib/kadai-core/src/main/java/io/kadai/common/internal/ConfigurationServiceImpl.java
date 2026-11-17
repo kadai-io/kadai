@@ -56,15 +56,14 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
   public void setupDefaultCustomAttributes() {
     internalKadaiEngine.executeInDatabaseConnection(
-        CheckedRunnable.wrapping(
-            () -> {
-              if (mapper.getAllCustomAttributes(true) == null) {
-                if (LOGGER.isDebugEnabled()) {
-                  LOGGER.debug("custom attributes are not set. Setting default value");
-                }
-                setAllCustomAttributes(generateDefaultCustomAttributes());
-              }
-            }));
+        CheckedRunnable.wrapping(() -> {
+          if (mapper.getAllCustomAttributes(true) == null) {
+            if (LOGGER.isDebugEnabled()) {
+              LOGGER.debug("custom attributes are not set. Setting default value");
+            }
+            setAllCustomAttributes(generateDefaultCustomAttributes());
+          }
+        }));
   }
 
   @Override

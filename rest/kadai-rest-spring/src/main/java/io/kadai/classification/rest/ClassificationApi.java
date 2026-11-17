@@ -152,13 +152,14 @@ public interface ClassificationApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "key" : "Key0815casdgdgh",
-                            "domain" : "DOMAIN_B",
-                            "priority" : 0,
-                            "serviceLevel" : "P1D",
-                            "type" : "TASK"
-                          }"""))),
+                                  {
+                                    "key" : "Key0815casdgdgh",
+                                    "domain" : "DOMAIN_B",
+                                    "priority" : 0,
+                                    "serviceLevel" : "P1D",
+                                    "type" : "TASK"
+                                  }\
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "201",
@@ -238,32 +239,33 @@ public interface ClassificationApi {
                           @ExampleObject(
                               value =
                                   """
-                          {
-                            "classificationId" : \
-                          "CLI:100000000000000000000000000000000009",
-                            "key" : "L140101",
-                            "applicationEntryPoint" : "",
-                            "category" : "EXTERNAL",
-                            "domain" : "DOMAIN_A",
-                            "name" : "new name",
-                            "parentId" : "",
-                            "parentKey" : "",
-                            "priority" : 2,
-                            "serviceLevel" : "P2D",
-                            "type" : "TASK",
-                            "custom1" : "VNR",
-                            "custom2" : "",
-                            "custom3" : "",
-                            "custom4" : "",
-                            "custom5" : "",
-                            "custom6" : "",
-                            "custom7" : "",
-                            "custom8" : "",
-                            "isValidInDomain" : true,
-                            "created" : "2018-02-01T12:00:00.000Z",
-                            "modified" : "2018-02-01T12:00:00.000Z",
-                            "description" : "Zustimmungserklärung"
-                          }"""))),
+                                  {
+                                    "classificationId" : \
+                                  "CLI:100000000000000000000000000000000009",
+                                    "key" : "L140101",
+                                    "applicationEntryPoint" : "",
+                                    "category" : "EXTERNAL",
+                                    "domain" : "DOMAIN_A",
+                                    "name" : "new name",
+                                    "parentId" : "",
+                                    "parentKey" : "",
+                                    "priority" : 2,
+                                    "serviceLevel" : "P2D",
+                                    "type" : "TASK",
+                                    "custom1" : "VNR",
+                                    "custom2" : "",
+                                    "custom3" : "",
+                                    "custom4" : "",
+                                    "custom5" : "",
+                                    "custom6" : "",
+                                    "custom7" : "",
+                                    "custom8" : "",
+                                    "isValidInDomain" : true,
+                                    "created" : "2018-02-01T12:00:00.000Z",
+                                    "modified" : "2018-02-01T12:00:00.000Z",
+                                    "description" : "Zustimmungserklärung"
+                                  }\
+                                  """))),
       responses = {
         @ApiResponse(
             responseCode = "200",
@@ -335,7 +337,7 @@ public interface ClassificationApi {
       responses = {
         @ApiResponse(
             responseCode = "204",
-            content = {@Content(schema = @Schema())}),
+            content = {@Content(schema = @Schema)}),
         @ApiResponse(
             responseCode = "404",
             description = "CLASSIFICATION_WITH_ID_NOT_FOUND, CLASSIFICATION_WITH_KEY_NOT_FOUND",

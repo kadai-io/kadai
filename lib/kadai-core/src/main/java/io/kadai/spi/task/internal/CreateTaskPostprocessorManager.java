@@ -18,8 +18,7 @@ public class CreateTaskPostprocessorManager {
     createTaskPostProcessors = SpiLoader.load(CreateTaskPostprocessor.class);
     for (CreateTaskPostprocessor postProcessor : createTaskPostProcessors) {
       LOGGER.info(
-              "Registered CreateTaskPostProcessor provider: {}",
-              postProcessor.getClass().getName());
+          "Registered CreateTaskPostProcessor provider: {}", postProcessor.getClass().getName());
     }
     if (createTaskPostProcessors.isEmpty()) {
       LOGGER.info("No CreateTaskPostProcessor found. Running without CreateTaskPostProcessor.");
@@ -29,8 +28,8 @@ public class CreateTaskPostprocessorManager {
   public Task processTaskAfterCreation(Task taskToProcess) {
     if (LOGGER.isDebugEnabled()) {
       LOGGER.debug(
-              "Sending task to CreateTaskPreprocessor providers: {}",
-              LogSanitizer.stripLineBreakingChars(taskToProcess));
+          "Sending task to CreateTaskPreprocessor providers: {}",
+          LogSanitizer.stripLineBreakingChars(taskToProcess));
     }
     Task result = taskToProcess;
     for (CreateTaskPostprocessor postProcessor : createTaskPostProcessors) {

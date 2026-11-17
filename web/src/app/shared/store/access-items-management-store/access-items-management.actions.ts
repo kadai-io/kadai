@@ -16,10 +16,10 @@
  *
  */
 
-import { AccessId } from '../../models/access-id';
-import { Sorting, WorkbasketAccessItemQuerySortParameter } from '../../models/sorting';
-import { WorkbasketAccessItemQueryFilterParameter } from '../../models/workbasket-access-item-query-filter-parameter';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
+import { AccessId } from 'app/shared/models/access-id';
+import { Sorting, WorkbasketAccessItemQuerySortParameter } from 'app/shared/models/sorting';
+import { WorkbasketAccessItemQueryFilterParameter } from 'app/shared/models/workbasket-access-item-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
 
 export class SelectAccessId {
   static readonly type = '[Access Items Management] Select access ID';

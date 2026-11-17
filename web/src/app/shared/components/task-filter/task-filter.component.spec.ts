@@ -20,9 +20,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { NgxsModule, Store } from '@ngxs/store';
 import { TaskFilterComponent } from './task-filter.component';
-import { FilterState } from '../../store/filter-store/filter.state';
-import { ClearTaskFilter, SetTaskFilter } from '../../store/filter-store/filter.actions';
-import { TaskState } from '../../models/task-state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
+import { ClearTaskFilter, SetTaskFilter } from 'app/shared/store/filter-store/filter.actions';
+import { TaskState } from 'app/shared/models/task-state';
 import { provideAnimations } from '@angular/platform-browser/animations';
 
 describe('TaskFilterComponent', () => {

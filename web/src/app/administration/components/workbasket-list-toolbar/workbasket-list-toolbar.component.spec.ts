@@ -21,16 +21,15 @@ import { WorkbasketListToolbarComponent } from './workbasket-list-toolbar.compon
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { CreateWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { Direction, Sorting, WorkbasketQuerySortParameter } from '../../../shared/models/sorting';
-import { ACTION } from '../../../shared/models/action';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { CreateWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
+import { ACTION } from 'app/shared/models/action';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { FilterState } from '../../../shared/store/filter-store/filter.state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const domainServiceMock: Partial<DomainService> = {
   getDomains: vi.fn().mockResolvedValue(''),
@@ -55,8 +54,7 @@ describe('WorkbasketListToolbarComponent', () => {
           useValue: domainServiceMock
         },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

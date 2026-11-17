@@ -18,7 +18,6 @@
 
 package io.kadai.common.rest;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -405,9 +404,7 @@ class AccessIdControllerIntTest {
     ResponseEntity<Boolean> response =
         restClient
             .get()
-            .uri(
-                restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION)
-                    + "?access-id=teamlead-1")
+            .uri(restHelper.toUrl(RestEndpoints.URL_ACCESS_ID_VALIDATION) + "?access-id=teamlead-1")
             .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("businessadmin")))
             .retrieve()
             .toEntity(Boolean.class);

@@ -17,30 +17,39 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import * as fileSaver from 'file-saver-es';
 import { BlobGenerator } from './blob-generator';
 
 describe('BlobGenerator', () => {
-  let saveAsSpy: ReturnType<typeof vi.spyOn>;
+  let createUrlSpy: ReturnType<typeof vi.spyOn>;
+  let clickSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
-    saveAsSpy = vi.spyOn(fileSaver, 'saveAs').mockImplementation(() => {});
+    createUrlSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test');
+    vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+    clickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
   });
+
+  const savedBlob = () => createUrlSpy.mock.calls[0][0] as Blob;
+  const clickedLink = () => clickSpy.mock.contexts[0] as HTMLAnchorElement;
 
   afterEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('should call saveAs with a Blob and the given filename', () => {
-    const obj = { key: 'value' };
-    const fileName = 'test-output.json';
+  it('should click a download link for the Blob with the given filename', () => {
+    BlobGenerator.saveFile({ key: 'value' }, 'test-output.json');
 
-    BlobGenerator.saveFile(obj, fileName);
+    expect(clickSpy).toHaveBeenCalledOnce();
+    expect(savedBlob()).toBeInstanceOf(Blob);
+    expect(clickedLink().href).toBe('blob:test');
+    expect(clickedLink().download).toBe('test-output.json');
+  });
 
-    expect(saveAsSpy).toHaveBeenCalledOnce();
-    const [blobArg, nameArg] = saveAsSpy.mock.calls[0];
-    expect(blobArg).toBeInstanceOf(Blob);
-    expect(nameArg).toBe(fileName);
+  it('should revoke the object URL after the click', async () => {
+    BlobGenerator.saveFile({}, 'x.json');
+
+    await new Promise((resolve) => setTimeout(resolve));
+    expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test');
   });
 
   it('should create the Blob with application/json charset', async () => {
@@ -49,7 +58,7 @@ describe('BlobGenerator', () => {
 
     BlobGenerator.saveFile(obj, fileName);
 
-    const [blobArg] = saveAsSpy.mock.calls[0];
+    const blobArg = savedBlob();
     // The browser normalises the MIME charset to lowercase
     expect((blobArg as Blob).type.toLowerCase()).toBe('application/json;charset=utf-8');
   });
@@ -60,7 +69,7 @@ describe('BlobGenerator', () => {
 
     BlobGenerator.saveFile(obj, fileName);
 
-    const [blobArg] = saveAsSpy.mock.calls[0];
+    const blobArg = savedBlob();
     const text = await (blobArg as Blob).text();
     expect(JSON.parse(text)).toEqual(obj);
   });
@@ -68,16 +77,15 @@ describe('BlobGenerator', () => {
   it('should handle an empty object', () => {
     BlobGenerator.saveFile({}, 'empty.json');
 
-    expect(saveAsSpy).toHaveBeenCalledOnce();
-    const [blobArg, nameArg] = saveAsSpy.mock.calls[0];
-    expect(blobArg).toBeInstanceOf(Blob);
-    expect(nameArg).toBe('empty.json');
+    expect(clickSpy).toHaveBeenCalledOnce();
+    expect(savedBlob()).toBeInstanceOf(Blob);
+    expect(clickedLink().download).toBe('empty.json');
   });
 
   it('should handle an array as the object argument', () => {
     const arr = [1, 2, 3];
     BlobGenerator.saveFile(arr, 'array.json');
 
-    expect(saveAsSpy).toHaveBeenCalledOnce();
+    expect(clickSpy).toHaveBeenCalledOnce();
   });
 });

@@ -17,10 +17,10 @@
  */
 
 import { Component } from '@angular/core';
-import { MetaInfoData } from '../../models/meta-info-data';
+import { MetaInfoData } from 'app/monitor/models/meta-info-data';
 import { MatTab, MatTabGroup } from '@angular/material/tabs';
-import { WorkbasketReportDueDateComponent } from '../workbasket-report-due-date/workbasket-report-due-date.component';
-import { WorkbasketReportPlannedDateComponent } from '../workbasket-report-planned-date/workbasket-report-planned-date.component';
+import { WorkbasketReportDueDateComponent } from 'app/monitor/components/workbasket-report-due-date/workbasket-report-due-date.component';
+import { WorkbasketReportPlannedDateComponent } from 'app/monitor/components/workbasket-report-planned-date/workbasket-report-planned-date.component';
 import { DatePipe } from '@angular/common';
 
 @Component({

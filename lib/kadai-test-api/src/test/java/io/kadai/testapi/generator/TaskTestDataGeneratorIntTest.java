@@ -55,19 +55,17 @@ class TaskTestDataGeneratorIntTest {
     assertThat(tasks).hasSize(25);
     assertThat(generator.getEnvironment().domains()).containsExactlyElementsOf(configuredDomains);
     assertThat(tasks)
-        .allSatisfy(
-            task -> {
-              assertThat(configuredDomains).contains(task.getDomain());
-              assertThat(task.getClassificationSummary()).isNotNull();
-              assertThat(task.getWorkbasketSummary()).isNotNull();
-              assertThat(task.getPrimaryObjRef()).isNotNull();
-              assertThat(task.getWorkbasketSummary().getDomain()).isEqualTo(task.getDomain());
-              assertThat(task.getClassificationSummary().getDomain()).isEqualTo(task.getDomain());
-              assertThat(configuration.getClassificationCategoriesByType("TASK"))
-                  .anyMatch(
-                      category ->
-                          category.equalsIgnoreCase(task.getClassificationSummary().getCategory()));
-            });
+        .allSatisfy(task -> {
+          assertThat(configuredDomains).contains(task.getDomain());
+          assertThat(task.getClassificationSummary()).isNotNull();
+          assertThat(task.getWorkbasketSummary()).isNotNull();
+          assertThat(task.getPrimaryObjRef()).isNotNull();
+          assertThat(task.getWorkbasketSummary().getDomain()).isEqualTo(task.getDomain());
+          assertThat(task.getClassificationSummary().getDomain()).isEqualTo(task.getDomain());
+          assertThat(configuration.getClassificationCategoriesByType("TASK"))
+              .anyMatch(category ->
+                  category.equalsIgnoreCase(task.getClassificationSummary().getCategory()));
+        });
   }
 
   @WithAccessId(user = "admin")

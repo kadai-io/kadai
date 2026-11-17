@@ -17,31 +17,32 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { SvgIconRegistryService } from 'app/shared/components/svg-icon/svg-icon-registry.service';
 import { WorkbasketInformationComponent } from './workbasket-information.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { Observable, of } from 'rxjs';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { NotificationService } from '../../../shared/services/notifications/notification.service';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { ACTION } from '../../../shared/models/action';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { ACTION } from 'app/shared/models/action';
 import {
   MarkWorkbasketForDeletion,
   RemoveDistributionTarget,
   UpdateWorkbasket
-} from '../../../shared/store/workbasket-store/workbasket.actions';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
   workbasketReadStateMock
-} from '../../../shared/store/mock-data/mock-store';
+} from 'app/shared/store/mock-data/mock-store';
 import { By } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   triggerWorkBasketSaved: vi.fn(),
@@ -62,16 +63,25 @@ describe('WorkbasketInformationComponent', () => {
   let store: Store;
   let actions$: Observable<any>;
 
+  const accessIdsServiceMock = {
+    validateAccessId: vi.fn(),
+    searchForAccessId: vi.fn()
+  };
+
   beforeEach(async () => {
+    accessIdsServiceMock.validateAccessId.mockReturnValue(of(true));
+    accessIdsServiceMock.searchForAccessId.mockReturnValue(of([]));
+
     await TestBed.configureTestingModule({
       imports: [WorkbasketInformationComponent],
       providers: [
+        { provide: SvgIconRegistryService, useValue: { loadSvg: () => of(null) } },
         provideStore([EngineConfigurationState, WorkbasketState]),
         provideRouter([]),
         { provide: WorkbasketService, useValue: workbasketServiceMock },
+        { provide: AccessIdsService, useValue: accessIdsServiceMock },
 
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 
@@ -179,9 +189,26 @@ describe('WorkbasketInformationComponent', () => {
     expect(actionDispatched).toBe(true);
   });
 
-  it('should set workbasket owner when onSelectedOwner is called', () => {
-    component.onSelectedOwner({ accessId: 'user-test', name: 'Test User' });
+  it('should bind the workbasket owner to the type-ahead form control', async () => {
+    await fixture.whenStable();
+    const ownerControl = component.workbasketForm()!.form.controls['workbasket.owner'];
+    expect(ownerControl.value).toBe(component.workbasket()!.owner);
+
+    ownerControl.setValue('user-test');
+    fixture.detectChanges();
     expect(component.workbasket()!.owner).toBe('user-test');
+  });
+
+  it('should require an owner when the owner is looked up', async () => {
+    await fixture.whenStable();
+    const onSaveSpy = vi.spyOn(component, 'onSave');
+    const ownerControl = component.workbasketForm()!.form.controls['workbasket.owner'];
+
+    ownerControl.setValue('');
+    await component.onSubmit();
+
+    expect(ownerControl.hasError('required')).toBe(true);
+    expect(onSaveSpy).not.toHaveBeenCalled();
   });
 
   it('should handle workbasket customization without owner config', () => {
@@ -452,11 +479,15 @@ describe('WorkbasketInformationComponent', () => {
     expect(showErrorSpy).toHaveBeenCalledWith('WORKBASKET_SAVE');
   });
 
-  it('should show error when isOwnerValid is false', () => {
+  it('should show an owner error when the type-ahead owner is not a valid access id', async () => {
+    await fixture.whenStable();
     const notificationService = TestBed.inject(NotificationService);
     const showErrorSpy = vi.spyOn(notificationService, 'showError');
-    component.isOwnerValid = false;
-    component.onSubmit();
+    accessIdsServiceMock.validateAccessId.mockReturnValue(of(false));
+    const ownerControl = component.workbasketForm()!.form.controls['workbasket.owner'];
+    ownerControl.setValue('unknown-user');
+    await component.onSubmit();
+    expect(ownerControl.hasError('invalidAccessId')).toBe(true);
     expect(showErrorSpy).toHaveBeenCalledWith('OWNER_NOT_VALID', { owner: 'owner' });
   });
 
@@ -505,12 +536,6 @@ describe('WorkbasketInformationComponent', () => {
     actions$.pipe(ofActionDispatched(MarkWorkbasketForDeletion)).subscribe(() => (actionDispatched = true));
     component.onRemoveConfirmed();
     expect(actionDispatched).toBe(false);
-  });
-
-  it('should not set owner from onSelectedOwner when workbasket is undefined', () => {
-    fixture.componentRef.setInput('workbasket', undefined);
-    fixture.detectChanges();
-    expect(() => component.onSelectedOwner({ accessId: 'a-user', name: 'A User' })).not.toThrow();
   });
 
   it('should default all custom fields to visible when workbaskets customisation has no information field', async () => {

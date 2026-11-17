@@ -951,30 +951,29 @@ public class TaskQueryFilterCustomIntFields implements QueryParameter<TaskQuery,
                 TaskCustomIntField.CUSTOM_INT_8,
                 Quadruple.of(customInt8In, customInt8NotIn, customInt8Within, customInt8NotWithin),
                 Quadruple.of(customInt8From, customInt8FromNot, customInt8To, customInt8ToNot)))
-        .forEach(
-            triplet -> {
-              TaskCustomIntField customField = triplet.getLeft();
-              Optional.ofNullable(triplet.getMiddle().getFirst())
-                  .ifPresent(l -> query.customIntAttributeIn(customField, l));
-              Optional.ofNullable(triplet.getMiddle().getSecond())
-                  .ifPresent(l -> query.customIntAttributeNotIn(customField, l));
-              Optional.ofNullable(triplet.getMiddle().getThird())
-                  .map(this::extractIntIntervals)
-                  .ifPresent(l -> query.customIntAttributeWithin(customField, l));
-              Optional.ofNullable(triplet.getMiddle().getFourth())
-                  .map(this::extractIntIntervals)
-                  .ifPresent(l -> query.customIntAttributeNotWithin(customField, l));
-              Integer from = triplet.getRight().getFirst();
-              Integer to = triplet.getRight().getThird();
-              if (from != null || to != null) {
-                query.customIntAttributeWithin(customField, new IntInterval(from, to));
-              }
-              Integer fromNot = triplet.getRight().getSecond();
-              Integer toNot = triplet.getRight().getFourth();
-              if (fromNot != null || toNot != null) {
-                query.customIntAttributeWithin(customField, new IntInterval(fromNot, toNot));
-              }
-            });
+        .forEach(triplet -> {
+          TaskCustomIntField customField = triplet.getLeft();
+          Optional.ofNullable(triplet.getMiddle().getFirst())
+              .ifPresent(l -> query.customIntAttributeIn(customField, l));
+          Optional.ofNullable(triplet.getMiddle().getSecond())
+              .ifPresent(l -> query.customIntAttributeNotIn(customField, l));
+          Optional.ofNullable(triplet.getMiddle().getThird())
+              .map(this::extractIntIntervals)
+              .ifPresent(l -> query.customIntAttributeWithin(customField, l));
+          Optional.ofNullable(triplet.getMiddle().getFourth())
+              .map(this::extractIntIntervals)
+              .ifPresent(l -> query.customIntAttributeNotWithin(customField, l));
+          Integer from = triplet.getRight().getFirst();
+          Integer to = triplet.getRight().getThird();
+          if (from != null || to != null) {
+            query.customIntAttributeWithin(customField, new IntInterval(from, to));
+          }
+          Integer fromNot = triplet.getRight().getSecond();
+          Integer toNot = triplet.getRight().getFourth();
+          if (fromNot != null || toNot != null) {
+            query.customIntAttributeWithin(customField, new IntInterval(fromNot, toNot));
+          }
+        });
     return null;
   }
 }

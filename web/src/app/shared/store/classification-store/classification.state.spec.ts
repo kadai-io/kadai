@@ -36,9 +36,9 @@ import {
   UpdateClassification
 } from './classification.actions';
 
-import { ClassificationCategoriesService } from '../../services/classification-categories/classification-categories.service';
-import { ClassificationsService } from '../../services/classifications/classifications.service';
-import { DomainService } from '../../services/domain/domain.service';
+import { ClassificationCategoriesService } from 'app/shared/services/classification-categories/classification-categories.service';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
 import { ClassificationSelectors } from './classification.selectors';
 
 const mockClassificationTypes = {

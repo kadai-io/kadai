@@ -6,9 +6,15 @@ services:
       - "5102:5432"
     environment:
       - POSTGRES_PASSWORD=postgres
-  kadai-db2_11-5:
-    image: taskana/db2:11.5
+  kadai-db2_12-1:
+    build: db2_12-1
+    privileged: true
     environment:
       - LICENSE=accept
+      - DB2INSTANCE=db2inst1
+      - DB2INST1_PASSWORD=db2inst1-pwd
+      - DBNAME=KADDB
+      - AUTOCONFIG=false
+      - ARCHIVE_LOGS=false
     ports:
       - "5101:50000"

@@ -17,14 +17,14 @@
  */
 
 import { Component, inject, OnInit, output, signal } from '@angular/core';
-import { ReportData } from '../../models/report-data';
-import { ChartData } from '../../models/chart-data';
-import { MonitorService } from '../../services/monitor.service';
-import { MetaInfoData } from '../../models/meta-info-data';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
+import { ReportData } from 'app/monitor/models/report-data';
+import { ChartData } from 'app/monitor/models/chart-data';
+import { MonitorService } from 'app/monitor/services/monitor.service';
+import { MetaInfoData } from 'app/monitor/models/meta-info-data';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { ChartConfiguration, ChartType } from 'chart.js';
 
-import { ReportTableComponent } from '../report-table/report-table.component';
+import { ReportTableComponent } from 'app/monitor/components/report-table/report-table.component';
 import { BaseChartDirective } from 'ng2-charts';
 
 @Component({

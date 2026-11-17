@@ -48,22 +48,20 @@ public class EnumPropertyParser implements PropertyParser<Enum<?>> {
               value, targetClass, getTargetClass()));
     }
     return Optional.ofNullable(value)
-        .map(
-            v -> {
-              Map<String, ?> enumConstantsByLowerCaseName =
-                  Arrays.stream(targetClass.getEnumConstants())
-                      .collect(
-                          Collectors.toMap(e -> e.toString().toLowerCase(), Function.identity()));
-              Enum<?> enumConstant = (Enum<?>) enumConstantsByLowerCaseName.get(v.toLowerCase());
-              if (enumConstant == null) {
-                throw new SystemException(
-                    String.format(
-                        "Invalid property value '%s': Valid values are '%s' or '%s",
-                        v,
-                        enumConstantsByLowerCaseName.keySet(),
-                        Arrays.toString(targetClass.getEnumConstants())));
-              }
-              return enumConstant;
-            });
+        .map(v -> {
+          Map<String, ?> enumConstantsByLowerCaseName =
+              Arrays.stream(targetClass.getEnumConstants())
+                  .collect(Collectors.toMap(e -> e.toString().toLowerCase(), Function.identity()));
+          Enum<?> enumConstant = (Enum<?>) enumConstantsByLowerCaseName.get(v.toLowerCase());
+          if (enumConstant == null) {
+            throw new SystemException(
+                String.format(
+                    "Invalid property value '%s': Valid values are '%s' or '%s",
+                    v,
+                    enumConstantsByLowerCaseName.keySet(),
+                    Arrays.toString(targetClass.getEnumConstants())));
+          }
+          return enumConstant;
+        });
   }
 }

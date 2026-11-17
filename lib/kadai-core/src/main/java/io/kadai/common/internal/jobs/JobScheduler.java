@@ -47,30 +47,29 @@ public class JobScheduler {
     this.plainJavaTransactionProvider =
         new PlainJavaTransactionProvider(
             kadaiEngine, kadaiEngine.getConfiguration().getDataSource());
-    plainJavaTransactionProvider.executeInTransaction(
-        () -> {
-          if (kadaiEngine.getConfiguration().isTaskCleanupJobEnabled()) {
-            AbstractKadaiJob.initializeSchedule(kadaiEngine, TaskCleanupJob.class);
-            LOGGER.info("Job '{}' enabled", TaskCleanupJob.class.getName());
-          }
-          if (kadaiEngine.getConfiguration().isTaskUpdatePriorityJobEnabled()) {
-            AbstractKadaiJob.initializeSchedule(kadaiEngine, TaskUpdatePriorityJob.class);
-            LOGGER.info("Job '{}' enabled", TaskUpdatePriorityJob.class.getName());
-          }
-          if (kadaiEngine.getConfiguration().isWorkbasketCleanupJobEnabled()) {
-            AbstractKadaiJob.initializeSchedule(kadaiEngine, WorkbasketCleanupJob.class);
-            LOGGER.info("Job '{}' enabled", WorkbasketCleanupJob.class.getName());
-          }
-          if (kadaiEngine.getConfiguration().isUserInfoRefreshJobEnabled()) {
-            initJobByClassName("io.kadai.user.jobs.UserInfoRefreshJob");
-          }
-          if (kadaiEngine.getConfiguration().isSimpleHistoryCleanupJobEnabled()) {
-            initJobByClassName("io.kadai.simplehistory.jobs.TaskHistoryCleanupJob");
-          }
-          kadaiEngine.getConfiguration().getCustomJobs().forEach(this::initJobByClassName);
+    plainJavaTransactionProvider.executeInTransaction(() -> {
+      if (kadaiEngine.getConfiguration().isTaskCleanupJobEnabled()) {
+        AbstractKadaiJob.initializeSchedule(kadaiEngine, TaskCleanupJob.class);
+        LOGGER.info("Job '{}' enabled", TaskCleanupJob.class.getName());
+      }
+      if (kadaiEngine.getConfiguration().isTaskUpdatePriorityJobEnabled()) {
+        AbstractKadaiJob.initializeSchedule(kadaiEngine, TaskUpdatePriorityJob.class);
+        LOGGER.info("Job '{}' enabled", TaskUpdatePriorityJob.class.getName());
+      }
+      if (kadaiEngine.getConfiguration().isWorkbasketCleanupJobEnabled()) {
+        AbstractKadaiJob.initializeSchedule(kadaiEngine, WorkbasketCleanupJob.class);
+        LOGGER.info("Job '{}' enabled", WorkbasketCleanupJob.class.getName());
+      }
+      if (kadaiEngine.getConfiguration().isUserInfoRefreshJobEnabled()) {
+        initJobByClassName("io.kadai.user.jobs.UserInfoRefreshJob");
+      }
+      if (kadaiEngine.getConfiguration().isSimpleHistoryCleanupJobEnabled()) {
+        initJobByClassName("io.kadai.simplehistory.jobs.TaskHistoryCleanupJob");
+      }
+      kadaiEngine.getConfiguration().getCustomJobs().forEach(this::initJobByClassName);
 
-          return "Initialized Jobs successfully";
-        });
+      return "Initialized Jobs successfully";
+    });
     this.clock.register(this::runAsyncJobsAsAdmin);
   }
 
@@ -93,13 +92,12 @@ public class JobScheduler {
   }
 
   private void runAsyncJobsAsAdmin() {
-    kadaiEngine.runAsAdmin(
-        () -> {
-          JobRunner runner = new JobRunner(kadaiEngine);
-          runner.registerTransactionProvider(plainJavaTransactionProvider);
-          LOGGER.info("Running Jobs");
-          runner.runJobs();
-          return "Successful";
-        });
+    kadaiEngine.runAsAdmin(() -> {
+      JobRunner runner = new JobRunner(kadaiEngine);
+      runner.registerTransactionProvider(plainJavaTransactionProvider);
+      LOGGER.info("Running Jobs");
+      runner.runJobs();
+      return "Successful";
+    });
   }
 }

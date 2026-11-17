@@ -18,10 +18,10 @@
 
 import { inject, Injectable } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogPopUpComponent } from '../../components/popup/dialog-pop-up.component';
+import { DialogPopUpComponent } from 'app/shared/components/popup/dialog-pop-up.component';
 import { HotToastService } from '@ngneat/hot-toast';
-import { ObtainMessageService } from '../obtain-message/obtain-message.service';
-import { messageTypes } from '../obtain-message/message-types';
+import { ObtainMessageService } from 'app/shared/services/obtain-message/obtain-message.service';
+import { messageTypes } from 'app/shared/services/obtain-message/message-types';
 
 @Injectable({
   providedIn: 'root'

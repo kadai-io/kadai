@@ -21,7 +21,7 @@ import { Router, Routes, UrlTree } from '@angular/router';
 
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { KadaiEngineService } from '../../shared/services/kadai-engine/kadai-engine.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 
 export const routes: Routes = [
   {

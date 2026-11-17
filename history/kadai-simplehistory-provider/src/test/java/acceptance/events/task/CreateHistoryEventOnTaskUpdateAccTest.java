@@ -38,31 +38,28 @@ class CreateHistoryEventOnTaskUpdateAccTest extends AbstractAccTest {
   @Test
   void should_CreateUpdatedHistoryEvent_When_TaskIsCreated() throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskId = "TKI:000000000000000000000000000000000000";
-              Instant before = Instant.now();
+        CheckedRunnable.rethrowing(() -> {
+          final String taskId = "TKI:000000000000000000000000000000000000";
+          Instant before = Instant.now();
 
-              Task task = taskService.getTask(taskId);
-              task.setName("someUpdatedName");
-              taskService.updateTask(task);
-              List<TaskHistoryEvent> events =
-                  taskHistoryService
-                      .createTaskHistoryQuery()
-                      .taskIdIn(taskId)
-                      .createdWithin(new TimeInterval(before, null))
-                      .list();
+          Task task = taskService.getTask(taskId);
+          task.setName("someUpdatedName");
+          taskService.updateTask(task);
+          List<TaskHistoryEvent> events =
+              taskHistoryService
+                  .createTaskHistoryQuery()
+                  .taskIdIn(taskId)
+                  .createdWithin(new TimeInterval(before, null))
+                  .list();
 
-              assertThat(events)
-                  .extracting(TaskHistoryEvent::getEventType)
-                  .containsExactly(TaskHistoryEventType.UPDATED.getName());
-              assertThat(events)
-                  .extracting(TaskHistoryEvent::getUserId)
-                  .containsExactly("user-3-2");
-              assertThat(events)
-                  .extracting(TaskHistoryEvent::getProxyAccessId)
-                  .containsExactly("admin");
-            }),
+          assertThat(events)
+              .extracting(TaskHistoryEvent::getEventType)
+              .containsExactly(TaskHistoryEventType.UPDATED.getName());
+          assertThat(events).extracting(TaskHistoryEvent::getUserId).containsExactly("user-3-2");
+          assertThat(events)
+              .extracting(TaskHistoryEvent::getProxyAccessId)
+              .containsExactly("admin");
+        }),
         "user-3-2");
   }
 }

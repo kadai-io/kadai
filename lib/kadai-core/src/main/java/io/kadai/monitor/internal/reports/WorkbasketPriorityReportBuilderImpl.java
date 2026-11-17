@@ -160,10 +160,10 @@ public class WorkbasketPriorityReportBuilderImpl implements WorkbasketPriorityRe
     this.kadaiEngine.getEngine().checkRoleMembership(KadaiRole.MONITOR, KadaiRole.ADMIN);
 
     DetailedWorkbasketPriorityReport report =
-          new DetailedWorkbasketPriorityReport(this.columnHeaders);
+        new DetailedWorkbasketPriorityReport(this.columnHeaders);
     List<DetailedPriorityQueryItem> items =
-          kadaiEngine.executeInDatabaseConnection(
-              () -> monitorMapper.getTaskCountByDetailedPriority(this));
+        kadaiEngine.executeInDatabaseConnection(
+            () -> monitorMapper.getTaskCountByDetailedPriority(this));
     report.addItems(items);
     return report;
   }

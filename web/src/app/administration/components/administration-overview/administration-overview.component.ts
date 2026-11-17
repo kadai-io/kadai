@@ -19,9 +19,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { Subject } from 'rxjs';
-import { DomainService } from '../../../shared/services/domain/domain.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
 import { takeUntil } from 'rxjs/operators';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { MatTabLink, MatTabNav, MatTabNavPanel } from '@angular/material/tabs';
 import { MatFormField } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';

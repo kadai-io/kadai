@@ -29,8 +29,7 @@ class CollectionUtilTest {
 
   @Test
   void should_SplitListIntoChunks_When_CallingPartitionBasedOnSize() {
-    List<Integer> listWith1000Entries =
-        IntStream.rangeClosed(1, 1000).boxed().toList();
+    List<Integer> listWith1000Entries = IntStream.rangeClosed(1, 1000).boxed().toList();
     assertThat(listWith1000Entries).hasSize(1000);
     Collection<List<Integer>> partitions =
         CollectionUtil.partitionBasedOnSize(listWith1000Entries, 100);

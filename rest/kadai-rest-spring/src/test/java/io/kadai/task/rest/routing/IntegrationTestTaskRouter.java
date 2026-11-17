@@ -26,7 +26,6 @@ public class IntegrationTestTaskRouter implements TaskRoutingProvider {
 
   public static final String DEFAULT_ROUTING_TARGET = "WBI:100000000000000000000000000000000002";
 
-
   @Override
   public void initialize(KadaiEngine kadaiEngine) {
     // NOOP

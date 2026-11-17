@@ -131,14 +131,13 @@
           }
           <!-- OWNER -->
           @if ((tasksCustomisation$ | async)?.information?.owner?.lookupField) {
-            <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectedOwner($event)"
-                                     (isFormValid)="isOwnerValid = $event"
+            <kadai-shared-type-ahead [(ngModel)]="task.owner"
+                                     [disabled]="!!task.state && task.state !== 'READY'"
                                      [displayError]="true"
-                                     [entityId]="task.taskId"
-                                     [isDisabled]="task.state && task.state !== 'READY'"
-                                     [savedAccessId]="task.owner"
+                                     kadaiAccessIdExists
                                      matTooltip="{{task.state && task.state !== 'READY'? 'Cannot be modified since Task is not in state READY' : '' }}"
-                                     placeHolderMessage="Owner" />
+                                     name="task.owner"
+                                     placeholder="Owner" />
           } @else {
             <mat-form-field appearance="outline">
               <mat-label>Owner</mat-label>

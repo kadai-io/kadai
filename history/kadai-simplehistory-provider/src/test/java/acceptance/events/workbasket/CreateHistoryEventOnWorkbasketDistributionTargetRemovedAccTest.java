@@ -42,40 +42,38 @@ class CreateHistoryEventOnWorkbasketDistributionTargetRemovedAccTest extends Abs
       should_CreateWorkbasketDistributionTargetRemovedHistoryEvent_When_RemovingDistributionTarget()
           throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String sourceWorkbasketId = "WBI:100000000000000000000000000000000001";
-              final String targetWorkbasketId = "WBI:100000000000000000000000000000000002";
+        CheckedRunnable.rethrowing(() -> {
+          final String sourceWorkbasketId = "WBI:100000000000000000000000000000000001";
+          final String targetWorkbasketId = "WBI:100000000000000000000000000000000002";
 
-              List<WorkbasketHistoryEvent> events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(sourceWorkbasketId)
-                      .list();
+          List<WorkbasketHistoryEvent> events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(sourceWorkbasketId)
+                  .list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              workbasketService.removeDistributionTarget(sourceWorkbasketId, targetWorkbasketId);
+          workbasketService.removeDistributionTarget(sourceWorkbasketId, targetWorkbasketId);
 
-              events =
-                  historyService
-                      .createWorkbasketHistoryQuery()
-                      .workbasketIdIn(sourceWorkbasketId)
-                      .list();
+          events =
+              historyService
+                  .createWorkbasketHistoryQuery()
+                  .workbasketIdIn(sourceWorkbasketId)
+                  .list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              workbasketHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType)
-                  .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGET_REMOVED.getName());
-              assertThat(details)
-                  .contains("\"oldValue\":\"WBI:100000000000000000000000000000000002\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-2-4");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType)
+              .isEqualTo(WorkbasketHistoryEventType.DISTRIBUTION_TARGET_REMOVED.getName());
+          assertThat(details).contains("\"oldValue\":\"WBI:100000000000000000000000000000000002\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-2-4");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "user-2-4");
   }
 }

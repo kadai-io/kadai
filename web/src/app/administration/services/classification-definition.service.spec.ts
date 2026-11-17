@@ -20,8 +20,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ClassificationDefinitionService } from './classification-definition.service';
-import { StartupService } from '../../shared/services/startup/startup.service';
-import { BlobGenerator } from '../../shared/util/blob-generator';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { BlobGenerator } from 'app/shared/util/blob-generator';
 
 const REST_URL = 'http://localhost:8080/kadai';
 const BASE_URL = `${REST_URL}/v1/classification-definitions`;
@@ -33,10 +33,7 @@ describe('ClassificationDefinitionService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [
-        provideHttpClientTesting(),
-        { provide: StartupService, useValue: { getKadaiRestUrl: () => REST_URL } }
-      ]
+      providers: [provideHttpClientTesting(), { provide: RuntimeConfigService, useValue: { kadaiRestUrl: REST_URL } }]
     });
     service = TestBed.inject(ClassificationDefinitionService);
     httpTesting = TestBed.inject(HttpTestingController);

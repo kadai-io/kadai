@@ -36,11 +36,10 @@ public class QueryParamsValidator {
     Set<String> allowedParams =
         Stream.of(filterOrSortingClazz)
             .flatMap(clazz -> Stream.of(clazz.getDeclaredFields()))
-            .map(
-                field ->
-                    Optional.ofNullable(field.getDeclaredAnnotation(JsonProperty.class))
-                        .map(JsonProperty::value)
-                        .orElseGet(field::getName))
+            .map(field ->
+                Optional.ofNullable(field.getDeclaredAnnotation(JsonProperty.class))
+                    .map(JsonProperty::value)
+                    .orElseGet(field::getName))
             .collect(Collectors.toSet());
 
     Set<String> providedParams = new HashSet<>(request.getParameterMap().keySet());

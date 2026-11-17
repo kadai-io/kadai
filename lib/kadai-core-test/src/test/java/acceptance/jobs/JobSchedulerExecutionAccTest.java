@@ -88,21 +88,19 @@ class JobSchedulerExecutionAccTest implements KadaiConfigurationModifier {
 
   private static void makeJobsOverdue(JobMapper jobMapper, List<ScheduledJob> jobs) {
     Instant due = Instant.now().minus(10, ChronoUnit.MILLIS);
-    jobs.forEach(
-        job -> {
-          job.setDue(due);
-          jobMapper.update(job);
-        });
+    jobs.forEach(job -> {
+      job.setDue(due);
+      jobMapper.update(job);
+    });
   }
 
   private static void makeJobRunFirst(JobMapper jobMapper, List<ScheduledJob> jobs, String type) {
     jobs.stream()
         .filter(job -> type.equals(job.getType()))
-        .forEach(
-            job -> {
-              job.setPriority(51);
-              jobMapper.update(job);
-            });
+        .forEach(job -> {
+          job.setPriority(51);
+          jobMapper.update(job);
+        });
   }
 
   @WithAccessId(user = "admin")

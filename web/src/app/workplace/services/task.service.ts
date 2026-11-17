@@ -22,20 +22,20 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { TaskResource } from 'app/workplace/models/task-resource';
 import { Sorting, TaskQuerySortParameter } from 'app/shared/models/sorting';
-import { StartupService } from '../../shared/services/startup/startup.service';
-import { asUrlQueryString } from '../../shared/util/query-parameters-v2';
-import { TaskQueryFilterParameter } from '../../shared/models/task-query-filter-parameter';
-import { QueryPagingParameter } from '../../shared/models/query-paging-parameter';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
+import { TaskQueryFilterParameter } from 'app/shared/models/task-query-filter-parameter';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
   private httpClient = inject(HttpClient);
-  private startupService = inject(StartupService);
+  private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {
-    return this.startupService.getKadaiRestUrl() + '/v1/tasks';
+    return this.runtimeConfigService.kadaiRestUrl + '/v1/tasks';
   }
 
   private static convertTasksDatesToGMT(task: Task): Task {

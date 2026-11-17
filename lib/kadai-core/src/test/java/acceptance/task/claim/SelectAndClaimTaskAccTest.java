@@ -157,24 +157,20 @@ class SelectAndClaimTaskAccTest extends AbstractAccTest {
 
   private Runnable getRunnableTest(List<Task> selectedAndClaimedTasks, List<String> accessIds)
       throws KadaiException {
-    return CheckedRunnable.rethrowing(
-        () -> {
-          Subject subject = new Subject();
-          subject.getPrincipals().add(new UserPrincipal(accessIds.remove(0)));
+    return CheckedRunnable.rethrowing(() -> {
+      Subject subject = new Subject();
+      subject.getPrincipals().add(new UserPrincipal(accessIds.remove(0)));
 
-          Consumer<TaskService> consumer =
-              CheckedConsumer.rethrowing(
-                  taskService ->
-                      taskService
-                          .selectAndClaim(getTaskQuery())
-                          .ifPresent(selectedAndClaimedTasks::add));
-          Callable<Void> action =
-              () -> {
-                consumer.accept(kadaiEngine.getTaskService());
-                return null;
-              };
-          Subject.callAs(subject, action);
-        });
+      Consumer<TaskService> consumer =
+          CheckedConsumer.rethrowing(taskService ->
+              taskService.selectAndClaim(getTaskQuery()).ifPresent(selectedAndClaimedTasks::add));
+      Callable<Void> action =
+          () -> {
+            consumer.accept(kadaiEngine.getTaskService());
+            return null;
+          };
+      Subject.callAs(subject, action);
+    });
   }
 
   private TaskQuery getTaskQuery() {

@@ -23,7 +23,7 @@ import { KadaiDate } from 'app/shared/util/kadai.date';
 import {
   CategoriesResponse,
   ClassificationCategoriesService
-} from '../../services/classification-categories/classification-categories.service';
+} from 'app/shared/services/classification-categories/classification-categories.service';
 import {
   CopyClassification,
   CreateClassification,
@@ -37,12 +37,12 @@ import {
   SetSelectedClassificationType,
   UpdateClassification
 } from './classification.actions';
-import { ClassificationsService } from '../../services/classifications/classifications.service';
-import { DomainService } from '../../services/domain/domain.service';
-import { Classification } from '../../models/classification';
-import { ClassificationSummary } from '../../models/classification-summary';
-import { ClassificationQueryFilterParameter } from '../../models/classification-query-filter-parameter';
-import { ClassificationQuerySortParameter, Direction, Sorting } from '../../models/sorting';
+import { ClassificationsService } from 'app/shared/services/classifications/classifications.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { Classification } from 'app/shared/models/classification';
+import { ClassificationSummary } from 'app/shared/models/classification-summary';
+import { ClassificationQueryFilterParameter } from 'app/shared/models/classification-query-filter-parameter';
+import { ClassificationQuerySortParameter, Direction, Sorting } from 'app/shared/models/sorting';
 import { inject, Injectable } from '@angular/core';
 
 class InitializeStore {

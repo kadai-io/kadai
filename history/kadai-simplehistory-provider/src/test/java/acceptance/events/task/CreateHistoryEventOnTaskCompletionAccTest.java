@@ -40,34 +40,33 @@ class CreateHistoryEventOnTaskCompletionAccTest extends AbstractAccTest {
   @Test
   void should_CreateCompletedHistoryEvent_When_TaskIsCompleted() throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskId = "TKI:000000000000000000000000000000000001";
+        CheckedRunnable.rethrowing(() -> {
+          final String taskId = "TKI:000000000000000000000000000000000001";
 
-              TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
+          TaskHistoryQueryMapper taskHistoryQueryMapper = getHistoryQueryMapper();
 
-              List<TaskHistoryEvent> events =
-                  taskHistoryQueryMapper.queryHistoryEvents(
-                      (TaskHistoryQueryImpl)
-                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+          List<TaskHistoryEvent> events =
+              taskHistoryQueryMapper.queryHistoryEvents(
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              assertThat(taskService.getTask(taskId).getState()).isEqualTo(TaskState.CLAIMED);
-              Task task = taskService.forceCompleteTask(taskId);
-              assertThat(task.getState()).isEqualTo(TaskState.COMPLETED);
+          assertThat(taskService.getTask(taskId).getState()).isEqualTo(TaskState.CLAIMED);
+          Task task = taskService.forceCompleteTask(taskId);
+          assertThat(task.getState()).isEqualTo(TaskState.COMPLETED);
 
-              events =
-                  taskHistoryQueryMapper.queryHistoryEvents(
-                      (TaskHistoryQueryImpl)
-                          taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
+          events =
+              taskHistoryQueryMapper.queryHistoryEvents(
+                  (TaskHistoryQueryImpl)
+                      taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId));
 
-              String eventType = events.get(0).getEventType();
+          String eventType = events.get(0).getEventType();
 
-              assertThat(eventType).isEqualTo(TaskHistoryEventType.COMPLETED.getName());
-              assertThat(events.get(0).getUserId()).isEqualTo("user-4-4");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("taskadmin");
-            }),
+          assertThat(eventType).isEqualTo(TaskHistoryEventType.COMPLETED.getName());
+          assertThat(events.get(0).getUserId()).isEqualTo("user-4-4");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("taskadmin");
+        }),
         KadaiRole.TASK_ADMIN,
         "user-4-4");
   }

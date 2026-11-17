@@ -22,7 +22,7 @@ import { of } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { HotToastService } from '@ngneat/hot-toast';
 import { NotificationService } from './notification.service';
-import { ObtainMessageService } from '../obtain-message/obtain-message.service';
+import { ObtainMessageService } from 'app/shared/services/obtain-message/obtain-message.service';
 
 describe('NotificationService', () => {
   let service: NotificationService;

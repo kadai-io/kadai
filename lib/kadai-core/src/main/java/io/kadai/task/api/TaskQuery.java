@@ -1347,8 +1347,8 @@ public interface TaskQuery extends BaseQuery<TaskSummary, TaskQueryColumnName> {
   /**
    * Add the isReopened flag to the query.
    *
-   * @param isReopened as Boolean. If null, it won't be integrated into the statement. It will
-   *     only be integrated into the statement if set to true or false
+   * @param isReopened as Boolean. If null, it won't be integrated into the statement. It will only
+   *     be integrated into the statement if set to true or false
    * @return the query
    */
   TaskQuery reopenedEquals(Boolean isReopened);

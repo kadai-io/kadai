@@ -17,13 +17,13 @@
  */
 
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { KadaiEngineService } from '../../services/kadai-engine/kadai-engine.service';
-import { SidenavService } from '../../services/sidenav/sidenav.service';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
+import { SidenavService } from 'app/shared/services/sidenav/sidenav.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
-import { MonitorRoles } from '../../roles/monitor.roles';
-import { UserRoles } from '../../roles/user.roles';
-import { BusinessAdminRoles } from '../../roles/business-admin.roles';
+import { MonitorRoles } from 'app/shared/roles/monitor.roles';
+import { UserRoles } from 'app/shared/roles/user.roles';
+import { BusinessAdminRoles } from 'app/shared/roles/business-admin.roles';
 import { MatListItem, MatNavList } from '@angular/material/list';
 
 @Component({

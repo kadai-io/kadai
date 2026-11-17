@@ -250,14 +250,12 @@ class GetTaskCommentAccTest {
       List<TaskComment> taskComments = taskService.getTaskComments(task1.getId());
 
       taskComments.forEach(
-          rethrowing(
-              taskComment -> {
-                String creatorFullName =
-                    userService.getUser(taskComment.getCreator()).getFullName();
-                assertThat(taskComment)
-                    .extracting(TaskComment::getCreatorFullName)
-                    .isEqualTo(creatorFullName);
-              }));
+          rethrowing(taskComment -> {
+            String creatorFullName = userService.getUser(taskComment.getCreator()).getFullName();
+            assertThat(taskComment)
+                .extracting(TaskComment::getCreatorFullName)
+                .isEqualTo(creatorFullName);
+          }));
     }
   }
 
@@ -300,9 +298,8 @@ class GetTaskCommentAccTest {
 
       List<TaskComment> taskComments = taskService.getTaskComments(task1.getId());
 
-      taskComments.forEach(
-          taskComment ->
-              assertThat(taskComment).extracting(TaskComment::getCreatorFullName).isNull());
+      taskComments.forEach(taskComment ->
+          assertThat(taskComment).extracting(TaskComment::getCreatorFullName).isNull());
     }
   }
 }

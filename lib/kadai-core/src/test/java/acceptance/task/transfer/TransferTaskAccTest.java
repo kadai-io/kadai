@@ -403,8 +403,7 @@ class TransferTaskAccTest extends AbstractAccTest {
   @WithAccessId(user = "admin")
   @Test
   void should_NotSetTheTransferFlag_When_WorkbasketKeyAndDomainAreProvided() throws Exception {
-    taskService.transfer(
-        "TKI:000000000000000000000000000000000003", "USER-1-1", "DOMAIN_A", false);
+    taskService.transfer("TKI:000000000000000000000000000000000003", "USER-1-1", "DOMAIN_A", false);
 
     Task transferredTask = taskService.getTask("TKI:000000000000000000000000000000000003");
     assertThat(transferredTask).isNotNull();
@@ -532,16 +531,15 @@ class TransferTaskAccTest extends AbstractAccTest {
     assertThat(notTransferredTask.getWorkbasketKey()).isEqualTo("TEAMLEAD-1");
 
     notTransferredTask =
-        kadaiEngine.runAsAdmin(
-            () -> {
-              try {
-                return taskService.getTask("TKI:000000000000000000000000000000000041");
-              } catch (NotAuthorizedOnWorkbasketException e) {
-                throw new RuntimeException(e);
-              } catch (TaskNotFoundException e) {
-                throw new RuntimeException(e);
-              }
-            });
+        kadaiEngine.runAsAdmin(() -> {
+          try {
+            return taskService.getTask("TKI:000000000000000000000000000000000041");
+          } catch (NotAuthorizedOnWorkbasketException e) {
+            throw new RuntimeException(e);
+          } catch (TaskNotFoundException e) {
+            throw new RuntimeException(e);
+          }
+        });
     assertThat(notTransferredTask).isNotNull();
     assertThat(notTransferredTask.isTransferred()).isFalse();
     assertThat(notTransferredTask.getWorkbasketKey()).isEqualTo("USER-B-2");

@@ -161,14 +161,13 @@ public class ClassificationDefinitionController implements ClassificationDefinit
     definitionList.stream()
         .map(ClassificationDefinitionRepresentationModel::getClassification)
         .forEach(
-            rethrowing(
-                cl -> {
-                  String key = cl.getKey();
-                  String domain = cl.getDomain();
-                  if (!seen.add(logicalId(key, domain))) {
-                    throw new LogicalDuplicateInPayloadException(logicalId(key, domain));
-                  }
-                }));
+            rethrowing(cl -> {
+              String key = cl.getKey();
+              String domain = cl.getDomain();
+              if (!seen.add(logicalId(key, domain))) {
+                throw new LogicalDuplicateInPayloadException(logicalId(key, domain));
+              }
+            }));
   }
 
   private Map<Classification, String> mapChildrenToParentKeys(
@@ -184,9 +183,8 @@ public class ClassificationDefinitionController implements ClassificationDefinit
     Map<String, String> classificationIdToKey =
         definitionList.stream()
             .map(ClassificationDefinitionRepresentationModel::getClassification)
-            .filter(
-                classification ->
-                    classification.getClassificationId() != null && classification.getKey() != null)
+            .filter(classification ->
+                classification.getClassificationId() != null && classification.getKey() != null)
             .collect(
                 toMap(
                     ClassificationSummaryRepresentationModel::getClassificationId,
@@ -201,9 +199,8 @@ public class ClassificationDefinitionController implements ClassificationDefinit
 
     return definitionList.stream()
         .map(def -> Map.entry(def, def.getClassification()))
-        .filter(
-            defClassEntry ->
-                hasResolvableParent(defClassEntry.getValue(), keysWithDomain, systemIds))
+        .filter(defClassEntry ->
+            hasResolvableParent(defClassEntry.getValue(), keysWithDomain, systemIds))
         .collect(
             toMap(
                 defClassEntry -> assembler.toEntityModel(defClassEntry.getKey()),

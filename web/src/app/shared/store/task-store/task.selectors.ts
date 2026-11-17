@@ -18,12 +18,12 @@
 
 import { Selector } from '@ngxs/store';
 import { TaskWorkflowState, TaskWorkflowStateModel } from './task.state';
-import { Task } from '../../../workplace/models/task';
-import { Workbasket } from '../../models/workbasket';
-import { Page } from '../../models/page';
-import { SearchType } from '../../../workplace/models/search';
-import { Sorting, TaskQuerySortParameter } from '../../models/sorting';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
+import { Task } from 'app/workplace/models/task';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { Page } from 'app/shared/models/page';
+import { SearchType } from 'app/workplace/models/search';
+import { Sorting, TaskQuerySortParameter } from 'app/shared/models/sorting';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
 
 export class TaskSelectors {
   @Selector([TaskWorkflowState])

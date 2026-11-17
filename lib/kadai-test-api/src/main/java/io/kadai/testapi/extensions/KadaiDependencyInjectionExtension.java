@@ -36,18 +36,19 @@ import org.junit.platform.commons.JUnitException;
  * supplying them as parameter to test-functions.
  *
  * <p>Usage may look like:
- * <pre>
- *   {@code
- *     @ExtendWith(KadaiDependencyInjectionExtension.class)
- *     class MyTestClass {
  *
- *       @KadaiInject KadaiEngine kadaiEngine;
+ * <pre>{@code
+ *    @ExtendWith(KadaiDependencyInjectionExtension.class)
+ *    class MyTestClass {
  *
- *       @Test
- *       void myTest(TaskService taskService) {}
- *     }
- *   }
- *  * </pre>
+ *      @KadaiInject KadaiEngine kadaiEngine;
+ *
+ *      @Test
+ *      void myTest(TaskService taskService) {}
+ *    }
+ *  }
+ * *
+ * </pre>
  */
 public class KadaiDependencyInjectionExtension
     implements ParameterResolver, TestInstancePostProcessor {

@@ -27,27 +27,24 @@ import { KadaiType } from 'app/shared/models/kadai-type';
 import { EngineConfigurationSelectors } from 'app/shared/store/engine-configuration-store/engine-configuration.selectors';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { AsyncPipe, Location } from '@angular/common';
-import { ClassificationCategoryImages } from '../../../shared/models/customisation';
+import { ClassificationCategoryImages } from 'app/shared/models/customisation';
 
-import {
-  CreateClassification,
-  GetClassifications
-} from '../../../shared/store/classification-store/classification.actions';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { ClassificationSummary } from '../../../shared/models/classification-summary';
-import { RequestInProgressService } from '../../../shared/services/request-in-progress/request-in-progress.service';
-import { Pair } from '../../../shared/models/pair';
+import { CreateClassification, GetClassifications } from 'app/shared/store/classification-store/classification.actions';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { ClassificationSummary } from 'app/shared/models/classification-summary';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { Pair } from 'app/shared/models/pair';
 import { MatButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { ImportExportComponent } from '../import-export/import-export.component';
+import { ImportExportComponent } from 'app/administration/components/import-export/import-export.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
-import { ClassificationTypesSelectorComponent } from '../classification-types-selector/classification-types-selector.component';
-import { KadaiTreeComponent } from '../tree/tree.component';
+import { ClassificationTypesSelectorComponent } from 'app/administration/components/classification-types-selector/classification-types-selector.component';
+import { KadaiTreeComponent } from 'app/administration/components/tree/tree.component';
 
 @Component({
   selector: 'kadai-administration-classification-list',

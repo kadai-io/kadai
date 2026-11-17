@@ -115,13 +115,12 @@ public class ObjectReferenceHandler {
       final Map<String, ObjectReference> oldObjectReferencesMap =
           oldObjectReferences.stream()
               .collect(Collectors.toMap(ObjectReference::getId, Function.identity()));
-      newObjectReferences.forEach(
-          o -> {
-            if (oldObjectReferencesMap.containsKey(o.getId())
-                && !o.equals(oldObjectReferencesMap.get(o.getId()))) {
-              objectReferenceMapper.update((ObjectReferenceImpl) o);
-            }
-          });
+      newObjectReferences.forEach(o -> {
+        if (oldObjectReferencesMap.containsKey(o.getId())
+            && !o.equals(oldObjectReferencesMap.get(o.getId()))) {
+          objectReferenceMapper.update((ObjectReferenceImpl) o);
+        }
+      });
     }
   }
 
@@ -136,18 +135,17 @@ public class ObjectReferenceHandler {
     List<ObjectReference> oldObjectReferences = oldTaskImpl.getSecondaryObjectReferences();
     if (oldObjectReferences != null && !oldObjectReferences.isEmpty()) {
       final List<String> newObjRefIds = newObjectReferencesIds;
-      oldObjectReferences.forEach(
-          o -> {
-            if (!newObjRefIds.contains(o.getId())) {
-              objectReferenceMapper.delete(o.getId());
-              if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug(
-                    "TaskService.updateTask() for TaskId={} DELETED an ObjectReference={}.",
-                    newTaskImpl.getId(),
-                    o);
-              }
-            }
-          });
+      oldObjectReferences.forEach(o -> {
+        if (!newObjRefIds.contains(o.getId())) {
+          objectReferenceMapper.delete(o.getId());
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug(
+                "TaskService.updateTask() for TaskId={} DELETED an ObjectReference={}.",
+                newTaskImpl.getId(),
+                o);
+          }
+        }
+      });
     }
   }
 

@@ -35,54 +35,52 @@ class CreateHistoryEventOnTaskTerminationAccTest extends AbstractAccTest {
   @Test
   void should_CreateTerminatedHistoryEvent_When_TerminatingTaskInStateClaimed() throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskId = "TKI:000000000000000000000000000000000001";
+        CheckedRunnable.rethrowing(() -> {
+          final String taskId = "TKI:000000000000000000000000000000000001";
 
-              List<TaskHistoryEvent> events =
-                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          List<TaskHistoryEvent> events =
+              taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              taskService.terminateTask(taskId);
+          taskService.terminateTask(taskId);
 
-              events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
+          String eventType = events.get(0).getEventType();
 
-              assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
-              assertThat(events.get(0).getUserId()).isEqualTo("user-1-3");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
+          assertThat(events.get(0).getUserId()).isEqualTo("user-1-3");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "user-1-3");
   }
 
   @Test
   void should_CreateTerminatedHistoryEvent_When_TerminatingTaskInStateReady() throws Exception {
     kadaiEngine.runAsAdmin(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskId = "TKI:000000000000000000000000000000000003";
+        CheckedRunnable.rethrowing(() -> {
+          final String taskId = "TKI:000000000000000000000000000000000003";
 
-              List<TaskHistoryEvent> events =
-                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          List<TaskHistoryEvent> events =
+              taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              taskService.terminateTask(taskId);
+          taskService.terminateTask(taskId);
 
-              events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
+          String eventType = events.get(0).getEventType();
 
-              assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
-              assertThat(events.get(0).getUserId()).isEqualTo("teamlead-1");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType).isEqualTo(TaskHistoryEventType.TERMINATED.getName());
+          assertThat(events.get(0).getUserId()).isEqualTo("teamlead-1");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         "teamlead-1");
   }
 }

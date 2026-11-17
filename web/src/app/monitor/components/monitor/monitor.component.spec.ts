@@ -25,7 +25,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { of } from 'rxjs';
-import { DomainService } from '../../../shared/services/domain/domain.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
 
 const domainServiceMock = {
   getDomains: vi.fn().mockReturnValue(of(['DOMAIN_A', 'DOMAIN_B'])),

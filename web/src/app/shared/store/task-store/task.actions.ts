@@ -16,10 +16,10 @@
  *
  */
 
-import { Task } from '../../../workplace/models/task';
-import { SearchType } from '../../../workplace/models/search';
-import { Workbasket } from '../../models/workbasket';
-import { Sorting, TaskQuerySortParameter } from '../../models/sorting';
+import { Task } from 'app/workplace/models/task';
+import { SearchType } from 'app/workplace/models/search';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { Sorting, TaskQuerySortParameter } from 'app/shared/models/sorting';
 
 // Task list
 export class LoadTasks {

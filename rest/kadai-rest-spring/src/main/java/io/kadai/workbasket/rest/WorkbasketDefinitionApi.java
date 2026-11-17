@@ -121,7 +121,7 @@ public interface WorkbasketDefinitionApi {
       responses = {
         @ApiResponse(
             responseCode = "204",
-            content = {@Content(schema = @Schema())}),
+            content = {@Content(schema = @Schema)}),
         @ApiResponse(
             responseCode = "400",
             description = "DOMAIN_NOT_FOUND, INVALID_ARGUMENT, LOGICAL_DUPLICATE_IN_PAYLOAD",

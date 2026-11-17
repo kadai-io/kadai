@@ -21,7 +21,7 @@ import { TestBed } from '@angular/core/testing';
 import { RoutingUploadService } from './routing-upload.service';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { StartupService } from 'app/shared/services/startup/startup.service';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 
 const REST_URL = 'http://localhost:8080/kadai';
 
@@ -34,8 +34,8 @@ describe('RoutingUploadService', () => {
       providers: [
         provideHttpClientTesting(),
         {
-          provide: StartupService,
-          useValue: { getKadaiRestUrl: () => REST_URL }
+          provide: RuntimeConfigService,
+          useValue: { kadaiRestUrl: REST_URL }
         }
       ]
     });

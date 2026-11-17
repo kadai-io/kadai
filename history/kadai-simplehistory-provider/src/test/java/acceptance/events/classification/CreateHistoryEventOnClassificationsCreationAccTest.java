@@ -43,31 +43,30 @@ class CreateHistoryEventOnClassificationsCreationAccTest extends AbstractAccTest
       throws Exception {
 
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              Classification newClassification =
-                  classificationService.newClassification("somekey", "DOMAIN_A", "TASK");
-              newClassification.setDescription("some description");
-              newClassification.setServiceLevel("P1D");
-              newClassification = classificationService.createClassification(newClassification);
+        CheckedRunnable.rethrowing(() -> {
+          Classification newClassification =
+              classificationService.newClassification("somekey", "DOMAIN_A", "TASK");
+          newClassification.setDescription("some description");
+          newClassification.setServiceLevel("P1D");
+          newClassification = classificationService.createClassification(newClassification);
 
-              List<ClassificationHistoryEvent> events =
-                  classificationHistoryService
-                      .createClassificationHistoryQuery()
-                      .classificationIdIn(newClassification.getId())
-                      .list();
+          List<ClassificationHistoryEvent> events =
+              classificationHistoryService
+                  .createClassificationHistoryQuery()
+                  .classificationIdIn(newClassification.getId())
+                  .list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
-              String details =
-                  classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
+          String eventType = events.get(0).getEventType();
+          String details =
+              classificationHistoryEventMapper.findById(events.get(0).getId()).getDetails();
 
-              assertThat(eventType).isEqualTo(ClassificationHistoryEventType.CREATED.getName());
-              assertThat(details).contains("\"newValue\":\"some description\"");
-              assertThat(events.get(0).getUserId()).isEqualTo("user-1-2");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType).isEqualTo(ClassificationHistoryEventType.CREATED.getName());
+          assertThat(details).contains("\"newValue\":\"some description\"");
+          assertThat(events.get(0).getUserId()).isEqualTo("user-1-2");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         KadaiRole.ADMIN,
         "user-1-2");
   }

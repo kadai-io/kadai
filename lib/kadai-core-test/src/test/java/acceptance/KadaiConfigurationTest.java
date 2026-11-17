@@ -164,6 +164,7 @@ class KadaiConfigurationTest {
           .isEqualTo(Instant.parse("2023-01-01T00:00:00Z"));
       assertThat(configuration.getTaskUpdatePriorityJobRunEvery()).isEqualTo(Duration.ofDays(1));
       assertThat(configuration.isUserInfoRefreshJobEnabled()).isFalse();
+      assertThat(configuration.getUserRefreshJobBatchSize()).isEqualTo(1_000);
       assertThat(configuration.getUserRefreshJobFirstRun())
           .isEqualTo(Instant.parse("2023-01-01T23:00:00Z"));
       assertThat(configuration.getUserRefreshJobRunEvery()).isEqualTo(Duration.ofDays(1));
@@ -243,6 +244,7 @@ class KadaiConfigurationTest {
           .isEqualTo(Instant.parse("2018-07-25T08:00:00Z"));
       assertThat(configuration.getTaskUpdatePriorityJobRunEvery()).isEqualTo(Duration.ofDays(3));
       assertThat(configuration.isUserInfoRefreshJobEnabled()).isTrue();
+      assertThat(configuration.getUserRefreshJobBatchSize()).isEqualTo(998);
       assertThat(configuration.getUserRefreshJobFirstRun())
           .isEqualTo(Instant.parse("2018-07-25T08:00:00Z"));
       assertThat(configuration.getUserRefreshJobRunEvery()).isEqualTo(Duration.ofDays(4));
@@ -324,6 +326,7 @@ class KadaiConfigurationTest {
       Duration expectedTaskUpdatePriorityJobRunEvery = Duration.ofMinutes(17);
       Duration expectedTaskUpdatePriorityJobLockExpirationPeriod = Duration.ofDays(2);
       boolean expectedUserInfoRefreshJobEnabled = true;
+      int expectedUserRefreshJobBatchSize = 998;
       Instant expectedUserRefreshJobFirstRun = Instant.MIN.plus(2, ChronoUnit.DAYS);
       Duration expectedUserRefreshJobRunEvery = Duration.ofDays(5);
       Duration expectedUserRefreshJobLockExpirationPeriod = Duration.ofDays(2);
@@ -397,6 +400,7 @@ class KadaiConfigurationTest {
               .taskUpdatePriorityJobLockExpirationPeriod(
                   expectedTaskUpdatePriorityJobLockExpirationPeriod)
               .userInfoRefreshJobEnabled(expectedUserInfoRefreshJobEnabled)
+              .userRefreshJobBatchSize(expectedUserRefreshJobBatchSize)
               .userRefreshJobFirstRun(expectedUserRefreshJobFirstRun)
               .userRefreshJobRunEvery(expectedUserRefreshJobRunEvery)
               .userRefreshJobLockExpirationPeriod(expectedUserRefreshJobLockExpirationPeriod)
@@ -482,6 +486,8 @@ class KadaiConfigurationTest {
           .isEqualTo(expectedTaskUpdatePriorityJobRunEvery);
       assertThat(configuration.isUserInfoRefreshJobEnabled())
           .isEqualTo(expectedUserInfoRefreshJobEnabled);
+      assertThat(configuration.getUserRefreshJobBatchSize())
+          .isEqualTo(expectedUserRefreshJobBatchSize);
       assertThat(configuration.getUserRefreshJobFirstRun())
           .isEqualTo(expectedUserRefreshJobFirstRun);
       assertThat(configuration.getUserRefreshJobRunEvery())
@@ -494,7 +500,7 @@ class KadaiConfigurationTest {
     }
 
     @Test
-    void should_PopulateEveryConfigurationProperty_When_UsingCopyConstructor()  throws Exception {
+    void should_PopulateEveryConfigurationProperty_When_UsingCopyConstructor() throws Exception {
       // given
       KadaiConfiguration configuration =
           new Builder(TestContainerExtension.createDataSourceForH2(), false, "KADAI", false)
@@ -550,6 +556,7 @@ class KadaiConfigurationTest {
               .taskUpdatePriorityJobRunEvery(Duration.ofMinutes(17))
               .taskUpdatePriorityJobLockExpirationPeriod(Duration.ofDays(10))
               .userInfoRefreshJobEnabled(true)
+              .userRefreshJobBatchSize(998)
               .userRefreshJobFirstRun(Instant.MIN.plus(2, ChronoUnit.DAYS))
               .userRefreshJobRunEvery(Duration.ofDays(5))
               .userRefreshJobLockExpirationPeriod(Duration.ofDays(8))
@@ -585,17 +592,16 @@ class KadaiConfigurationTest {
       ReflectionUtil.retrieveAllFields(KadaiConfiguration.class).stream()
           .filter(f -> !ignoredFields.contains(f.getName()))
           .forEach(
-              CheckedConsumer.rethrowing(
-                  field -> {
-                    field.setAccessible(true);
-                    Object value = field.get(configuration);
-                    Object defaultValue = field.get(defaultConfiguration);
-                    assertThat(value)
-                        .as(
-                            "Field '%s' (%s) should not be a default configuration value",
-                            field.getName(), kadaiPropertyNameByFieldName.get(field.getName()))
-                        .isNotEqualTo(defaultValue);
-                  }));
+              CheckedConsumer.rethrowing(field -> {
+                field.setAccessible(true);
+                Object value = field.get(configuration);
+                Object defaultValue = field.get(defaultConfiguration);
+                assertThat(value)
+                    .as(
+                        "Field '%s' (%s) should not be a default configuration value",
+                        field.getName(), kadaiPropertyNameByFieldName.get(field.getName()))
+                    .isNotEqualTo(defaultValue);
+              }));
     }
   }
 
@@ -711,13 +717,12 @@ class KadaiConfigurationTest {
       Stream<Field> fields =
           ReflectionUtil.retrieveAllFields(KadaiConfiguration.class).stream()
               .filter(f -> Map.class.isAssignableFrom(f.getType()))
-              .filter(
-                  f -> {
-                    ParameterizedType genericType = (ParameterizedType) f.getGenericType();
-                    Class<?> childClass =
-                        ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
-                    return Collection.class.isAssignableFrom(childClass);
-                  });
+              .filter(f -> {
+                ParameterizedType genericType = (ParameterizedType) f.getGenericType();
+                Class<?> childClass =
+                    ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
+                return Collection.class.isAssignableFrom(childClass);
+              });
 
       // when
       KadaiConfiguration configuration = builder.build();
@@ -730,18 +735,17 @@ class KadaiConfigurationTest {
             Map<?, Collection<?>> o = (Map<?, Collection<?>>) field.get(configuration);
 
             o.values()
-                .forEach(
-                    collection -> {
-                      // PLEASE do not change this to the _assertThatThrownBy_ syntax.
-                      // That syntax does not respect the given description and thus might confuse
-                      // future devs.
-                      assertThatExceptionOfType(UnsupportedOperationException.class)
-                          .as(
-                              "Nested Collection within Map '%s' "
-                                  + "should be an unmodifiable Collection",
-                              field.getName())
-                          .isThrownBy(() -> collection.add(null));
-                    });
+                .forEach(collection -> {
+                  // PLEASE do not change this to the _assertThatThrownBy_ syntax.
+                  // That syntax does not respect the given description and thus might confuse
+                  // future devs.
+                  assertThatExceptionOfType(UnsupportedOperationException.class)
+                      .as(
+                          "Nested Collection within Map '%s' "
+                              + "should be an unmodifiable Collection",
+                          field.getName())
+                      .isThrownBy(() -> collection.add(null));
+                });
           };
 
       return DynamicTest.stream(fields, Field::getName, testCase);
@@ -784,63 +788,73 @@ class KadaiConfigurationTest {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Collection.class.isAssignableFrom(f.getType()))
           .forEach(
-              CheckedConsumer.rethrowing(
-                  f -> {
-                    f.setAccessible(true);
-                    Supplier<Collection<?>> collectionSupplier =
-                        mutableCollectionByClass.get(f.getType());
-                    if (collectionSupplier == null) {
-                      throw new SystemException(
-                          String.format("Unknown Collection class '%s'", f.getType()));
-                    }
-                    f.set(builder, collectionSupplier.get());
-                  }));
+              CheckedConsumer.rethrowing(f -> {
+                f.setAccessible(true);
+                Supplier<Collection<?>> collectionSupplier =
+                    mutableCollectionByClass.get(f.getType());
+                if (collectionSupplier == null) {
+                  throw new SystemException(
+                      String.format("Unknown Collection class '%s'", f.getType()));
+                }
+                f.set(builder, collectionSupplier.get());
+              }));
     }
 
     private void initializeWithMutableMaps(Builder builder) throws Exception {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Map.class.isAssignableFrom(f.getType()))
           .forEach(
-              CheckedConsumer.rethrowing(
-                  f -> {
-                    f.setAccessible(true);
-                    f.set(builder, new HashMap<>());
-                  }));
+              CheckedConsumer.rethrowing(f -> {
+                f.setAccessible(true);
+                f.set(builder, new HashMap<>());
+              }));
     }
 
     private void initializeWithMutableCollectionsAsMapValues(Builder builder) throws Exception {
       ReflectionUtil.retrieveAllFields(Builder.class).stream()
           .filter(f -> Map.class.isAssignableFrom(f.getType()))
-          .filter(
-              f -> {
+          .filter(f -> {
+            ParameterizedType genericType = (ParameterizedType) f.getGenericType();
+            Class<?> childClass =
+                ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
+            return Collection.class.isAssignableFrom(childClass);
+          })
+          .forEach(
+              CheckedConsumer.rethrowing(f -> {
                 ParameterizedType genericType = (ParameterizedType) f.getGenericType();
                 Class<?> childClass =
                     ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
-                return Collection.class.isAssignableFrom(childClass);
-              })
-          .forEach(
-              CheckedConsumer.rethrowing(
-                  f -> {
-                    ParameterizedType genericType = (ParameterizedType) f.getGenericType();
-                    Class<?> childClass =
-                        ReflectionUtil.getRawClass(genericType.getActualTypeArguments()[1]);
 
-                    Supplier<Collection<?>> collectionSupplier =
-                        mutableCollectionByClass.get(childClass);
-                    if (collectionSupplier == null) {
-                      throw new SystemException(
-                          String.format("Unknown Collection class '%s'", f.getType()));
-                    }
+                Supplier<Collection<?>> collectionSupplier =
+                    mutableCollectionByClass.get(childClass);
+                if (collectionSupplier == null) {
+                  throw new SystemException(
+                      String.format("Unknown Collection class '%s'", f.getType()));
+                }
 
-                    f.setAccessible(true);
-                    f.set(builder, Map.of("", collectionSupplier.get()));
-                  }));
+                f.setAccessible(true);
+                f.set(builder, Map.of("", collectionSupplier.get()));
+              }));
     }
   }
 
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class Validation {
+
+    @ParameterizedTest
+    @ValueSource(ints = {-1, 0})
+    void should_ThrowInvalidArgumentEx_When_UserRefreshJobBatchSizeIsNotPositive(int batchSize) {
+      KadaiConfiguration.Builder builder =
+          new KadaiConfiguration.Builder(
+                  TestContainerExtension.createDataSourceForH2(), false, "KADAI")
+              .userRefreshJobBatchSize(batchSize);
+
+      assertThatThrownBy(builder::build)
+          .isInstanceOf(InvalidArgumentException.class)
+          .hasMessageContaining("userRefreshJobBatchSize (kadai.jobs.refresh.user.batchSize)")
+          .hasMessageContaining("positive integer");
+    }
 
     @ParameterizedTest
     @ValueSource(ints = {-1, 0})
@@ -985,8 +999,7 @@ class KadaiConfigurationTest {
                   TestContainerExtension.createDataSourceForH2(), false, "KADAI")
               .taskCleanupJobMinimumAgeByDomain(overrides);
 
-      assertThatThrownBy(builder::build)
-          .isInstanceOf(InvalidArgumentException.class);
+      assertThatThrownBy(builder::build).isInstanceOf(InvalidArgumentException.class);
     }
 
     @Test
@@ -996,8 +1009,7 @@ class KadaiConfigurationTest {
                   TestContainerExtension.createDataSourceForH2(), false, "KADAI")
               .taskCleanupJobMinimumAgeByDomain(Map.of("   ", Duration.ofDays(1)));
 
-      assertThatThrownBy(builder::build)
-          .isInstanceOf(InvalidArgumentException.class);
+      assertThatThrownBy(builder::build).isInstanceOf(InvalidArgumentException.class);
     }
 
     @Test
@@ -1041,8 +1053,7 @@ class KadaiConfigurationTest {
               .domains(List.of("DOMAIN_A"))
               .taskCleanupJobMinimumAgeByDomain(Map.of("DOMAIN_A", Duration.ofDays(-1)));
 
-      assertThatThrownBy(builder::build)
-          .isInstanceOf(InvalidArgumentException.class);
+      assertThatThrownBy(builder::build).isInstanceOf(InvalidArgumentException.class);
     }
 
     @ParameterizedTest

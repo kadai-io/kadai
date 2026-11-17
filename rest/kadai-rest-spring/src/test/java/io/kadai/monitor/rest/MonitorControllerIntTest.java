@@ -18,7 +18,6 @@
 
 package io.kadai.monitor.rest;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -284,10 +283,7 @@ class MonitorControllerIntTest {
     assertThat(report).isNotNull();
     assertThat(report.getSumRow())
         .extracting(RowRepresentationModel::getCells)
-        .containsExactlyInAnyOrder(
-            new int[] {2, 0, 1},
-            new int[] {2, 0, 1}
-        );
+        .containsExactlyInAnyOrder(new int[] {2, 0, 1}, new int[] {2, 0, 1});
   }
 
   @Test

@@ -41,8 +41,7 @@ class KadaiEventLoggerTest {
 
   static KadaiEngine kadaiEngineMock;
   private final JsonMapper jsonMapper = new JsonMapper();
-  private final KadaiEventLogger kadaiEventLogger =
-      new KadaiEventLogger();
+  private final KadaiEventLogger kadaiEventLogger = new KadaiEventLogger();
   private final TestLogger logger = TestLoggerFactory.getTestLogger("AUDIT");
 
   @AfterEach

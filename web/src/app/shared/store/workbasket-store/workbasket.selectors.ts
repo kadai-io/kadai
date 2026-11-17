@@ -18,13 +18,13 @@
 
 import { Selector } from '@ngxs/store';
 import { WorkbasketState, WorkbasketStateModel } from './workbasket.state';
-import { WorkbasketSummary } from '../../models/workbasket-summary';
-import { WorkbasketSummaryRepresentation } from '../../models/workbasket-summary-representation';
-import { ACTION } from '../../models/action';
-import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
-import { Workbasket } from '../../models/workbasket';
-import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
-import { ButtonAction } from '../../../administration/models/button-action';
+import { WorkbasketSummary } from 'app/shared/models/workbasket-summary';
+import { WorkbasketSummaryRepresentation } from 'app/shared/models/workbasket-summary-representation';
+import { ACTION } from 'app/shared/models/action';
+import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { WorkbasketComponent } from 'app/administration/models/workbasket-component';
+import { ButtonAction } from 'app/administration/models/button-action';
 
 export class WorkbasketSelectors {
   // Workbasket

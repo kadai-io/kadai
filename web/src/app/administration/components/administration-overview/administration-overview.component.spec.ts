@@ -18,8 +18,8 @@
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { AdministrationOverviewComponent } from './administration-overview.component';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { KadaiEngineService } from '../../../shared/services/kadai-engine/kadai-engine.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { KadaiEngineService } from 'app/shared/services/kadai-engine/kadai-engine.service';
 import { of } from 'rxjs';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';

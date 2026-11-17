@@ -187,11 +187,10 @@ public class WorkingTimeCalculatorImpl implements WorkingTimeCalculator {
             .findFirst();
     return workSlotEndingAfterCurrentTime
         .map(it -> new WorkSlot(currentDate, it))
-        .orElseGet(
-            () ->
-                // we started after the last working slot on that day, the next start time is the
-                // first working slot of the next working day.
-                getWorkSlotOrNext(getDayAfter(currentDateTime)));
+        .orElseGet(() ->
+            // we started after the last working slot on that day, the next start time is the
+            // first working slot of the next working day.
+            getWorkSlotOrNext(getDayAfter(currentDateTime)));
   }
 
   /**
@@ -220,11 +219,10 @@ public class WorkingTimeCalculatorImpl implements WorkingTimeCalculator {
             .findFirst();
     return workSlotStartingBeforeCurrentTime
         .map(it -> new WorkSlot(currentDate, it))
-        .orElseGet(
-            () ->
-                // we started before the first working slot on that day, the next start time is the
-                // last working slot of the previous working day.
-                getWorkSlotOrPrevious(getDayBefore(currentDateTime)));
+        .orElseGet(() ->
+            // we started before the first working slot on that day, the next start time is the
+            // last working slot of the previous working day.
+            getWorkSlotOrPrevious(getDayBefore(currentDateTime)));
   }
 
   private ZonedDateTime getDayAfter(ZonedDateTime current) {
@@ -244,7 +242,6 @@ public class WorkingTimeCalculatorImpl implements WorkingTimeCalculator {
   private ZonedDateTime toZonedDateTime(Instant instant) {
     return instant.atZone(zoneId);
   }
-
 
   private LocalDate toLocalDate(Instant instant) {
     return LocalDate.ofInstant(instant, zoneId);

@@ -213,12 +213,11 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
   public Void apply(TimeIntervalReportBuilder<?, ?, TimeIntervalColumnHeader> builder) {
     builder.withColumnHeaders(defaultColumnHeaders());
     Optional.ofNullable(inWorkingDays)
-        .ifPresent(
-            bool -> {
-              if (Boolean.TRUE.equals(bool)) {
-                builder.inWorkingDays();
-              }
-            });
+        .ifPresent(bool -> {
+          if (Boolean.TRUE.equals(bool)) {
+            builder.inWorkingDays();
+          }
+        });
     Optional.ofNullable(workbasketId).map(Arrays::asList).ifPresent(builder::workbasketIdIn);
     Optional.ofNullable(state).map(Arrays::asList).ifPresent(builder::stateIn);
     Optional.ofNullable(classificationCategory)
@@ -249,10 +248,9 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
             Pair.of(TaskCustomField.CUSTOM_14, custom14),
             Pair.of(TaskCustomField.CUSTOM_15, custom15),
             Pair.of(TaskCustomField.CUSTOM_16, custom16))
-        .forEach(
-            pair ->
-                Optional.ofNullable(pair.getRight())
-                    .ifPresent(l -> builder.customAttributeIn(pair.getLeft(), l)));
+        .forEach(pair ->
+            Optional.ofNullable(pair.getRight())
+                .ifPresent(l -> builder.customAttributeIn(pair.getLeft(), l)));
     Stream.of(
             Pair.of(TaskCustomField.CUSTOM_1, custom1Like),
             Pair.of(TaskCustomField.CUSTOM_2, custom2Like),
@@ -270,11 +268,10 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
             Pair.of(TaskCustomField.CUSTOM_14, custom14Like),
             Pair.of(TaskCustomField.CUSTOM_15, custom15Like),
             Pair.of(TaskCustomField.CUSTOM_16, custom16Like))
-        .forEach(
-            pair ->
-                Optional.ofNullable(pair.getRight())
-                    .map(this::wrapElementsInLikeStatement)
-                    .ifPresent(l -> builder.customAttributeLike(pair.getLeft(), l)));
+        .forEach(pair ->
+            Optional.ofNullable(pair.getRight())
+                .map(this::wrapElementsInLikeStatement)
+                .ifPresent(l -> builder.customAttributeLike(pair.getLeft(), l)));
 
     Stream.of(
             Pair.of(TaskCustomField.CUSTOM_1, custom1NotIn),
@@ -293,10 +290,9 @@ public class TimeIntervalReportFilterParameter extends ReportFilterParameter
             Pair.of(TaskCustomField.CUSTOM_14, custom14NotIn),
             Pair.of(TaskCustomField.CUSTOM_15, custom15NotIn),
             Pair.of(TaskCustomField.CUSTOM_16, custom16NotIn))
-        .forEach(
-            pair ->
-                Optional.ofNullable(pair.getRight())
-                    .ifPresent(l -> builder.customAttributeNotIn(pair.getLeft(), l)));
+        .forEach(pair ->
+            Optional.ofNullable(pair.getRight())
+                .ifPresent(l -> builder.customAttributeNotIn(pair.getLeft(), l)));
     return null;
   }
 

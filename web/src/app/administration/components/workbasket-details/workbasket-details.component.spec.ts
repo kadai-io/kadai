@@ -21,16 +21,16 @@ import { WorkbasketDetailsComponent } from './workbasket-details.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import { ACTION } from '../../../shared/models/action';
-import { WorkbasketState } from '../../../shared/store/workbasket-store/workbasket.state';
-import { DomainService } from '../../../shared/services/domain/domain.service';
-import { WorkbasketService } from '../../../shared/services/workbasket/workbasket.service';
+import { ACTION } from 'app/shared/models/action';
+import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   engineConfigurationMock,
   selectedWorkbasketMock,
   workbasketReadStateMock
-} from '../../../shared/store/mock-data/mock-store';
+} from 'app/shared/store/mock-data/mock-store';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import {
   CopyWorkbasket,
@@ -40,13 +40,12 @@ import {
   SaveNewWorkbasket,
   SelectComponent,
   UpdateWorkbasket
-} from '../../../shared/store/workbasket-store/workbasket.actions';
+} from 'app/shared/store/workbasket-store/workbasket.actions';
 import { take } from 'rxjs/operators';
-import { EngineConfigurationState } from '../../../shared/store/engine-configuration-store/engine-configuration.state';
+import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { provideAngularSvgIcon } from 'angular-svg-icon';
-import { ButtonAction } from '../../models/button-action';
+import { ButtonAction } from 'app/administration/models/button-action';
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomain: vi.fn().mockReturnValue(of('A')),
@@ -92,8 +91,7 @@ describe('WorkbasketDetailsComponent', () => {
           useValue: domainServiceSpy
         },
         { provide: WorkbasketService, useValue: workbasketServiceMock },
-        provideHttpClientTesting(),
-        provideAngularSvgIcon()
+        provideHttpClientTesting()
       ]
     }).compileComponents();
 

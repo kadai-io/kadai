@@ -16,7 +16,6 @@
  *
  */
 
-
 package org.camunda.bpm.dmn.xlsx;
 
 import org.camunda.bpm.dmn.xlsx.api.Spreadsheet;

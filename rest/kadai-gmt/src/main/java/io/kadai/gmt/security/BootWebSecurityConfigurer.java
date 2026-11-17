@@ -90,20 +90,15 @@ public class BootWebSecurityConfigurer {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http.authorizeHttpRequests(
-            authorizeHttpRequests ->
-                authorizeHttpRequests
-                    .requestMatchers("/css/**", "/img/**")
-                    .permitAll()
-                    .requestMatchers(HttpMethod.GET, "/docs/**")
-                    .permitAll()
-                    .requestMatchers(
-                        HttpMethod.GET,
-                        "/api-docs",
-                        "/api-docs/**",
-                        "/swagger-ui",
-                        "/swagger-ui/**")
-                    .permitAll())
+    http.authorizeHttpRequests(authorizeHttpRequests ->
+            authorizeHttpRequests
+                .requestMatchers("/css/**", "/img/**")
+                .permitAll()
+                .requestMatchers(HttpMethod.GET, "/docs/**")
+                .permitAll()
+                .requestMatchers(
+                    HttpMethod.GET, "/api-docs", "/api-docs/**", "/swagger-ui", "/swagger-ui/**")
+                .permitAll())
         .cors(Customizer.withDefaults())
         .addFilter(jaasApiIntegrationFilter())
         .addFilterAfter(new SpringSecurityToJaasFilter(), JaasApiIntegrationFilter.class);
@@ -111,10 +106,9 @@ public class BootWebSecurityConfigurer {
     if (enableCsrf) {
       CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
       csrfTokenRepository.setCookiePath("/");
-      http.csrf(
-              csrf ->
-                  csrf.csrfTokenRepository(csrfTokenRepository)
-                      .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
+      http.csrf(csrf ->
+              csrf.csrfTokenRepository(csrfTokenRepository)
+                  .csrfTokenRequestHandler(new SpaCsrfTokenRequestHandler()))
           .addFilterAfter(new CsrfCookieFilter(), SpringSecurityToJaasFilter.class);
     } else {
       http.csrf(AbstractHttpConfigurer::disable).httpBasic(Customizer.withDefaults());
@@ -123,13 +117,12 @@ public class BootWebSecurityConfigurer {
     if (devMode) {
       http.headers(
               headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
-          .authorizeHttpRequests(
-              authorizeHttpRequests ->
-                  authorizeHttpRequests
-                      .requestMatchers("/h2-console/**")
-                      .permitAll()
-                      .anyRequest()
-                      .fullyAuthenticated())
+          .authorizeHttpRequests(authorizeHttpRequests ->
+              authorizeHttpRequests
+                  .requestMatchers("/h2-console/**")
+                  .permitAll()
+                  .anyRequest()
+                  .fullyAuthenticated())
           .logout(logout -> logout.logoutSuccessUrl("http://localhost:4200/#").permitAll());
     } else {
       addLoginPageConfiguration(http);
@@ -168,23 +161,20 @@ public class BootWebSecurityConfigurer {
   protected void addLoginPageConfiguration(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(
             authorizeHttpRequests -> authorizeHttpRequests.anyRequest().fullyAuthenticated())
-        .formLogin(
-            formLogin ->
-                formLogin
-                    .loginPage("/login")
-                    .failureUrl("/login?error")
-                    .defaultSuccessUrl("/index.html")
-                    .permitAll())
-        .logout(
-            logout ->
-                logout
-                    .invalidateHttpSession(true)
-                    .clearAuthentication(true)
-                    .logoutRequestMatcher(
-                        PathPatternRequestMatcher.withDefaults().matcher("/logout"))
-                    .logoutSuccessUrl("/login?logout")
-                    .deleteCookies("JSESSIONID")
-                    .permitAll());
+        .formLogin(formLogin ->
+            formLogin
+                .loginPage("/login")
+                .failureUrl("/login?error")
+                .defaultSuccessUrl("/index.html")
+                .permitAll())
+        .logout(logout ->
+            logout
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .logoutRequestMatcher(PathPatternRequestMatcher.withDefaults().matcher("/logout"))
+                .logoutSuccessUrl("/login?logout")
+                .deleteCookies("JSESSIONID")
+                .permitAll());
   }
 
   protected JaasApiIntegrationFilter jaasApiIntegrationFilter() {

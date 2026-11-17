@@ -213,11 +213,10 @@ class UpdateObjectsUseUtcTimeStampsAccTest extends AbstractAccTest {
     final ScheduledJob jobForLambda = job;
     ScheduledJob retrievedJob =
         jobs.stream()
-            .filter(
-                j ->
-                    j.getJobId().equals(jobForLambda.getJobId())
-                        && j.getArguments() != null
-                        && "valueBla".equals(j.getArguments().get("keyBla")))
+            .filter(j ->
+                j.getJobId().equals(jobForLambda.getJobId())
+                    && j.getArguments() != null
+                    && "valueBla".equals(j.getArguments().get("keyBla")))
             .findFirst()
             .orElse(null);
 

@@ -20,15 +20,25 @@ package io.kadai.user.jobs;
 
 import static io.kadai.common.internal.util.CheckedFunction.rethrowing;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
 import io.kadai.common.api.KadaiEngine;
+import io.kadai.common.api.exceptions.SystemException;
+import io.kadai.common.internal.jobs.JobLockGuard;
+import io.kadai.common.internal.transaction.KadaiTransactionProvider;
 import io.kadai.common.rest.ldap.LdapClient;
+import io.kadai.common.rest.ldap.LdapUserSnapshot;
 import io.kadai.rest.test.KadaiSpringBootTest;
+import io.kadai.spi.user.internal.RefreshUserPostprocessorManager;
 import io.kadai.testapi.security.JaasExtension;
 import io.kadai.testapi.security.WithAccessId;
 import io.kadai.user.api.UserService;
 import io.kadai.user.api.models.User;
+import io.kadai.user.internal.UserServiceImpl;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -37,22 +47,21 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import org.assertj.core.api.recursive.comparison.RecursiveComparisonConfiguration;
-import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 @KadaiSpringBootTest
 @ExtendWith(JaasExtension.class)
-@TestMethodOrder(OrderAnnotation.class)
 class UserInfoRefreshJobIntTest {
 
   KadaiEngine kadaiEngine;
   UserService userService;
   @MockitoSpyBean LdapClient ldapClient;
+  @Autowired KadaiTransactionProvider transactionProvider;
 
   @Autowired
   public UserInfoRefreshJobIntTest(
@@ -62,19 +71,32 @@ class UserInfoRefreshJobIntTest {
     this.ldapClient = ldapClient;
   }
 
+  @BeforeEach
+  @WithAccessId(user = "businessadmin")
+  void clearRefreshState() throws Exception {
+    resetRefreshState();
+  }
+
+  @AfterEach
+  @WithAccessId(user = "businessadmin")
+  void cleanRefreshState() throws Exception {
+    resetRefreshState();
+  }
+
+  private void resetRefreshState() throws Exception {
+    ((UserServiceImpl) userService).deleteAllUsersGroupsPermissions();
+    reset(ldapClient);
+  }
+
   @Test
   @WithAccessId(user = "businessadmin")
-  @Order(1)
   void should_RefreshUserInfo_When_UserInfoRefreshJobIsExecuted() throws Exception {
+    UserInfoRefreshJob userInfoRefreshJob =
+        new UserInfoRefreshJob(kadaiEngine, transactionProvider, null);
+    userInfoRefreshJob.execute();
+
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
-
       List<User> users = getUsers(connection);
-      assertThat(users).hasSize(18);
-
-      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
-      userInfoRefreshJob.execute();
-
-      users = getUsers(connection);
       List<User> ldapusers = ldapClient.searchUsersInUserRole();
       users.sort(Comparator.comparing(User::getId));
       ldapusers.sort(Comparator.comparing(User::getId));
@@ -127,61 +149,102 @@ class UserInfoRefreshJobIntTest {
 
   @Test
   @WithAccessId(user = "businessadmin")
-  @Order(2)
   void should_PostprocessUser_When_RefreshUserPostprocessorIsActive() throws Exception {
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
 
-      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
+      UserInfoRefreshJob userInfoRefreshJob =
+          new UserInfoRefreshJob(kadaiEngine, transactionProvider, null);
       userInfoRefreshJob.execute();
 
-      Statement statement = connection.createStatement();
-      ResultSet rs =
-          statement.executeQuery(
-              "SELECT * FROM "
-                  + connection.getSchema()
-                  + ".USER_INFO "
-                  + "WHERE USER_ID='user-2-2'");
-      rs.next();
-      String updatedOrgLevel = rs.getString("ORG_LEVEL_1");
-      assertThat(updatedOrgLevel).isEqualTo("FirstSecond");
+      try (Statement statement = connection.createStatement();
+          ResultSet rs =
+              statement.executeQuery(
+                  "SELECT * FROM "
+                      + connection.getSchema()
+                      + ".USER_INFO "
+                      + "WHERE USER_ID='user-2-2'")) {
+        rs.next();
+        String updatedOrgLevel = rs.getString("ORG_LEVEL_1");
+        assertThat(updatedOrgLevel).isEqualTo("FirstSecond");
+      }
     }
   }
 
   @Test
   @WithAccessId(user = "businessadmin")
-  @Order(3)
   void should_RefreshUserInfoAndSkipErrorProneUsers_When_UserInfoRefreshJobIsExecuted()
       throws Exception {
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
+    List<User> sourceUsers;
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      sourceUsers = getUsers(connection);
+    }
+    int sourceCount = sourceUsers.size();
+    sourceUsers.get(0).setId(null);
+    when(ldapClient.searchAllUsersInUserRole())
+        .thenReturn(new LdapUserSnapshot(sourceUsers, 1, sourceUsers.size()));
+
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
 
     try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      assertThat(getUsers(connection)).hasSize(sourceCount - 1);
+    }
+  }
 
-      List<User> users = getUsers(connection);
-      assertThat(users).hasSize(6);
+  @Test
+  @WithAccessId(user = "businessadmin")
+  void should_RollBackRefreshWhenFinalLockCheckFails() throws Exception {
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
+    List<User> before = readUsers();
+    assertThat(before).isNotEmpty();
+    when(ldapClient.searchAllUsersInUserRole()).thenReturn(new LdapUserSnapshot(List.of(), 1, 0));
+    JobLockGuard lockGuard = mock(JobLockGuard.class);
+    doNothing().doThrow(new SystemException("Refresh lock lost")).when(lockGuard).renewOrThrow();
+    UserInfoRefreshJob job =
+        new UserInfoRefreshJob(
+            kadaiEngine,
+            transactionProvider,
+            null,
+            ldapClient,
+            new RefreshUserPostprocessorManager(),
+            lockGuard);
 
-      // Incomplete user - supposed to fail in the Job
-      users.get(0).setId(null);
-      when(ldapClient.searchUsersInUserRole()).thenReturn(users);
+    assertThatThrownBy(job::execute).hasRootCauseMessage("Refresh lock lost");
 
-      UserInfoRefreshJob userInfoRefreshJob = new UserInfoRefreshJob(kadaiEngine);
-      userInfoRefreshJob.execute();
+    assertThat(readUsers()).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(before);
+  }
 
-      users = getUsers(connection);
-      List<User> ldapusers = ldapClient.searchUsersInUserRole();
+  @Test
+  @WithAccessId(user = "businessadmin")
+  void should_RejectSynchronizationWithoutTransaction() throws Exception {
+    new UserInfoRefreshJob(kadaiEngine, transactionProvider, null).execute();
+    List<User> before = readUsers();
+    UserServiceImpl service = (UserServiceImpl) userService;
+    var input = service.prepareUserRefresh(List.of());
 
-      assertThat(users).hasSize(ldapusers.size() - 1);
-      assertThat(users).hasSize(5);
+    assertThatThrownBy(() -> service.synchronizeUsers(input, 5))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("caller-managed transaction");
+
+    assertThat(readUsers()).usingRecursiveComparison().ignoringCollectionOrder().isEqualTo(before);
+  }
+
+  private List<User> readUsers() throws Exception {
+    try (Connection connection = kadaiEngine.getConfiguration().getDataSource().getConnection()) {
+      return getUsers(connection);
     }
   }
 
   private List<User> getUsers(Connection connection) throws Exception {
 
     List<String> users = new ArrayList<>();
-    Statement statement = connection.createStatement();
-    ResultSet rs = statement.executeQuery("SELECT * FROM " + connection.getSchema() + ".USER_INFO");
-
-    while (rs.next()) {
-      users.add(rs.getString("USER_ID"));
+    try (Statement statement = connection.createStatement();
+        ResultSet rs =
+            statement.executeQuery("SELECT * FROM " + connection.getSchema() + ".USER_INFO")) {
+      while (rs.next()) {
+        users.add(rs.getString("USER_ID"));
+      }
     }
 
     List<User> userList = users.stream().map(rethrowing(userService::getUser)).toList();
@@ -190,28 +253,32 @@ class UserInfoRefreshJobIntTest {
 
   private List<String> getGroupInfo(Connection connection, String userId) throws Exception {
     List<String> groupIds = new ArrayList<>();
-    PreparedStatement ps =
+    try (PreparedStatement ps =
         connection.prepareStatement(
-            "SELECT group_id FROM " + connection.getSchema() + ".group_info WHERE user_id = ?");
-    ps.setString(1, userId);
-    ResultSet rs = ps.executeQuery();
-    while (rs.next()) {
-      groupIds.add(rs.getString(1));
+            "SELECT group_id FROM " + connection.getSchema() + ".group_info WHERE user_id = ?")) {
+      ps.setString(1, userId);
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          groupIds.add(rs.getString(1));
+        }
+      }
     }
     return groupIds;
   }
 
   private List<String> getPermissionInfo(Connection connection, String userId) throws Exception {
     List<String> permissionIds = new ArrayList<>();
-    PreparedStatement ps =
+    try (PreparedStatement ps =
         connection.prepareStatement(
             "SELECT permission_id FROM "
                 + connection.getSchema()
-                + ".permission_info WHERE user_id = ?");
-    ps.setString(1, userId);
-    ResultSet rs = ps.executeQuery();
-    while (rs.next()) {
-      permissionIds.add(rs.getString(1));
+                + ".permission_info WHERE user_id = ?")) {
+      ps.setString(1, userId);
+      try (ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+          permissionIds.add(rs.getString(1));
+        }
+      }
     }
     return permissionIds;
   }

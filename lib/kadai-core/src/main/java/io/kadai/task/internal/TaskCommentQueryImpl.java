@@ -322,18 +322,16 @@ public class TaskCommentQueryImpl implements TaskCommentQuery {
       }
 
       Arrays.stream(taskIdIn)
-          .forEach(
-              taskId -> {
-                try {
-                  taskService.getTask(taskId);
-                } catch (NotAuthorizedOnWorkbasketException e) {
-                  throw new NotAuthorizedToQueryWorkbasketException(
-                      e.getMessage(), e.getErrorCode(), e);
-                } catch (TaskNotFoundException e) {
-                  LOGGER.warn(
-                      String.format("The Task with the ID ' %s ' does not exist.", taskId), e);
-                }
-              });
+          .forEach(taskId -> {
+            try {
+              taskService.getTask(taskId);
+            } catch (NotAuthorizedOnWorkbasketException e) {
+              throw new NotAuthorizedToQueryWorkbasketException(
+                  e.getMessage(), e.getErrorCode(), e);
+            } catch (TaskNotFoundException e) {
+              LOGGER.warn(String.format("The Task with the ID ' %s ' does not exist.", taskId), e);
+            }
+          });
     }
   }
 

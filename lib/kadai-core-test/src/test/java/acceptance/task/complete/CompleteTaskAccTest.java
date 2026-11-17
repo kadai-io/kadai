@@ -72,8 +72,7 @@ import org.junit.jupiter.api.function.ThrowingConsumer;
 class CompleteTaskAccTest implements KadaiConfigurationModifier {
 
   @KadaiInject TaskService taskService;
-  @KadaiInject
-  CurrentUserContext currentUserContext;
+  @KadaiInject CurrentUserContext currentUserContext;
 
   @KadaiInject UserService userService;
 

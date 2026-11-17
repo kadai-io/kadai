@@ -36,27 +36,26 @@ class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
   @Test
   void should_CreateCancelledHistoryEvent_When_CancelTaskInStateClaimed() throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskId = "TKI:000000000000000000000000000000000001";
+        CheckedRunnable.rethrowing(() -> {
+          final String taskId = "TKI:000000000000000000000000000000000001";
 
-              List<TaskHistoryEvent> listEvents =
-                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          List<TaskHistoryEvent> listEvents =
+              taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(listEvents).isEmpty();
+          assertThat(listEvents).isEmpty();
 
-              taskService.cancelTask(taskId);
+          taskService.cancelTask(taskId);
 
-              listEvents = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          listEvents = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(listEvents).hasSize(1);
+          assertThat(listEvents).hasSize(1);
 
-              String eventType = listEvents.get(0).getEventType();
+          String eventType = listEvents.get(0).getEventType();
 
-              assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
-              assertThat(listEvents.get(0).getUserId()).isEqualTo("user-2-2");
-              assertThat(listEvents.get(0).getProxyAccessId()).isEqualTo("taskadmin");
-            }),
+          assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+          assertThat(listEvents.get(0).getUserId()).isEqualTo("user-2-2");
+          assertThat(listEvents.get(0).getProxyAccessId()).isEqualTo("taskadmin");
+        }),
         KadaiRole.TASK_ADMIN,
         "user-2-2");
   }
@@ -64,27 +63,26 @@ class CreateHistoryEventOnTaskCancellationAccTest extends AbstractAccTest {
   @Test
   void should_CreateCancelledHistoryEvent_When_CancelTaskInStateReady() throws Exception {
     kadaiEngine.runAs(
-        CheckedRunnable.rethrowing(
-            () -> {
-              final String taskId = "TKI:000000000000000000000000000000000003";
+        CheckedRunnable.rethrowing(() -> {
+          final String taskId = "TKI:000000000000000000000000000000000003";
 
-              List<TaskHistoryEvent> events =
-                  taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          List<TaskHistoryEvent> events =
+              taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(events).isEmpty();
+          assertThat(events).isEmpty();
 
-              taskService.cancelTask(taskId);
+          taskService.cancelTask(taskId);
 
-              events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
+          events = taskHistoryService.createTaskHistoryQuery().taskIdIn(taskId).list();
 
-              assertThat(events).hasSize(1);
+          assertThat(events).hasSize(1);
 
-              String eventType = events.get(0).getEventType();
+          String eventType = events.get(0).getEventType();
 
-              assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
-              assertThat(events.get(0).getUserId()).isEqualTo("user-1-1");
-              assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
-            }),
+          assertThat(eventType).isEqualTo(TaskHistoryEventType.CANCELLED.getName());
+          assertThat(events.get(0).getUserId()).isEqualTo("user-1-1");
+          assertThat(events.get(0).getProxyAccessId()).isEqualTo("admin");
+        }),
         KadaiRole.ADMIN,
         "user-1-1");
   }

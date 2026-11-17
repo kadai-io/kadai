@@ -23,7 +23,7 @@ import { of, Subject, throwError } from 'rxjs';
 import { Location } from '@angular/common';
 
 import { WorkbasketState } from './workbasket.state';
-import { FilterState } from '../filter-store/filter.state';
+import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import {
   CopyWorkbasket,
   CreateWorkbasket,
@@ -45,18 +45,18 @@ import {
   UpdateWorkbasketDistributionTargets
 } from './workbasket.actions';
 
-import { WorkbasketService } from '../../services/workbasket/workbasket.service';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
-import { DomainService } from '../../services/domain/domain.service';
-import { ACTION } from '../../models/action';
-import { WorkbasketComponent } from '../../../administration/models/workbasket-component';
-import { Side } from '../../../administration/models/workbasket-distribution-enums';
-import { ButtonAction } from '../../../administration/models/button-action';
-import { WorkbasketQueryFilterParameter } from '../../models/workbasket-query-filter-parameter';
-import { Direction, WorkbasketQuerySortParameter } from '../../models/sorting';
-import { QueryPagingParameter } from '../../models/query-paging-parameter';
-import { selectedWorkbasketMock, workbasketAccessItemsMock } from '../mock-data/mock-store';
+import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { DomainService } from 'app/shared/services/domain/domain.service';
+import { ACTION } from 'app/shared/models/action';
+import { WorkbasketComponent } from 'app/administration/models/workbasket-component';
+import { Side } from 'app/administration/models/workbasket-distribution-enums';
+import { ButtonAction } from 'app/administration/models/button-action';
+import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { Direction, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
+import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
+import { selectedWorkbasketMock, workbasketAccessItemsMock } from 'app/shared/store/mock-data/mock-store';
 import { ActivatedRoute } from '@angular/router';
 
 const mockWorkbasket = selectedWorkbasketMock;

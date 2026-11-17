@@ -21,15 +21,15 @@ import { Store } from '@ngxs/store';
 import { Observable, Subject } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { take, takeUntil } from 'rxjs/operators';
-import { WorkbasketAndAction, WorkbasketSelectors } from '../../../shared/store/workbasket-store/workbasket.selectors';
+import { WorkbasketAndAction, WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
 
-import { CreateWorkbasket, SelectWorkbasket } from '../../../shared/store/workbasket-store/workbasket.actions';
-import { Workbasket } from '../../../shared/models/workbasket';
-import { WorkbasketListComponent } from '../workbasket-list/workbasket-list.component';
+import { CreateWorkbasket, SelectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { WorkbasketListComponent } from 'app/administration/components/workbasket-list/workbasket-list.component';
 
 import { MatIcon } from '@angular/material/icon';
-import { WorkbasketDetailsComponent } from '../workbasket-details/workbasket-details.component';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { WorkbasketDetailsComponent } from 'app/administration/components/workbasket-details/workbasket-details.component';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 
 @Component({
   selector: 'kadai-administration-workbasket-overview',

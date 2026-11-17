@@ -175,9 +175,8 @@ public class KadaiInitializationExtension
       try (MockedStatic<SpiLoader> staticMock = Mockito.mockStatic(SpiLoader.class)) {
         ServiceProviderExtractor.extractServiceProviders(
                 testClass, extractEnclosingTestInstances(testInstance))
-            .forEach(
-                (spi, serviceProviders) ->
-                    staticMock.when(() -> SpiLoader.load(spi)).thenReturn(serviceProviders));
+            .forEach((spi, serviceProviders) ->
+                staticMock.when(() -> SpiLoader.load(spi)).thenReturn(serviceProviders));
         kadaiEngine =
             KadaiEngine.buildKadaiEngine(
                 kadaiConfigurationBuilder.build(), ConnectionManagementMode.AUTOCOMMIT);

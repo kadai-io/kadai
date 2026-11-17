@@ -18,7 +18,7 @@
 
 import { Selector } from '@ngxs/store';
 import { ClassificationState, ClassificationStateModel } from './classification.state';
-import { Classification } from '../../models/classification';
+import { Classification } from 'app/shared/models/classification';
 
 export class ClassificationSelectors {
   @Selector([ClassificationState])

@@ -25,12 +25,12 @@ import {
   SelectAccessId
 } from './access-items-management.actions';
 import { Observable, of } from 'rxjs';
-import { AccessIdsService } from '../../services/access-ids/access-ids.service';
+import { AccessIdsService } from 'app/shared/services/access-ids/access-ids.service';
 import { take, tap } from 'rxjs/operators';
-import { AccessId } from '../../models/access-id';
-import { NotificationService } from '../../services/notifications/notification.service';
-import { WorkbasketAccessItemsRepresentation } from '../../models/workbasket-access-items-representation';
-import { RequestInProgressService } from '../../services/request-in-progress/request-in-progress.service';
+import { AccessId } from 'app/shared/models/access-id';
+import { NotificationService } from 'app/shared/services/notifications/notification.service';
+import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { inject, Injectable } from '@angular/core';
 
 class InitializeStore {

@@ -52,24 +52,22 @@ public class CollectionPropertyParser<T extends Collection<Object>> implements P
               value, rawClass, getTargetClass()));
     }
     return Optional.ofNullable(value)
-        .flatMap(
-            string -> {
-              Class<?> elementClass =
-                  ReflectionUtil.getRawClass(
-                      ((ParameterizedType) type).getActualTypeArguments()[0]);
+        .flatMap(string -> {
+          Class<?> elementClass =
+              ReflectionUtil.getRawClass(((ParameterizedType) type).getActualTypeArguments()[0]);
 
-              PropertyParser<?> parser = PropertyParser.getPropertyParser(elementClass);
-              T collection = emptyCollection.get();
-              for (String it : value.split(Pattern.quote(separator))) {
-                it = it.trim();
-                if (!it.isEmpty()) {
-                  parser.parse(it, separator, elementClass).ifPresent(collection::add);
-                }
-              }
-              if (collection.isEmpty()) {
-                return Optional.empty();
-              }
-              return Optional.of(collection);
-            });
+          PropertyParser<?> parser = PropertyParser.getPropertyParser(elementClass);
+          T collection = emptyCollection.get();
+          for (String it : value.split(Pattern.quote(separator))) {
+            it = it.trim();
+            if (!it.isEmpty()) {
+              parser.parse(it, separator, elementClass).ifPresent(collection::add);
+            }
+          }
+          if (collection.isEmpty()) {
+            return Optional.empty();
+          }
+          return Optional.of(collection);
+        });
   }
 }

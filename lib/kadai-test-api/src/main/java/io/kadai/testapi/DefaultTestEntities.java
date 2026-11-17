@@ -32,9 +32,8 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * Utility-Class providing prepared
- * {@linkplain io.kadai.testapi.builder.EntityBuilder Entity-Builders} to build default entities
- * for tests.
+ * Utility-Class providing prepared {@linkplain io.kadai.testapi.builder.EntityBuilder
+ * Entity-Builders} to build default entities for tests.
  */
 public class DefaultTestEntities {
 
@@ -82,9 +81,9 @@ public class DefaultTestEntities {
   }
 
   /**
-   * Returns a {@link UserBuilder} with random {@linkplain UserBuilder#id(String) id},
-   * {@linkplain UserBuilder#firstName(String) firstName} and
-   * {@linkplain UserBuilder#lastName(String) lastName}.
+   * Returns a {@link UserBuilder} with random {@linkplain UserBuilder#id(String) id}, {@linkplain
+   * UserBuilder#firstName(String) firstName} and {@linkplain UserBuilder#lastName(String)
+   * lastName}.
    *
    * @return the default {@link ClassificationBuilder}
    */

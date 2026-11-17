@@ -20,8 +20,9 @@
 
   <!-- SEARCH -->
   <div class="access-items__typeahead">
-    <kadai-shared-type-ahead (accessIdEventEmitter)="onSelectAccessId($event)"
-                             placeHolderMessage="Search for AccessId" />
+    <kadai-shared-type-ahead (accessIdSelected)="onSelectAccessId($event)"
+                             [emitEmptySelection]="false"
+                             placeholder="Search for AccessId" />
   </div>
   @if (!accessItemsForm) {
     <div class="access-items__icon">

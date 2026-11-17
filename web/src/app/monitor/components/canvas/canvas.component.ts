@@ -18,13 +18,13 @@
 
 import { AfterViewInit, Component, inject, input, OnDestroy, OnInit } from '@angular/core';
 import { ArcElement, Chart, DoughnutController, Legend, Title, Tooltip } from 'chart.js';
-import { ReportRow } from '../../models/report-row';
+import { ReportRow } from 'app/monitor/models/report-row';
 import { Store } from '@ngxs/store';
-import { SettingsSelectors } from '../../../shared/store/settings-store/settings.selectors';
+import { SettingsSelectors } from 'app/shared/store/settings-store/settings.selectors';
 import { Observable, Subject } from 'rxjs';
-import { Settings } from '../../../settings/models/settings';
+import { Settings } from 'app/settings/models/settings';
 import { takeUntil } from 'rxjs/operators';
-import { SettingMembers } from '../../../settings/components/Settings/expected-members';
+import { SettingMembers } from 'app/settings/components/Settings/expected-members';
 
 @Component({
   selector: 'kadai-monitor-canvas',

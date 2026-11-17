@@ -61,8 +61,8 @@ public interface TaskRoutingProvider extends KadaiInitializable {
 
   /**
    * This method is used instead of {@linkplain TaskRoutingProvider#determineWorkbasketId(Task)} if
-   * the parameter kadai.routing.includeOwner is set to true. Use this if you want to initialize
-   * the owner during Routing.
+   * the parameter kadai.routing.includeOwner is set to true. Use this if you want to initialize the
+   * owner during Routing.
    *
    * <p>Determine the {@linkplain RoutingTarget} for a given {@linkplain Task}.This method will be
    * invoked by KADAI when it is asked to {@linkplain io.kadai.task.api.TaskService#createTask(Task)
@@ -71,17 +71,17 @@ public interface TaskRoutingProvider extends KadaiInitializable {
    * <p>If more than one TaskRoutingProvider class is registered, KADAI calls them all and uses
    * their results only if they agree on the {@linkplain RoutingTarget}. This is, if more than one
    * {@linkplain RoutingTarget RoutingTargets} are returned, KADAI uses them only if they are
-   * identical.  If different RoutingTargets are returned, the {@linkplain Task} will not be
+   * identical. If different RoutingTargets are returned, the {@linkplain Task} will not be
    * {@linkplain io.kadai.task.api.TaskService#createTask(Task) created}.
    *
    * <p>If the {@linkplain RoutingTarget} cannot be computed, the method should return an empty
-   * {@linkplain RoutingTarget}. If every registered TaskRoutingProvider return an empty
-   * {@linkplain RoutingTarget}, the {@linkplain Task} will not be {@linkplain
+   * {@linkplain RoutingTarget}. If every registered TaskRoutingProvider return an empty {@linkplain
+   * RoutingTarget}, the {@linkplain Task} will not be {@linkplain
    * io.kadai.task.api.TaskService#createTask(Task) created}
    *
    * <p>If the owner of the returned {@linkplain RoutingTarget} is null, then the owner of
-   * {@linkplain Task} is kept. Else, the owner of {@linkplain Task} is overwritten by the owner
-   * of the returned RoutingTarget.
+   * {@linkplain Task} is kept. Else, the owner of {@linkplain Task} is overwritten by the owner of
+   * the returned RoutingTarget.
    *
    * <p>The behaviour is undefined if this method tries to apply persistent changes to any entity.
    *

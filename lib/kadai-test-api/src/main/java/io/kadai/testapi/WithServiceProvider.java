@@ -27,32 +27,31 @@ import java.lang.annotation.Target;
 
 /**
  * Annotation allowing to declare, define and register an SPI into the KadaiEngine of a Test-Class
- * extended with
- * {@linkplain
+ * extended with {@linkplain
  * io.kadai.testapi.extensions.KadaiInitializationExtension @KadaiInitializationExtension}.
  *
  * <p>Usage may look like:
- * <pre>
- *   {@code
- *     @WithServiceProvider(
- *       serviceProviderInterface = PriorityServiceProvider.class,
- *       serviceProviders = TestStaticValuePriorityServiceProvider.class)
- *     @ExtendWith(KadaiInitializationExtension.class)
- *     class MyTestClass {
- *       static class TestStaticValuePriorityServiceProvider implements PriorityServiceProvider {
- *          @Override
- *          public OptionalInt calculatePriority(TaskSummary taskSummary) {
- *            return OptionalInt.of(10);
- *          }
- *        }
  *
- *       @Test
- *       void myTest() {
- *         // trigger some action that fires registered SPI
- *       }
- *     }
+ * <pre>{@code
+ * @WithServiceProvider(
+ *   serviceProviderInterface = PriorityServiceProvider.class,
+ *   serviceProviders = TestStaticValuePriorityServiceProvider.class)
+ * @ExtendWith(KadaiInitializationExtension.class)
+ * class MyTestClass {
+ *   static class TestStaticValuePriorityServiceProvider implements PriorityServiceProvider {
+ *      @Override
+ *      public OptionalInt calculatePriority(TaskSummary taskSummary) {
+ *        return OptionalInt.of(10);
+ *      }
+ *    }
+ *
+ *   @Test
+ *   void myTest() {
+ *     // trigger some action that fires registered SPI
  *   }
- * </pre>
+ * }
+ *
+ * }</pre>
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
@@ -67,17 +66,17 @@ public @interface WithServiceProvider {
   Class<?> serviceProviderInterface();
 
   /**
-   * Returns the types of the classes implementing the declared
-   * {@linkplain #serviceProviderInterface() ServiceProviderInterface}.
+   * Returns the types of the classes implementing the declared {@linkplain
+   * #serviceProviderInterface() ServiceProviderInterface}.
    *
-   * @return the types of the classes implementing the declared
-   *     {@linkplain #serviceProviderInterface() ServiceProviderInterface}
+   * @return the types of the classes implementing the declared {@linkplain
+   *     #serviceProviderInterface() ServiceProviderInterface}
    */
   Class<?>[] serviceProviders();
 
   /**
-   * Annotation allowing to declare multiple types of
-   * {@linkplain WithServiceProvider @WithServiceProvider}.
+   * Annotation allowing to declare multiple types of {@linkplain
+   * WithServiceProvider @WithServiceProvider}.
    */
   @Retention(RetentionPolicy.RUNTIME)
   @Target(ElementType.TYPE)

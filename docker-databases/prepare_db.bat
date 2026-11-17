@@ -7,8 +7,8 @@ SETLOCAL
     ECHO PRESS a number to select your task - anything to EXIT.
     ECHO -----------------------------------------------------
     ECHO.
-    ECHO 1 - Start DB2 11.5
-    ECHO 2 - Stop  DB2 11.5
+    ECHO 1 - Start DB2 12.1
+    ECHO 2 - Stop  DB2 12.1
     ECHO.
     ECHO 3 - Start POSTGRES 17
     ECHO 4 - Stop  POSTGRES 17
@@ -17,25 +17,25 @@ SETLOCAL
     ECHO.
     SET /P MENU=Select task then press ENTER:
     ECHO.
-    IF [%MENU%]==[1] GOTO START_DB2_11_5
-    IF [%MENU%]==[2] GOTO STOP_DB2_11_5
+    IF [%MENU%]==[1] GOTO START_DB2_12_1
+    IF [%MENU%]==[2] GOTO STOP_DB2_12_1
     IF [%MENU%]==[3] GOTO START_POSTGRES_17
     IF [%MENU%]==[4] GOTO STOP_POSTGRES_17
     IF [%MENU%]==[7] GOTO STOP_ALL
     EXIT /B
 
-:START_DB2_11_5
+:START_DB2_12_1
     ECHO ---
-    ECHO docker compose -f %~dp0/docker-compose.yml up -d kadai-db2_11-5
-    docker compose -f %~dp0/docker-compose.yml up -d kadai-db2_11-5
+    ECHO docker compose -f %~dp0/docker-compose.yml up -d kadai-db2_12-1
+    docker compose -f %~dp0/docker-compose.yml up -d kadai-db2_12-1
 
     ECHO ---
     GOTO MENU
 
-:STOP_DB2_11_5
+:STOP_DB2_12_1
     ECHO ---
-    ECHO docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-db2_11-5
-    docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-db2_11-5
+    ECHO docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-db2_12-1
+    docker compose -f %~dp0/docker-compose.yml rm -f -s -v kadai-db2_12-1
     ECHO ---
     GOTO MENU
 

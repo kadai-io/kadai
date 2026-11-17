@@ -269,11 +269,10 @@ public class ClassificationQueryFilterParameter
             Pair.of(ClassificationCustomField.CUSTOM_6, custom6Like),
             Pair.of(ClassificationCustomField.CUSTOM_7, custom7Like),
             Pair.of(ClassificationCustomField.CUSTOM_8, custom8Like))
-        .forEach(
-            pair ->
-                Optional.ofNullable(pair.getRight())
-                    .map(this::wrapElementsInLikeStatement)
-                    .ifPresent(l -> query.customAttributeLike(pair.getLeft(), l)));
+        .forEach(pair ->
+            Optional.ofNullable(pair.getRight())
+                .map(this::wrapElementsInLikeStatement)
+                .ifPresent(l -> query.customAttributeLike(pair.getLeft(), l)));
     return null;
   }
 }

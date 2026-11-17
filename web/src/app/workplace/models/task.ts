@@ -18,7 +18,7 @@
 
 import { Workbasket } from 'app/shared/models/workbasket';
 import { ObjectReference } from './object-reference';
-import { ClassificationSummary } from '../../shared/models/classification-summary';
+import { ClassificationSummary } from 'app/shared/models/classification-summary';
 
 export class Task {
   constructor(

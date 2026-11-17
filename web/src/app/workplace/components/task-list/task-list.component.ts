@@ -22,7 +22,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
 import { MatDivider } from '@angular/material/divider';
-import { SvgIconComponent } from 'angular-svg-icon';
+import { SvgIconComponent } from 'app/shared/components/svg-icon/svg-icon.component';
 
 @Component({
   selector: 'kadai-task-list',
