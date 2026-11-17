@@ -2011,6 +2011,13 @@ public class TaskServiceImpl implements TaskService {
     }
   }
 
+  /**
+   * Overwrites fields that TaskMapper::update never persists with their stored values.
+   * Changes to these fields have always been ignored on update, so rejecting them would break
+   * callers that send stale read-only or derived values (e.g. an outdated ownerLongName after an
+   * owner change). Restoring them keeps the returned task and the change history consistent with
+   * the database.
+   */
   private void restoreFieldsNotUpdatedByTaskMapper(
       TaskImpl oldTaskImpl, TaskImpl newTaskImpl) {
     newTaskImpl.setCreated(oldTaskImpl.getCreated());
