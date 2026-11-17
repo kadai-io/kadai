@@ -2018,7 +2018,6 @@ public class TaskServiceImpl implements TaskService {
     newTaskImpl.setCreatorLongName(oldTaskImpl.getCreatorLongName());
     newTaskImpl.setOwnerLongName(oldTaskImpl.getOwnerLongName());
     newTaskImpl.setCallbackState(oldTaskImpl.getCallbackState());
-    newTaskImpl.setNumberOfComments(oldTaskImpl.getNumberOfComments());
     newTaskImpl.setGroupByCount(oldTaskImpl.getGroupByCount());
   }
 
