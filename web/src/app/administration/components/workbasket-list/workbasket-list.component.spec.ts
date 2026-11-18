@@ -110,7 +110,7 @@ describe('WorkbasketListComponent', () => {
     const mockId = '123';
     component.selectWorkbasket(mockId);
     expect(actionDispatched).toBe(true);
-    expect(component.selectedId()).toEqual(undefined);
+    expect(component.selectedId()).toBeUndefined();
   });
 
   it('should dispatch DeselectWorkbasket when switching the domain the selected workbasket does not belong to', () => {
@@ -121,7 +121,7 @@ describe('WorkbasketListComponent', () => {
     actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
     selectedDomain$.next('B');
     expect(actionDispatched).toBe(true);
-    expect(component.selectedId()).toEqual(undefined);
+    expect(component.selectedId()).toBeUndefined();
   });
 
   it('should not dispatch DeselectWorkbasket when the same domain is emitted again', () => {
