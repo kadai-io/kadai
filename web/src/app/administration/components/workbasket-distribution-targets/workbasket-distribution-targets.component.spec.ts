@@ -25,7 +25,6 @@ import { Actions, provideStore, Store } from '@ngxs/store';
 import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
 import { ActivatedRoute } from '@angular/router';
 import { engineConfigurationMock, workbasketReadStateMock } from 'app/shared/store/mock-data/mock-store';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -43,12 +42,6 @@ const activatedRouteMock = {
   firstChild: {
     params: of({ id: 'workbasket' })
   }
-};
-
-const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-  getDomains: vi.fn().mockReturnValue(of('A'))
 };
 
 const workbasketServiceSpy: Partial<WorkbasketService> = {
@@ -79,7 +72,6 @@ describe('WorkbasketDistributionTargetsComponent', () => {
         provideHttpClientTesting(),
         { provide: WorkbasketService, useValue: workbasketServiceSpy },
         { provide: ActivatedRoute, useValue: activatedRouteMock },
-        { provide: DomainService, useValue: domainServiceSpy },
         { provide: NotificationService, useValue: notificationServiceSpy }
       ]
     }).compileComponents();

@@ -46,6 +46,7 @@ import { FilterState } from './app/shared/store/filter-store/filter.state';
 import { WorkplaceState } from './app/shared/store/workplace-store/workplace.state';
 import { SettingsState } from './app/shared/store/settings-store/settings.state';
 import { TaskWorkflowState } from './app/shared/store/task-store/task.state';
+import { DomainState } from './app/shared/store/domain-store/domain.state';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
 registerLocaleData(localeDe);
@@ -65,7 +66,8 @@ bootstrapApplication(AppComponent, {
         FilterState,
         WorkplaceState,
         SettingsState,
-        TaskWorkflowState
+        TaskWorkflowState,
+        DomainState
       ],
       { developmentMode: !environment.production }
     ),

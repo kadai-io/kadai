@@ -20,42 +20,42 @@
   @if (administrationAccess) {
     <a (click)="toggleSidenav(administrationsUrl)"
        [routerLinkActive]="['active']"
-       [routerLink]=[administrationsUrl] class="navlist__item navlist__admin" mat-list-item>Administration</a>
+       queryParamsHandling="merge" [routerLink]=[administrationsUrl] class="navlist__item navlist__admin" mat-list-item>Administration</a>
   }
   <div class="navlist__admin-item">
     @if (administrationAccess) {
       <a (click)="toggleSidenav(workbasketsUrl)"
          [routerLinkActive]="['active__sub']"
-         [routerLink]=[workbasketsUrl] class="navlist__item  navlist__admin-workbaskets"
+         queryParamsHandling="merge" [routerLink]=[workbasketsUrl] class="navlist__item  navlist__admin-workbaskets"
          mat-list-item>Workbaskets</a>
     }
     @if (administrationAccess) {
       <a (click)="toggleSidenav(classificationUrl)"
          [routerLinkActive]="['active__sub']"
-         [routerLink]=[classificationUrl] class="navlist__item  navlist__admin-classifications"
+         queryParamsHandling="merge" [routerLink]=[classificationUrl] class="navlist__item  navlist__admin-classifications"
          mat-list-item>Classifications</a>
     }
     @if (administrationAccess) {
       <a (click)="toggleSidenav(accessUrl)"
          [routerLinkActive]="['active__sub']"
-         [routerLink]=[accessUrl] class="navlist__item  navlist__admin-access-items" mat-list-item>Access
+         queryParamsHandling="merge" [routerLink]=[accessUrl] class="navlist__item  navlist__admin-access-items" mat-list-item>Access
         Items</a>
     }
     @if (routingAccess()) {
       <a (click)="toggleSidenav(routingUrl)"
          [routerLinkActive]="['active__sub']"
-         [routerLink]=[routingUrl] class="navlist__item  navlist__admin-task-routing" mat-list-item>Task
+         queryParamsHandling="merge" [routerLink]=[routingUrl] class="navlist__item  navlist__admin-task-routing" mat-list-item>Task
         Routing</a>
     }
   </div>
   @if (monitorAccess) {
     <a (click)="toggleSidenav(monitorUrl)" [routerLinkActive]="['active']"
-       [routerLink]=[monitorUrl]
+       queryParamsHandling="merge" [routerLink]=[monitorUrl]
        class="navlist__item navlist__monitor" mat-list-item>Monitor</a>
   }
   @if (workplaceAccess) {
     <a (click)="toggleSidenav(workplaceUrl)" [routerLinkActive]="['active']"
-       [routerLink]=[workplaceUrl] class="navlist__item navlist__workplace"
+       queryParamsHandling="merge" [routerLink]=[workplaceUrl] class="navlist__item navlist__workplace"
        mat-list-item>Workplace</a>
   }
   <div class="navlist__admin-item">
@@ -63,25 +63,25 @@
       <a (click)="toggleSidenav(workplaceUrl)"
          [queryParams]="{component: 'workbaskets'}"
          [routerLinkActive]="['active__sub']"
-         [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--workbaskets"
+         queryParamsHandling="merge" [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--workbaskets"
          mat-list-item>Workbaskets</a>
     }
     @if (workplaceAccess) {
       <a (click)="toggleSidenav(workplaceUrl)"
          [queryParams]="{component: 'task-search'}"
          [routerLinkActive]="['active__sub']"
-         [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--task-search"
+         queryParamsHandling="merge" [routerLink]=[workplaceUrl] class="navlist__item  navlist__workplace--task-search"
          mat-list-item>Task Search</a>
     }
   </div>
   @if (historyAccess()) {
     <a (click)="toggleSidenav(historyUrl)" [routerLinkActive]="['active']"
-       [routerLink]=[historyUrl]
+       queryParamsHandling="merge" [routerLink]=[historyUrl]
        class="navlist__item navlist__history" mat-list-item>History</a>
   }
   @if (settingsAccess) {
     <a (click)="toggleSidenav(settingsURL)" [routerLinkActive]="['active']"
-       [routerLink]=[settingsURL]
+       queryParamsHandling="merge" [routerLink]=[settingsURL]
        class="navlist__item navlist__setting" mat-list-item>Settings</a>
   }
 </mat-nav-list>

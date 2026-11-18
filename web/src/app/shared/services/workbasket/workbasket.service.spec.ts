@@ -19,39 +19,45 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { of, throwError } from 'rxjs';
+import { throwError } from 'rxjs';
 import { WorkbasketService } from './workbasket.service';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { provideStore, Store } from '@ngxs/store';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { WorkbasketAccessItems } from 'app/shared/models/workbasket-access-items';
 import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbasket-access-items-representation';
 import { Direction, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { RequestInProgressService } from '../request-in-progress/request-in-progress.service';
 
 describe('WorkbasketService', () => {
   let service: WorkbasketService;
   let httpMock: HttpTestingController;
 
-  const mockDomainService = {
-    getSelectedDomain: vi.fn().mockReturnValue(of('DOMAIN_A')),
-    domainChangedComplete: vi.fn()
+  const requestInProgressServiceMock = {
+    setRequestInProgress: vi.fn()
   };
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockDomainService.getSelectedDomain.mockReturnValue(of('DOMAIN_A'));
 
     TestBed.configureTestingModule({
       providers: [
         WorkbasketService,
         { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://test' } },
         provideHttpClientTesting(),
-        { provide: DomainService, useValue: mockDomainService }
+        provideStore([DomainState]),
+        { provide: RequestInProgressService, useValue: requestInProgressServiceMock }
       ]
     });
 
     service = TestBed.inject(WorkbasketService);
     httpMock = TestBed.inject(HttpTestingController);
+    const store = TestBed.inject(Store);
+    store.reset({
+      ...store.snapshot(),
+      domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' }
+    });
   });
 
   afterEach(() => {
@@ -289,13 +295,21 @@ describe('WorkbasketService', () => {
       req.flush({ workbaskets: [] });
     });
 
-    it('should call domainService.getSelectedDomain when forceRequest is true', () => {
+    it('should wait for a selected domain and clear the spinner when forceRequest is true', () => {
       service.getWorkBasketsSummary(true).subscribe();
 
       httpMock.expectOne((r) => r.url.includes('/v1/workbaskets')).flush({ workbaskets: [] });
 
-      expect(mockDomainService.getSelectedDomain).toHaveBeenCalled();
-      expect(mockDomainService.domainChangedComplete).toHaveBeenCalled();
+      expect(requestInProgressServiceMock.setRequestInProgress).toHaveBeenCalledWith(false);
+    });
+
+    it('should not request anything while no domain is selected', () => {
+      const store = TestBed.inject(Store);
+      store.reset({ ...store.snapshot(), domain: { domains: [], selectedDomain: undefined } });
+
+      service.getWorkBasketsSummary(true).subscribe();
+
+      httpMock.expectNone((r) => r.url.includes('/v1/workbaskets'));
     });
 
     it('should return cached observable when forceRequest is false and cache exists', () => {

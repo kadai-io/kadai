@@ -35,7 +35,9 @@ export class DeselectClassification {
 }
 
 export class CreateClassification {
-  static readonly type = '[Classification] Create a new classification';
+  static readonly type = '[Classification] Create new classification';
+
+  constructor(public domain: string | undefined) {}
 }
 
 export class CopyClassification {
@@ -66,6 +68,8 @@ export class RemoveSelectedClassification {
 
 export class GetClassifications {
   static readonly type = '[Classification] Get all classifications';
+
+  constructor(public domain: string) {}
 }
 
 export class UpdateClassification {

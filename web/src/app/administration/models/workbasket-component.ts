@@ -21,3 +21,9 @@ export enum WorkbasketComponent {
   ACCESS_ITEMS,
   DISTRIBUTION_TARGETS
 }
+
+export const WORKBASKET_COMPONENT_TABS: Record<WorkbasketComponent, string> = {
+  [WorkbasketComponent.INFORMATION]: 'information',
+  [WorkbasketComponent.ACCESS_ITEMS]: 'access-items',
+  [WorkbasketComponent.DISTRIBUTION_TARGETS]: 'distribution-targets'
+};

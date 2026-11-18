@@ -31,7 +31,7 @@
             <span>Workbaskets</span>
           </span>
         } @else {
-          <a [routerLink]="['/kadai/monitor/tasks-priority']" class="breadcrumb-item">
+          <a [routerLink]="['/kadai/monitor/tasks-priority']" queryParamsHandling="merge" class="breadcrumb-item">
             <mat-icon>list_alt</mat-icon>
             <span>Workbaskets</span>
           </a>
@@ -76,7 +76,7 @@
           <div class="task-priority-report__workbasket-headline">
             <h6>
               @if (isDepthZero()) {
-                <a [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]">{{ row.desc[0] }}</a>
+                <a [routerLink]="['/kadai/monitor/tasks-priority', row.desc[0]]" queryParamsHandling="merge">{{ row.desc[0] }}</a>
               } @else {
                 {{ row.desc[1] }}
               }

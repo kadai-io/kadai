@@ -27,7 +27,7 @@ import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.ser
 import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { Actions, ofActionCompleted, ofActionDispatched, Store } from '@ngxs/store';
-import { delay, takeUntil, tap } from 'rxjs/operators';
+import { delay, filter, takeUntil, tap } from 'rxjs/operators';
 import {
   DeselectWorkbasket,
   GetWorkbasketsSummary,
@@ -36,7 +36,10 @@ import {
 import { WorkbasketSelectors } from 'app/shared/store/workbasket-store/workbasket.selectors';
 import { Workbasket } from 'app/shared/models/workbasket';
 import { MatListOption, MatSelectionList } from '@angular/material/list';
-import { DomainService } from 'app/shared/services/domain/domain.service';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
+import { Router } from '@angular/router';
+import { WORKBASKETS_ROUTE } from 'app/shared/util/administration-routes';
+import { WORKBASKET_COMPONENT_TABS, WorkbasketComponent } from 'app/administration/models/workbasket-component';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
@@ -90,10 +93,10 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   destroy$ = new Subject<void>();
   toolbarElement = viewChild<ElementRef>('wbToolbar');
   private store = inject(Store);
+  private router = inject(Router);
   private workbasketService = inject(WorkbasketService);
   private orientationService = inject(OrientationService);
   private importExportService = inject(ImportExportService);
-  private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private ngxsActions$ = inject(Actions);
 
@@ -106,6 +109,9 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
       this.requestInProgressService.setRequestInProgress(false);
       this.requestInProgressLocal.set(false);
     });
+    this.ngxsActions$
+      .pipe(ofActionCompleted(SelectWorkbasket, DeselectWorkbasket), takeUntil(this.destroy$))
+      .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
   }
 
   ngOnInit() {
@@ -139,9 +145,12 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
         this.refreshWorkbasketList();
       });
 
-    this.domainService
-      .getSelectedDomain()
-      .pipe(takeUntil(this.destroy$))
+    this.store
+      .select(DomainSelectors.selectedDomain)
+      .pipe(
+        filter((domain): domain is string => domain !== undefined),
+        takeUntil(this.destroy$)
+      )
       .subscribe((domain) => {
         this.filterBy.domain = [domain];
         this.performRequest();
@@ -166,17 +175,13 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
 
   selectWorkbasket(id: string) {
     this.requestInProgressService.setRequestInProgress(true);
-    if (this.selectedId() === id) {
-      this.store
-        .dispatch(new DeselectWorkbasket())
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
-    } else {
-      this.store
-        .dispatch(new SelectWorkbasket(id))
-        .pipe(takeUntil(this.destroy$))
-        .subscribe(() => this.requestInProgressService.setRequestInProgress(false));
-    }
+    const isOpen = this.selectedId() === id;
+    const component =
+      this.store.selectSnapshot(WorkbasketSelectors.selectedComponent) ?? WorkbasketComponent.INFORMATION;
+    this.router.navigate([WORKBASKETS_ROUTE, { outlets: { detail: isOpen ? null : [id] } }], {
+      queryParams: { tab: isOpen ? null : WORKBASKET_COMPONENT_TABS[component] },
+      queryParamsHandling: 'merge'
+    });
   }
 
   performSorting(sort: Sorting<WorkbasketQuerySortParameter>) {

@@ -23,7 +23,6 @@ import { Observable } from 'rxjs';
 import { Classification } from 'app/shared/models/classification';
 
 import { ClassificationPagingList } from 'app/shared/models/classification-paging-list';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { ClassificationQuerySortParameter, Sorting } from 'app/shared/models/sorting';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
@@ -35,7 +34,6 @@ import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
 })
 export class ClassificationsService {
   private httpClient = inject(HttpClient);
-  private domainService = inject(DomainService);
   private runtimeConfigService = inject(RuntimeConfigService);
 
   get url(): string {

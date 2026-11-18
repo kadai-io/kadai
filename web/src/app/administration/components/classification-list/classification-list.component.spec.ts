@@ -17,15 +17,17 @@
  */
 
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
+import { CLASSIFICATIONS_ROUTE } from 'app/shared/util/administration-routes';
 import { Component, DebugElement, input } from '@angular/core';
-import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
+import { Actions, provideStore, Store } from '@ngxs/store';
+import { DomainState } from 'app/shared/store/domain-store/domain.state';
+import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { ClassificationState } from 'app/shared/store/classification-store/classification.state';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { ClassificationListComponent } from './classification-list.component';
 import { classificationStateMock, engineConfigurationMock } from 'app/shared/store/mock-data/mock-store';
 import { firstValueFrom, Observable, of } from 'rxjs';
-import { CreateClassification } from 'app/shared/store/classification-store/classification.actions';
 import { EngineConfigurationState } from 'app/shared/store/engine-configuration-store/engine-configuration.state';
 import { By } from '@angular/platform-browser';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
@@ -44,13 +46,6 @@ class MockSvgIconComponent {
   src = input<string>();
 }
 
-const domainServiceSpy: Partial<DomainService> = {
-  getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
-  getDomains: vi.fn().mockReturnValue(of('A')),
-  domainChangedComplete: vi.fn()
-};
-
 const requestInProgressServiceSpy: Partial<RequestInProgressService> = {
   setRequestInProgress: vi.fn().mockReturnValue(of()),
   getRequestInProgress: vi.fn().mockReturnValue(of(false))
@@ -67,10 +62,11 @@ describe('ClassificationListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ClassificationListComponent],
       providers: [
-        provideStore([ClassificationState, EngineConfigurationState]),
+        provideRouter([{ path: '**', children: [] }]),
+        provideStore([ClassificationState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
 
         provideHttpClientTesting(),
-        { provide: DomainService, useValue: domainServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy }
       ]
     })
@@ -84,6 +80,7 @@ describe('ClassificationListComponent', () => {
     debugElement = fixture.debugElement;
     component = fixture.debugElement.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     actions$ = TestBed.inject(Actions);
     store.reset({
       ...store.snapshot(),
@@ -98,13 +95,16 @@ describe('ClassificationListComponent', () => {
     expect(debugElement.nativeElement.querySelector('kadai-administration-import-export')).toBeTruthy();
   });
 
-  it('should call CreateClassification when add-classification button is clicked', async () => {
+  it('should navigate to the new classification url when the add button is clicked', () => {
     const button = debugElement.nativeElement.querySelector('.classification-list__add-button');
     expect(button).toBeTruthy();
-    let actionDispatched = false;
-    actions$.pipe(ofActionDispatched(CreateClassification)).subscribe(() => (actionDispatched = true));
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+
     button.click();
-    expect(actionDispatched).toBe(true);
+
+    expect(navigate).toHaveBeenCalledWith([CLASSIFICATIONS_ROUTE, { outlets: { detail: ['new-classification'] } }], {
+      queryParamsHandling: 'merge'
+    });
   });
 
   it('should display classification-types-selector component', () => {
@@ -381,10 +381,11 @@ describe('ClassificationListComponent — HTML template coverage without overrid
     await TestBed.configureTestingModule({
       imports: [ClassificationListComponent],
       providers: [
-        provideStore([ClassificationState, EngineConfigurationState]),
+        provideRouter([{ path: '**', children: [] }]),
+        provideStore([ClassificationState, EngineConfigurationState, DomainState]),
+        { provide: RuntimeConfigService, useValue: { kadaiRestUrl: 'http://localhost:8080/kadai' } },
         provideHttpClientTesting(),
         provideNoopAnimations(),
-        { provide: DomainService, useValue: domainServiceSpy },
         { provide: RequestInProgressService, useValue: requestInProgressServiceSpy },
         { provide: ClassificationCategoriesService, useValue: classificationCategoriesServiceSpy }
       ]
@@ -394,6 +395,7 @@ describe('ClassificationListComponent — HTML template coverage without overrid
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
     store = TestBed.inject(Store);
+    store.reset({ ...store.snapshot(), domain: { domains: ['DOMAIN_A', 'DOMAIN_B'], selectedDomain: 'DOMAIN_A' } });
     httpController = TestBed.inject(HttpTestingController);
     store.reset({
       ...store.snapshot(),

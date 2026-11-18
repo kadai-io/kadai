@@ -26,13 +26,15 @@ import { WorkbasketAccessItemsRepresentation } from 'app/shared/models/workbaske
 import { WorkbasketDistributionTargets } from 'app/shared/models/workbasket-distribution-targets';
 import { Sorting, WorkbasketQuerySortParameter } from 'app/shared/models/sorting';
 
-import { DomainService } from 'app/shared/services/domain/domain.service';
-import { catchError, mergeMap, tap } from 'rxjs/operators';
+import { Store } from '@ngxs/store';
+import { DomainSelectors } from 'app/shared/store/domain-store/domain.selectors';
+import { catchError, filter, mergeMap, tap } from 'rxjs/operators';
 import { WorkbasketRepresentation } from 'app/shared/models/workbasket-representation';
 import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { QueryPagingParameter } from 'app/shared/models/query-paging-parameter';
 import { asUrlQueryString } from 'app/shared/util/query-parameters-v2';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +44,8 @@ export class WorkbasketService {
   public workBasketSaved = new Subject<number>();
   public workbasketActionToolbarExpanded = new Subject<boolean>();
   private httpClient = inject(HttpClient);
-  private domainService = inject(DomainService);
+  private store = inject(Store);
+  private requestInProgressService = inject(RequestInProgressService);
   private runtimeConfigService = inject(RuntimeConfigService);
   private workbasketSummaryRef: Observable<WorkbasketSummaryRepresentation> = new Observable();
 
@@ -58,8 +61,9 @@ export class WorkbasketService {
       return this.workbasketSummaryRef;
     }
 
-    return this.domainService.getSelectedDomain().pipe(
-      mergeMap((domain) => {
+    return this.store.select(DomainSelectors.selectedDomain).pipe(
+      filter((domain): domain is string => domain !== undefined),
+      mergeMap(() => {
         this.workbasketSummaryRef = this.httpClient.get<WorkbasketSummaryRepresentation>(
           `${this.runtimeConfigService.kadaiRestUrl}/v1/workbaskets${asUrlQueryString({
             ...filterParameter,
@@ -70,7 +74,7 @@ export class WorkbasketService {
         return this.workbasketSummaryRef;
       }),
       tap(() => {
-        this.domainService.domainChangedComplete();
+        this.requestInProgressService.setRequestInProgress(false);
       })
     );
   }

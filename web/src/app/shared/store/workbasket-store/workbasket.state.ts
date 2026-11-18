@@ -17,9 +17,8 @@
  */
 
 import { Action, NgxsAfterBootstrap, State, StateContext } from '@ngxs/store';
-import { catchError, concatMap, take, tap } from 'rxjs/operators';
+import { catchError, concatMap, distinctUntilChanged, map, take, tap } from 'rxjs/operators';
 import { EMPTY, Observable, of, throwError } from 'rxjs';
-import { Location } from '@angular/common';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { Workbasket } from 'app/shared/models/workbasket';
 import {
@@ -54,7 +53,6 @@ import { ActivatedRoute } from '@angular/router';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { WorkbasketType } from 'app/shared/models/workbasket-type';
 import { KadaiDate } from 'app/shared/util/kadai.date';
-import { DomainService } from 'app/shared/services/domain/domain.service';
 import { ClearWorkbasketFilter } from 'app/shared/store/filter-store/filter.actions';
 import { inject, Injectable } from '@angular/core';
 import { WorkbasketQueryPagingParameter } from 'app/shared/models/workbasket-query-paging-parameter';
@@ -72,43 +70,45 @@ class InitializeStore {
 })
 export class WorkbasketState implements NgxsAfterBootstrap {
   private workbasketService = inject(WorkbasketService);
-  private location = inject(Location);
   private notificationService = inject(NotificationService);
-  private domainService = inject(DomainService);
   private route = inject(ActivatedRoute);
   private requestInProgressService = inject(RequestInProgressService);
 
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
     // read the selected tab from the route
-    this.route.queryParams.pipe(take(2)).subscribe((params) => {
-      let tabName: string = params.tab;
-      let tab: number;
+    this.route.queryParams
+      .pipe(
+        map((params) => params.tab),
+        distinctUntilChanged()
+      )
+      .subscribe((tabName: string) => {
+        let tab: number;
 
-      switch (tabName) {
-        case 'information':
-          tab = WorkbasketComponent.INFORMATION;
-          break;
-        case 'access-items':
-          tab = WorkbasketComponent.ACCESS_ITEMS;
-          break;
-        case 'distribution-targets':
-          tab = WorkbasketComponent.DISTRIBUTION_TARGETS;
-          break;
-        default:
-          tab = WorkbasketComponent.INFORMATION;
-      }
+        switch (tabName) {
+          case 'information':
+            tab = WorkbasketComponent.INFORMATION;
+            break;
+          case 'access-items':
+            tab = WorkbasketComponent.ACCESS_ITEMS;
+            break;
+          case 'distribution-targets':
+            tab = WorkbasketComponent.DISTRIBUTION_TARGETS;
+            break;
+          default:
+            tab = WorkbasketComponent.INFORMATION;
+        }
 
-      ctx.patchState({
-        badgeMessage: '',
-        availableDistributionTargetsPage: 0,
-        distributionTargetsPage: 0,
-        workbasketDistributionTargets: { distributionTargets: [], _links: {} },
-        availableDistributionTargets: { workbaskets: [], _links: {} }
+        ctx.patchState({
+          badgeMessage: '',
+          availableDistributionTargetsPage: 0,
+          distributionTargetsPage: 0,
+          workbasketDistributionTargets: { distributionTargets: [], _links: {} },
+          availableDistributionTargets: { workbaskets: [], _links: {} }
+        });
+
+        ctx.dispatch(new SelectComponent(tab));
       });
-
-      ctx.dispatch(new SelectComponent(tab));
-    });
     return of(null);
   }
 
@@ -129,19 +129,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(SelectWorkbasket)
   selectWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: SelectWorkbasket): Observable<any> {
-    let selectedComponent;
-    switch (ctx.getState().selectedComponent) {
-      case WorkbasketComponent.INFORMATION:
-        selectedComponent = 'information';
-        break;
-      case WorkbasketComponent.ACCESS_ITEMS:
-        selectedComponent = 'access-items';
-        break;
-      case WorkbasketComponent.DISTRIBUTION_TARGETS:
-        selectedComponent = 'distribution-targets';
-        break;
-    }
-
     const id = action.workbasketId;
     if (typeof id !== 'undefined') {
       return this.workbasketService.getWorkBasket(id).pipe(
@@ -158,12 +145,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
             ctx.dispatch(new GetWorkbasketAccessItems(links.accessItems.href));
           }
 
-          this.location.go(
-            this.location
-              .path()
-              .replace(/(workbaskets).*/g, `workbaskets/(detail:${action.workbasketId})?tab=${selectedComponent}`)
-          );
-
           ctx.dispatch(new ClearWorkbasketFilter('selectedDistributionTargets'));
           ctx.dispatch(new ClearWorkbasketFilter('availableDistributionTargets'));
           ctx.dispatch(new FetchWorkbasketDistributionTargets(true));
@@ -176,7 +157,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(DeselectWorkbasket)
   deselectWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
     ctx.patchState({
       selectedWorkbasket: undefined,
       action: ACTION.READ
@@ -195,15 +175,12 @@ export class WorkbasketState implements NgxsAfterBootstrap {
     switch (action.component) {
       case WorkbasketComponent.INFORMATION:
         ctx.patchState({ selectedComponent: WorkbasketComponent.INFORMATION });
-        this.location.go(this.location.path().replace(/(tab).*/g, 'tab=information'));
         break;
       case WorkbasketComponent.ACCESS_ITEMS:
         ctx.patchState({ selectedComponent: WorkbasketComponent.ACCESS_ITEMS });
-        this.location.go(this.location.path().replace(/(tab).*/g, 'tab=access-items'));
         break;
       case WorkbasketComponent.DISTRIBUTION_TARGETS:
         ctx.patchState({ selectedComponent: WorkbasketComponent.DISTRIBUTION_TARGETS });
-        this.location.go(this.location.path().replace(/(tab).*/g, 'tab=distribution-targets'));
         break;
     }
     return of(null);
@@ -222,8 +199,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
       take(1),
       tap((workbasketUpdated) => {
         this.notificationService.showSuccess('WORKBASKET_CREATE', { workbasketKey: workbasketUpdated.key });
-
-        this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
       }),
       concatMap((workbasketUpdated) =>
         workbasketUpdated.workbasketId ? ctx.dispatch(new SelectWorkbasket(workbasketUpdated.workbasketId)) : EMPTY
@@ -233,7 +208,6 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(CopyWorkbasket)
   copyWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets/(detail:new-workbasket)'));
     ctx.dispatch(new OnButtonPressed(undefined));
 
     const workbasket = { ...ctx.getState().selectedWorkbasket };
@@ -252,12 +226,9 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   }
 
   @Action(CreateWorkbasket)
-  createWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    return this.domainService.getSelectedDomain().pipe(
-      take(1),
+  createWorkbasket(ctx: StateContext<WorkbasketStateModel>, action: CreateWorkbasket): Observable<any> {
+    return of(action.domain).pipe(
       tap((domain) => {
-        this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets/(detail:new-workbasket)'));
-
         if (ctx.getState().availableDistributionTargets.workbaskets.length === 0) {
           ctx.dispatch(new FetchAvailableDistributionTargets(true));
         }

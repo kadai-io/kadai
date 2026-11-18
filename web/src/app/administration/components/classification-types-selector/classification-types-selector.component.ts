@@ -17,11 +17,13 @@
  */
 
 import { Component, inject } from '@angular/core';
+import { CLASSIFICATIONS_ROUTE } from '../../../shared/util/administration-routes';
+import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { Store } from '@ngxs/store';
 import { ClassificationSelectors } from 'app/shared/store/classification-store/classification.selectors';
 import { SetSelectedClassificationType } from 'app/shared/store/classification-store/classification.actions';
-import { AsyncPipe, Location } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -39,10 +41,12 @@ export class ClassificationTypesSelectorComponent {
   );
   classificationTypes$: Observable<string[]> = inject(Store).select(ClassificationSelectors.classificationTypes);
   private store = inject(Store);
-  private location = inject(Location);
+  private router = inject(Router);
 
   select(value: string): void {
     this.store.dispatch(new SetSelectedClassificationType(value));
-    this.location.go(this.location.path().replace(/(classifications).*/g, 'classifications'));
+    this.router.navigate([CLASSIFICATIONS_ROUTE, { outlets: { detail: null } }], {
+      queryParamsHandling: 'merge'
+    });
   }
 }
