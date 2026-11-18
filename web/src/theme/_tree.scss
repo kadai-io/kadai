@@ -21,10 +21,11 @@
 @use 'site';
 
 tree-viewport {
-  height: calc(100vh - 225px);
+  // TODO: the constant number is fragile, should be removed and replaced by the dynamic height of the tree viewport  
+  height: calc(100vh - 247px);
 
   & > div {
-    display: inline-block;
+    display: block;
   }
 }
 
@@ -63,6 +64,8 @@ tree-node-expander .toggle-children-wrapper-expanded {
   font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
   font-size: 16px;
   margin: 0 14px;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .node-wrapper {
@@ -92,7 +95,7 @@ tree-node-expander .toggle-children-wrapper-expanded {
   & > tree-node-content {
     color: white;
 
-    & > span > svg-icon {
+    & .tree__svg-icon > svg-icon {
       @extend .white;
     }
   }
