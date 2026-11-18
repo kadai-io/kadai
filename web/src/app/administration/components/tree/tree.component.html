@@ -34,7 +34,7 @@
   [options]="options"
 >
   <ng-template #treeNodeTemplate let-index="index" let-node>
-    <span [title]="node.data.key + ' - ' + node.data.name" class="tree__node-text">
+    <span class="tree__node-text">
       <span class="tree__svg-icon">
         @if (node.data.category) {
           <svg-icon [src]="getCategoryIcon(node.data.category).left"
@@ -42,10 +42,12 @@
           />
         }
       </span>
-      <span>
-        <strong>{{ node.data.key }}</strong>
+      <span [title]="node.data.key + ' - ' + node.data.name">
+        <span>
+          <strong>{{ node.data.key }}</strong>
+        </span>
+        <span> - {{ node.data.name }}</span>
       </span>
-      <span> - {{ node.data.name }}</span>
     </span>
   </ng-template>
 </tree-root>

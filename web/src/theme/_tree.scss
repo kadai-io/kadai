@@ -21,7 +21,8 @@
 @use 'site';
 
 tree-viewport {
-  height: calc(100vh - 245px);
+  // TODO: the constant number is fragile, should be removed and replaced by the dynamic height of the tree viewport  
+  height: calc(100vh - 247px);
 
   & > div {
     display: block;
@@ -94,7 +95,7 @@ tree-node-expander .toggle-children-wrapper-expanded {
   & > tree-node-content {
     color: white;
 
-    & > span > svg-icon {
+    & .tree__svg-icon > svg-icon {
       @extend .white;
     }
   }
