@@ -21,6 +21,7 @@ package io.kadai.testapi.benchmark;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.common.api.WorkingTimeCalculator;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
+import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.spi.priority.api.PriorityServiceProvider;
 import io.kadai.task.api.models.TaskSummary;
 import java.time.Duration;
@@ -37,10 +38,11 @@ import java.util.concurrent.atomic.AtomicLong;
  * them. A daily job run in production faces nearly the same, as each day adds to every task's
  * waiting time.
  *
- * <p>It also meters the job: it counts the tasks it is asked for and, once the time budget is
- * spent, stops the job by failing the calculation.
+ * <p>It also meters the job: on the thread that started the metering, it counts the tasks it is
+ * asked for and, once the time budget is spent, stops the job by failing the calculation. Other
+ * threads, such as API requests that create tasks, get their priority unmetered.
  */
-final class SlaPriorityServiceProvider implements PriorityServiceProvider {
+public final class SlaPriorityServiceProvider implements PriorityServiceProvider {
 
   private static final Duration DAY = Duration.ofDays(1);
   private static final int MAX_WAITING_DAYS = 30;
@@ -54,7 +56,8 @@ final class SlaPriorityServiceProvider implements PriorityServiceProvider {
   private final AtomicLong changes = new AtomicLong();
   private final AtomicLong firstCalculationNanos = new AtomicLong();
   private volatile long deadlineNanos;
-  private volatile boolean meteringStarted;
+  private volatile Thread meteredThread;
+  private volatile boolean timeBudgetExhausted;
   private WorkingTimeCalculator workingTimeCalculator;
 
   @Override
@@ -64,10 +67,12 @@ final class SlaPriorityServiceProvider implements PriorityServiceProvider {
 
   @Override
   public OptionalInt calculatePriority(TaskSummary taskSummary) {
-    if (meteringStarted) {
+    boolean metered = Thread.currentThread() == meteredThread;
+    if (metered) {
       long now = System.nanoTime();
       if (now - deadlineNanos > 0) {
-        throw new TimeBudgetExhaustedException();
+        timeBudgetExhausted = true;
+        throw new SystemException("Benchmark time budget exhausted - stopping the job on purpose");
       }
       firstCalculationNanos.compareAndSet(0, now);
       calculations.incrementAndGet();
@@ -77,31 +82,50 @@ final class SlaPriorityServiceProvider implements PriorityServiceProvider {
         taskSummary.getClassificationSummary().getPriority()
             + waitingBonus(taskSummary, now)
             + urgency(taskSummary, now);
-    if (priority != taskSummary.getPriority()) {
+    if (metered && priority != taskSummary.getPriority()) {
       changes.incrementAndGet();
     }
     return OptionalInt.of(priority);
   }
 
-  // resets the counters and starts the time budget of the job
-  void startMetering(Duration timeBudget) {
+  /**
+   * Resets the counters and meters the calculations of the current thread, which runs the job.
+   *
+   * @param timeBudget the time after which the job is stopped
+   */
+  public void startMetering(Duration timeBudget) {
     calculations.set(0);
     changes.set(0);
     firstCalculationNanos.set(0);
     deadlineNanos = System.nanoTime() + timeBudget.toNanos();
-    meteringStarted = true;
+    timeBudgetExhausted = false;
+    meteredThread = Thread.currentThread();
   }
 
-  long calculations() {
+  /** Ends the time budget now, so the job stops at its next priority calculation. */
+  public void endTimeBudget() {
+    deadlineNanos = System.nanoTime();
+  }
+
+  /**
+   * Tells whether a failure of the job is the intended stop.
+   *
+   * @return whether the provider stopped the job because the time budget was spent
+   */
+  public boolean isTimeBudgetExhausted() {
+    return timeBudgetExhausted;
+  }
+
+  public long calculations() {
     return calculations.get();
   }
 
-  long changes() {
+  public long changes() {
     return changes.get();
   }
 
   // System.nanoTime() of the first calculation, or 0 if there was none
-  long firstCalculationNanos() {
+  public long firstCalculationNanos() {
     return firstCalculationNanos.get();
   }
 
@@ -131,13 +155,5 @@ final class SlaPriorityServiceProvider implements PriorityServiceProvider {
     }
     return OVERDUE_BONUS
         + (int) Math.min(workingDays, MAX_OVERDUE_WORKING_DAYS) * OVERDUE_BONUS_PER_WORKING_DAY;
-  }
-
-  /** Stops the job on purpose once the benchmark's time budget is spent. */
-  static final class TimeBudgetExhaustedException extends RuntimeException {
-
-    private TimeBudgetExhaustedException() {
-      super("Benchmark time budget exhausted - stopping the job on purpose", null, false, false);
-    }
   }
 }
