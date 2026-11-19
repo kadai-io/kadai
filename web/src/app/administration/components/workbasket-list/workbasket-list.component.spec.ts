@@ -21,7 +21,7 @@ import { WorkbasketListComponent } from './workbasket-list.component';
 import { DebugElement } from '@angular/core';
 import { Actions, ofActionDispatched, provideStore, Store } from '@ngxs/store';
 import { By } from '@angular/platform-browser';
-import { Observable, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { WorkbasketState } from 'app/shared/store/workbasket-store/workbasket.state';
 import { WorkbasketService } from 'app/shared/services/workbasket/workbasket.service';
 import { DeselectWorkbasket, SelectWorkbasket } from 'app/shared/store/workbasket-store/workbasket.actions';
@@ -29,12 +29,16 @@ import { Direction, Sorting, WorkbasketQuerySortParameter } from 'app/shared/mod
 import { DomainService } from 'app/shared/services/domain/domain.service';
 import { selectedWorkbasketMock } from 'app/shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
+import { Workbasket } from 'app/shared/models/workbasket';
+import { ACTION } from 'app/shared/models/action';
 import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+
+let selectedDomain$: BehaviorSubject<string>;
 
 const workbasketServiceMock: Partial<WorkbasketService> = {
   workbasketSavedTriggered: vi.fn().mockReturnValue(of(1)),
@@ -47,7 +51,7 @@ const workbasketServiceMock: Partial<WorkbasketService> = {
 
 const domainServiceSpy: Partial<DomainService> = {
   getSelectedDomainValue: vi.fn().mockReturnValue('A'),
-  getSelectedDomain: vi.fn().mockReturnValue(of('A')),
+  getSelectedDomain: vi.fn(() => selectedDomain$),
   getDomains: vi.fn().mockReturnValue(of(['A', 'B']))
 };
 
@@ -77,6 +81,7 @@ describe('WorkbasketListComponent', () => {
       ]
     }).compileComponents();
 
+    selectedDomain$ = new BehaviorSubject<string>('A');
     fixture = TestBed.createComponent(WorkbasketListComponent);
     debugElement = fixture.debugElement;
     component = fixture.componentInstance;
@@ -106,7 +111,71 @@ describe('WorkbasketListComponent', () => {
     const mockId = '123';
     component.selectWorkbasket(mockId);
     expect(actionDispatched).toBe(true);
-    expect(component.selectedId()).toEqual(undefined);
+    expect(component.selectedId()).toBeUndefined();
+  });
+
+  it('should dispatch DeselectWorkbasket when switching the domain the selected workbasket does not belong to', () => {
+    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'A' };
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, selectedWorkbasket } });
+    expect(component.selectedId()).toEqual('WBI:1');
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    selectedDomain$.next('B');
+    expect(actionDispatched).toBe(true);
+    expect(component.selectedId()).toBeUndefined();
+  });
+
+  it('should dispatch DeselectWorkbasket when switching the domain while a new workbasket is being created', () => {
+    const selectedWorkbasket: Workbasket = { domain: 'A' };
+    store.reset({
+      ...store.snapshot(),
+      workbasket: { ...store.snapshot().workbasket, selectedWorkbasket, action: ACTION.CREATE }
+    });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    selectedDomain$.next('B');
+    expect(actionDispatched).toBe(true);
+  });
+
+  it('should not dispatch DeselectWorkbasket when the current domain is emitted again while a workbasket of another domain is selected', () => {
+    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'B' };
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, selectedWorkbasket } });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    selectedDomain$.next('A');
+    expect(actionDispatched).toBe(false);
+    expect(component.selectedId()).toEqual('WBI:1');
+  });
+
+  it('should not dispatch DeselectWorkbasket when switching to the domain the selected workbasket belongs to', () => {
+    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'B' };
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, selectedWorkbasket } });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    selectedDomain$.next('B');
+    expect(actionDispatched).toBe(false);
+    expect(component.selectedId()).toEqual('WBI:1');
+  });
+
+  it('should not dispatch DeselectWorkbasket when a workbasket of another domain is selected before the component starts', () => {
+    fixture.destroy();
+    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'B' };
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, selectedWorkbasket } });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    fixture = TestBed.createComponent(WorkbasketListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+    expect(actionDispatched).toBe(false);
+    expect(component.selectedId()).toEqual('WBI:1');
+  });
+
+  it('should not dispatch DeselectWorkbasket when switching domain without a selected workbasket', () => {
+    expect(component.selectedId()).toBeUndefined();
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    selectedDomain$.next('B');
+    expect(actionDispatched).toBe(false);
   });
 
   it('should set sort value when performSorting is called', () => {
