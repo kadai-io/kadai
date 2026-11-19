@@ -37,6 +37,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ImportExportService } from 'app/administration/services/import-export.service';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
+import { OrientationService } from 'app/shared/services/orientation/orientation.service';
 
 let selectedDomain$: BehaviorSubject<string>;
 
@@ -310,6 +311,22 @@ describe('WorkbasketListComponent', () => {
     const sort = { 'sort-by': 'NAME' as any, order: 'ASC' as any };
     component.performSorting(sort);
     expect(performRequestSpy).toHaveBeenCalled();
+  });
+
+  it('should request at least one workbasket per page when no card fits on the screen', () => {
+    const orientationService = TestBed.inject(OrientationService);
+    vi.spyOn(orientationService, 'calculateNumberItemsList').mockReturnValue(0);
+    vi.spyOn(component, 'performRequest').mockImplementation(() => {});
+    component.refreshWorkbasketList();
+    expect(component.pageParameter['page-size']).toBe(1);
+  });
+
+  it('should use the calculated number of cards as page size when at least one card fits', () => {
+    const orientationService = TestBed.inject(OrientationService);
+    vi.spyOn(orientationService, 'calculateNumberItemsList').mockReturnValue(7);
+    vi.spyOn(component, 'performRequest').mockImplementation(() => {});
+    component.refreshWorkbasketList();
+    expect(component.pageParameter['page-size']).toBe(7);
   });
 
   it('should call performRequest when changePage is called', () => {

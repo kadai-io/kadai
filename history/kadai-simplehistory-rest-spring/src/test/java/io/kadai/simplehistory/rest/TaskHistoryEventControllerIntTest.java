@@ -35,6 +35,8 @@ import java.time.ZoneId;
 import java.util.Objects;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
@@ -211,6 +213,48 @@ class TaskHistoryEventControllerIntTest {
     assertThat(response.getBody()).isNotNull();
     assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
     assertThat(response.getBody().getContent()).hasSize(23);
+  }
+
+  @ParameterizedTest
+  @ValueSource(
+      strings = {
+        "?page=0&page-size=5",
+        "?page=-5&page-size=5",
+        "?page=1&page-size=0",
+        "?page=1&page-size=-5"
+      })
+  void should_ReturnBadRequest_When_PagingParameterIsLessThanOne(String parameters) {
+    ThrowingCallable httpCall =
+        () ->
+            restClient
+                .get()
+                .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + parameters))
+                .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                .retrieve()
+                .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+
+    assertThatThrownBy(httpCall)
+        .isInstanceOf(HttpStatusCodeException.class)
+        .hasMessageContaining("INVALID_ARGUMENT")
+        .hasMessageContaining("must be greater than or equal to 1")
+        .extracting(HttpStatusCodeException.class::cast)
+        .extracting(HttpStatusCodeException::getStatusCode)
+        .isEqualTo(HttpStatus.BAD_REQUEST);
+  }
+
+  @Test
+  void should_ReturnSinglePage_When_PageAndPageSizeAreOne() {
+    ResponseEntity<TaskHistoryEventPagedRepresentationModel> response =
+        restClient
+            .get()
+            .uri(restHelper.toUrl(HistoryRestEndpoints.URL_HISTORY_EVENTS + "?page=1&page-size=1"))
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+            .retrieve()
+            .toEntity(TaskHistoryEventPagedRepresentationModel.class);
+
+    assertThat(response.getBody()).isNotNull();
+    assertThat(response.getBody().getContent()).hasSize(1);
+    assertThat(response.getBody().getPageMetadata()).isEqualTo(new PageMetadata(1, 45, 45, 1));
   }
 
   @Test

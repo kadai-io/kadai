@@ -21,6 +21,7 @@ package io.kadai.common.rest;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import io.kadai.common.api.BaseQuery;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.rest.models.PageMetadata;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.constraints.Min;
@@ -32,22 +33,39 @@ public class QueryPagingParameter<T, Q extends BaseQuery<T, ?>>
 
   @Parameter(
       name = "page",
-      description = "Request a specific page. Requires the definition of the 'page-size'.")
+      description =
+          "Request a specific page. Requires the definition of the 'page-size'. "
+              + "Must be greater than or equal to 1.")
   @JsonProperty("page")
   @Min(1)
   private final Integer page;
 
   @Parameter(
       name = "page-size",
-      description = "Defines the size for each page. This requires a specific requested 'page'.")
+      description =
+          "Defines the size for each page. This requires a specific requested 'page'. "
+              + "Must be greater than or equal to 1. There is no upper bound.")
   @JsonProperty("page-size")
   @Min(1)
   private final Integer pageSize;
 
   @JsonIgnore private PageMetadata pageMetadata;
 
+  /**
+   * Creates a new paging parameter.
+   *
+   * <p>There is deliberately no upper bound for {@code pageSize}: a request without {@code page}
+   * already returns the complete result set, so capping {@code pageSize} would not limit the
+   * amount of returned data.
+   *
+   * @param page the requested page; must be {@code >= 1} if present
+   * @param pageSize the size of each page; must be {@code >= 1} if present
+   * @throws InvalidArgumentException if {@code page} or {@code pageSize} is less than 1
+   */
   @ConstructorProperties({"page", "page-size"})
-  public QueryPagingParameter(Integer page, Integer pageSize) {
+  public QueryPagingParameter(Integer page, Integer pageSize) throws InvalidArgumentException {
+    verifyAtLeastOne("page", page);
+    verifyAtLeastOne("page-size", pageSize);
     if (pageSize == null) {
       pageSize = Integer.MAX_VALUE;
     }
@@ -79,6 +97,16 @@ public class QueryPagingParameter<T, Q extends BaseQuery<T, ?>>
       resultList = query.list();
     }
     return resultList;
+  }
+
+  private static void verifyAtLeastOne(String parameterName, Integer value)
+      throws InvalidArgumentException {
+    if (value != null && value < 1) {
+      throw new InvalidArgumentException(
+          String.format(
+              "The query parameter '%s' must be greater than or equal to 1, but was %d.",
+              parameterName, value));
+    }
   }
 
   private void initPageMetaData(Q query) {
