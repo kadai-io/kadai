@@ -313,9 +313,9 @@ describe('WorkbasketListComponent', () => {
     expect(performRequestSpy).toHaveBeenCalled();
   });
 
-  it('should request at least one workbasket per page when no card fits on the screen', () => {
+  it.each([0, -3])('should request at least one workbasket per page when %i cards fit on the screen', (cards) => {
     const orientationService = TestBed.inject(OrientationService);
-    vi.spyOn(orientationService, 'calculateNumberItemsList').mockReturnValue(0);
+    vi.spyOn(orientationService, 'calculateNumberItemsList').mockReturnValue(cards);
     vi.spyOn(component, 'performRequest').mockImplementation(() => {});
     component.refreshWorkbasketList();
     expect(component.pageParameter['page-size']).toBe(1);

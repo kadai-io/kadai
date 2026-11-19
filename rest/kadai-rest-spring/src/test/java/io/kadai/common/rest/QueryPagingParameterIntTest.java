@@ -118,12 +118,39 @@ class QueryPagingParameterIntTest {
             .toEntity(String.class);
 
     assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    JsonNode body = jsonMapper.readTree(response.getBody());
+    assertThat(body.properties())
+        .filteredOn(property -> property.getValue().isArray())
+        .singleElement()
+        .satisfies(content -> assertThat(content.getValue().size()).isOne());
     if (RestEndpoints.URL_TASK_COMMENTS.equals(endpoint)) {
       // the task comment endpoint applies paging but does not return page metadata
       return;
     }
-    JsonNode page = jsonMapper.readTree(response.getBody()).path("page");
+    JsonNode page = body.path("page");
     assertThat(page.path("size").asLong()).isOne();
     assertThat(page.path("number").asLong()).isOne();
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("pagedEndpoints")
+  void should_ReturnEmptyPage_When_PageWithoutPageSizeIsBeyondTheFirstPage(String endpoint) {
+    // without 'page-size' all results are on page 1. Page 3 used to overflow the offset
+    // computation and returned the first results instead of none.
+    String url = restHelper.toUrl(endpoint, TASK_ID) + "?page=3";
+
+    ResponseEntity<String> response =
+        restClient
+            .get()
+            .uri(url)
+            .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+            .retrieve()
+            .toEntity(String.class);
+
+    assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    JsonNode body = jsonMapper.readTree(response.getBody());
+    assertThat(body.properties())
+        .filteredOn(property -> property.getValue().isArray())
+        .allSatisfy(content -> assertThat(content.getValue().isEmpty()).isTrue());
   }
 }

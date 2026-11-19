@@ -221,7 +221,8 @@ class TaskHistoryEventControllerIntTest {
         "?page=0&page-size=5",
         "?page=-5&page-size=5",
         "?page=1&page-size=0",
-        "?page=1&page-size=-5"
+        "?page=1&page-size=-5",
+        "?page-size=0"
       })
   void should_ReturnBadRequest_When_PagingParameterIsLessThanOne(String parameters) {
     ThrowingCallable httpCall =

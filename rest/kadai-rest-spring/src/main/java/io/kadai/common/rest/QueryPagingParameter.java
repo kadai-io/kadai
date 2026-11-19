@@ -34,8 +34,8 @@ public class QueryPagingParameter<T, Q extends BaseQuery<T, ?>>
   @Parameter(
       name = "page",
       description =
-          "Request a specific page. Requires the definition of the 'page-size'. "
-              + "Must be greater than or equal to 1.")
+          "Request a specific page. Should be combined with 'page-size'; without it, the page "
+              + "contains all results. Must be greater than or equal to 1.")
   @JsonProperty("page")
   @Min(1)
   private final Integer page;
@@ -90,9 +90,14 @@ public class QueryPagingParameter<T, Q extends BaseQuery<T, ?>>
     initPageMetaData(query);
     List<T> resultList;
     if (pageMetadata != null) {
+      // computed as long, because (page - 1) * page-size can exceed the int range
+      long offset = (pageMetadata.getNumber() - 1) * pageMetadata.getSize();
       resultList =
-          query.listPage(
-              Math.toIntExact(pageMetadata.getNumber()), Math.toIntExact(pageMetadata.getSize()));
+          offset >= pageMetadata.getTotalElements()
+              ? List.of()
+              : query.listPage(
+                  Math.toIntExact(pageMetadata.getNumber()),
+                  Math.toIntExact(pageMetadata.getSize()));
     } else {
       resultList = query.list();
     }
