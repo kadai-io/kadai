@@ -152,7 +152,7 @@ class DmnConverterServiceAccTest {
   }
 
   @ParameterizedTest
-  @ValueSource(strings = {"A&B", "A<B", "A>B", "\"A\"", "&amp;", "a & b < c > d"})
+  @ValueSource(strings = {"A&B", "A<B", "A>B", "\"A\"", "&amp;", "a & b < c > d", "A\r\nB\rC"})
   @WithAccessId(user = "businessadmin")
   void should_StoreCellValuesExactlyAsEntered_When_TheyContainXmlSpecialCharacters(String cellValue)
       throws Exception {
@@ -166,6 +166,19 @@ class DmnConverterServiceAccTest {
     assertThat(inputEntry.getText().getTextContent()).isEqualTo("\"" + cellValue + "\"");
     Rule rule = storedDmn.getModelElementById("excelRow6");
     assertThat(rule.getDescription().getTextContent()).isEqualTo(cellValue);
+  }
+
+  @Test
+  @WithAccessId(user = "businessadmin")
+  void should_StoreFeelComparisonExactlyAsEntered_When_CellValueStartsWithLessThan()
+      throws Exception {
+    MultipartFile routingMultiPartFile =
+        excelRoutingFileWithReplacedCellValues(Map.of(INPUT_CELL_B8_VALUE, "<= 10"));
+
+    DmnModelInstance storedDmn = convertExcelToDmnAndReadStoredDmn(routingMultiPartFile);
+
+    InputEntry inputEntry = storedDmn.getModelElementById("B8");
+    assertThat(inputEntry.getText().getTextContent()).isEqualTo("<= 10");
   }
 
   @Test
@@ -194,7 +207,6 @@ class DmnConverterServiceAccTest {
         excelRoutingFileWithReplacedCellValues(Map.of(OUTPUT_CELLS_D6_TO_D8_VALUE, "GPK_KSC&<>"));
 
     DmnConverterService dmnConverterService = new DmnConverterService(kadaiEngine);
-    dmnConverterService.setDmnUploadPath(tempDir.resolve("routing.dmn").toString());
 
     ThrowingCallable call = () -> dmnConverterService.convertExcelToDmn(routingMultiPartFile);
     assertThatThrownBy(call)

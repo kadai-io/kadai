@@ -247,13 +247,16 @@ public class XlsxWorksheetConverter {
   }
 
   /**
-   * Escapes the given cell content so that it can be appended as text of an XML element.
+   * Escapes text derived from cell content so that it can be appended as text of an XML element.
    *
    * <p>Without escaping, cell content containing XML markup would change the structure of the
    * generated DMN and cell content containing an {@code &} or {@code <} would make it invalid.
+   * Carriage returns are escaped as well, because XML parsers would otherwise normalize them. The
+   * ids of the serialized elements need no escaping, because they consist of the column letters and
+   * the row number only.
    *
-   * @param text the decoded cell content
-   * @return the escaped cell content
+   * @param text the unescaped text content of a generated element
+   * @return the escaped text content
    */
   private static String escapeXmlText(String text) {
     StringBuilder escapedText = new StringBuilder(text.length());
@@ -263,6 +266,7 @@ public class XlsxWorksheetConverter {
         case '&' -> escapedText.append("&amp;");
         case '<' -> escapedText.append("&lt;");
         case '>' -> escapedText.append("&gt;");
+        case '\r' -> escapedText.append("&#13;");
         default -> escapedText.append(character);
       }
     }
