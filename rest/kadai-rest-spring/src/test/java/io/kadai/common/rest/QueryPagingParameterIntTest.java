@@ -122,7 +122,7 @@ class QueryPagingParameterIntTest {
     assertThat(body.properties())
         .filteredOn(property -> property.getValue().isArray())
         .singleElement()
-        .satisfies(content -> assertThat(content.getValue().size()).isOne());
+        .satisfies(content -> assertThat(content.getValue()).hasSize(1));
     if (RestEndpoints.URL_TASK_COMMENTS.equals(endpoint)) {
       // the task comment endpoint applies paging but does not return page metadata
       return;
@@ -151,6 +151,7 @@ class QueryPagingParameterIntTest {
     JsonNode body = jsonMapper.readTree(response.getBody());
     assertThat(body.properties())
         .filteredOn(property -> property.getValue().isArray())
-        .allSatisfy(content -> assertThat(content.getValue().isEmpty()).isTrue());
+        .singleElement()
+        .satisfies(content -> assertThat(content.getValue()).isEmpty());
   }
 }
