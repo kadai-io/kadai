@@ -21,3 +21,9 @@
   padding-right: 4px;
   fill: #555;
 }
+
+.tree__node-text {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
