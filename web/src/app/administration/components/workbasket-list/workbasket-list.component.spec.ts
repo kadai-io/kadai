@@ -124,12 +124,35 @@ describe('WorkbasketListComponent', () => {
     expect(component.selectedId()).toBeUndefined();
   });
 
-  it('should not dispatch DeselectWorkbasket when the same domain is emitted again', () => {
-    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'A' };
+  it('should not dispatch DeselectWorkbasket when the current domain is emitted again while a workbasket of another domain is selected', () => {
+    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'B' };
     store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, selectedWorkbasket } });
     let actionDispatched = false;
     actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
     selectedDomain$.next('A');
+    expect(actionDispatched).toBe(false);
+    expect(component.selectedId()).toEqual('WBI:1');
+  });
+
+  it('should not dispatch DeselectWorkbasket when switching to the domain the selected workbasket belongs to', () => {
+    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'B' };
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, selectedWorkbasket } });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    selectedDomain$.next('B');
+    expect(actionDispatched).toBe(false);
+    expect(component.selectedId()).toEqual('WBI:1');
+  });
+
+  it('should not dispatch DeselectWorkbasket when a workbasket of another domain is selected before the component starts', () => {
+    fixture.destroy();
+    const selectedWorkbasket: Workbasket = { workbasketId: 'WBI:1', domain: 'B' };
+    store.reset({ ...store.snapshot(), workbasket: { ...store.snapshot().workbasket, selectedWorkbasket } });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    fixture = TestBed.createComponent(WorkbasketListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
     expect(actionDispatched).toBe(false);
     expect(component.selectedId()).toEqual('WBI:1');
   });
