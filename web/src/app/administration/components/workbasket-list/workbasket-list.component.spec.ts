@@ -30,6 +30,7 @@ import { DomainService } from 'app/shared/services/domain/domain.service';
 import { selectedWorkbasketMock } from 'app/shared/store/mock-data/mock-store';
 import { WorkbasketQueryFilterParameter } from 'app/shared/models/workbasket-query-filter-parameter';
 import { Workbasket } from 'app/shared/models/workbasket';
+import { ACTION } from 'app/shared/models/action';
 import { FilterState } from 'app/shared/store/filter-store/filter.state';
 import { provideRouter } from '@angular/router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -122,6 +123,18 @@ describe('WorkbasketListComponent', () => {
     selectedDomain$.next('B');
     expect(actionDispatched).toBe(true);
     expect(component.selectedId()).toBeUndefined();
+  });
+
+  it('should dispatch DeselectWorkbasket when switching the domain while a new workbasket is being created', () => {
+    const selectedWorkbasket: Workbasket = { domain: 'A' };
+    store.reset({
+      ...store.snapshot(),
+      workbasket: { ...store.snapshot().workbasket, selectedWorkbasket, action: ACTION.CREATE }
+    });
+    let actionDispatched = false;
+    actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+    selectedDomain$.next('B');
+    expect(actionDispatched).toBe(true);
   });
 
   it('should not dispatch DeselectWorkbasket when the current domain is emitted again while a workbasket of another domain is selected', () => {

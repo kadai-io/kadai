@@ -154,10 +154,8 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
           return;
         }
 
-        const { workbasketId, domain: workbasketDomain } = this.store.selectSnapshot(
-          WorkbasketSelectors.selectedWorkbasket
-        );
-        if (workbasketId && workbasketDomain && workbasketDomain !== domain) {
+        const { domain: workbasketDomain } = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
+        if (workbasketDomain && workbasketDomain !== domain) {
           this.store.dispatch(new DeselectWorkbasket());
         }
       });
