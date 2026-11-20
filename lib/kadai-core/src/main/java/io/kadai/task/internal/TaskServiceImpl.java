@@ -701,6 +701,12 @@ public class TaskServiceImpl implements TaskService {
             WorkbasketPermission.EDITTASKS);
       }
 
+      if (isWorkbasketSummaryMissing(newTaskImpl.getWorkbasketSummary())) {
+        // The Workbasket of a Task cannot be changed via update. Keep the persisted one instead of
+        // resolving Classifications without a domain and persisting null Workbasket references.
+        newTaskImpl.setWorkbasketSummary(oldTaskImpl.getWorkbasketSummary());
+      }
+
       attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
       objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(newTaskImpl, oldTaskImpl);
       ObjectReferenceImpl.validate(
@@ -1777,6 +1783,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     return task;
+  }
+
+  private static boolean isWorkbasketSummaryMissing(WorkbasketSummary workbasketSummary) {
+    return workbasketSummary == null
+        || (workbasketSummary.getId() == null && workbasketSummary.getKey() == null);
   }
 
   private Workbasket resolveWorkbasket(TaskImpl task)

@@ -61,6 +61,7 @@ import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DynamicTest;
@@ -139,7 +140,42 @@ class TaskControllerIntTest {
     assertThat(theUpdatedTaskRepresentationModel.getOwner()).isEqualTo("dummyUser");
   }
 
-  private TaskRepresentationModel getTaskResourceSample() {
+  private static Stream<MissingNestedObjectCase> missingNestedObjectCases() {
+    return Stream.of(
+        new MissingNestedObjectCase(
+            "primaryObjRef",
+            task -> task.setPrimaryObjRef(null),
+            "primary ObjectReference of Task must not be null."),
+        new MissingNestedObjectCase(
+            "attachments[0].classificationSummary",
+            task -> {
+              AttachmentRepresentationModel attachment = getAttachmentResourceSample();
+              attachment.setClassificationSummary(null);
+              task.setAttachments(List.of(attachment));
+            },
+            "Classification of Attachment must not be null."),
+        new MissingNestedObjectCase(
+            "attachments[0].objectReference",
+            task -> {
+              AttachmentRepresentationModel attachment = getAttachmentResourceSample();
+              attachment.setObjectReference(null);
+              task.setAttachments(List.of(attachment));
+            },
+            "ObjectReference of Attachment must not be null."));
+  }
+
+  private static void assertInvalidArgument(ThrowingCallable httpCall, String expectedMessage) {
+    assertThatThrownBy(httpCall)
+        .isInstanceOf(HttpClientErrorException.BadRequest.class)
+        .extracting(HttpClientErrorException.BadRequest.class::cast)
+        .extracting(HttpClientErrorException::getResponseBodyAsString)
+        .asString()
+        .contains("INVALID_ARGUMENT")
+        .contains(expectedMessage)
+        .doesNotContain("NullPointerException");
+  }
+
+  private static TaskRepresentationModel getTaskResourceSample() {
     ClassificationSummaryRepresentationModel classificationResource =
         new ClassificationSummaryRepresentationModel();
     classificationResource.setKey("L11010");
@@ -161,7 +197,7 @@ class TaskControllerIntTest {
     return taskRepresentationModel;
   }
 
-  private ObjectReferenceRepresentationModel getObjectReferenceResourceSample() {
+  private static ObjectReferenceRepresentationModel getObjectReferenceResourceSample() {
     ObjectReferenceRepresentationModel objectReference = new ObjectReferenceRepresentationModel();
     objectReference.setCompany("MyCompany1");
     objectReference.setSystem("MySystem1");
@@ -171,7 +207,7 @@ class TaskControllerIntTest {
     return objectReference;
   }
 
-  private AttachmentRepresentationModel getAttachmentResourceSample() {
+  private static AttachmentRepresentationModel getAttachmentResourceSample() {
     AttachmentRepresentationModel attachmentRepresentationModel =
         new AttachmentRepresentationModel();
     attachmentRepresentationModel.setAttachmentId("A11010");
@@ -3247,6 +3283,40 @@ class TaskControllerIntTest {
   @TestInstance(Lifecycle.PER_CLASS)
   class CreateTasks {
 
+    @TestFactory
+    Stream<DynamicTest> should_ReturnBadRequest_When_CreatingTaskWithMissingNestedObject() {
+      Stream<MissingNestedObjectCase> cases =
+          Stream.concat(
+              missingNestedObjectCases(),
+              Stream.of(
+                  new MissingNestedObjectCase(
+                      "classificationSummary",
+                      task -> task.setClassificationSummary(null),
+                      "classificationKey of task must not be empty")));
+
+      ThrowingConsumer<MissingNestedObjectCase> test =
+          testCase -> {
+            TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
+            testCase.removeObject().accept(taskRepresentationModel);
+            String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
+
+            ThrowingCallable httpCall =
+                () ->
+                    restClient
+                        .post()
+                        .uri(url)
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .body(taskRepresentationModel)
+                        .retrieve()
+                        .toEntity(TaskRepresentationModel.class);
+
+            assertInvalidArgument(httpCall, testCase.expectedMessage());
+          };
+
+      return DynamicTest.stream(cases, c -> "missing " + c.field(), test);
+    }
+
     @Test
     void should_CreateAndDeleteTask() {
       TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
@@ -3500,6 +3570,82 @@ class TaskControllerIntTest {
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class UpdateTasks {
+
+    @TestFactory
+    Stream<DynamicTest> should_ReturnBadRequest_When_UpdatingTaskWithMissingNestedObject() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000000");
+
+      ThrowingConsumer<MissingNestedObjectCase> test =
+          testCase -> {
+            TaskRepresentationModel task =
+                restClient
+                    .get()
+                    .uri(url)
+                    .headers(headers ->
+                        headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskRepresentationModel.class)
+                    .getBody();
+            assertThat(task).isNotNull();
+            testCase.removeObject().accept(task);
+
+            ThrowingCallable httpCall =
+                () ->
+                    restClient
+                        .put()
+                        .uri(url)
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .body(task)
+                        .retrieve()
+                        .toEntity(TaskRepresentationModel.class);
+
+            assertInvalidArgument(httpCall, testCase.expectedMessage());
+          };
+
+      return DynamicTest.stream(missingNestedObjectCases(), c -> "missing " + c.field(), test);
+    }
+
+    @Test
+    void should_KeepWorkbasket_When_UpdatingTaskWithoutWorkbasketSummary() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000000");
+      TaskRepresentationModel task =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class)
+              .getBody();
+      assertThat(task).isNotNull();
+      String workbasketId = task.getWorkbasketSummary().getWorkbasketId();
+      task.setWorkbasketSummary(null);
+
+      ResponseEntity<TaskRepresentationModel> responseUpdate =
+          restClient
+              .put()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .body(task)
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(responseUpdate.getBody()).isNotNull();
+      assertThat(responseUpdate.getBody().getWorkbasketSummary().getWorkbasketId())
+          .isEqualTo(workbasketId);
+      TaskRepresentationModel persistedTask =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class)
+              .getBody();
+      assertThat(persistedTask).isNotNull();
+      assertThat(persistedTask.getWorkbasketSummary().getWorkbasketId()).isEqualTo(workbasketId);
+    }
 
     @Test
     void should_ChangeValueOfReceived_When_UpdatingTask() {
@@ -6217,4 +6363,7 @@ class TaskControllerIntTest {
           .isEqualTo(HttpStatus.FORBIDDEN);
     }
   }
+
+  private record MissingNestedObjectCase(
+      String field, Consumer<TaskRepresentationModel> removeObject, String expectedMessage) {}
 }

@@ -31,6 +31,7 @@ import io.kadai.workbasket.rest.models.WorkbasketSummaryRepresentationModel;
 import java.util.Collection;
 import java.util.List;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -83,7 +84,11 @@ public class WorkbasketSummaryRepresentationModelAssembler
     return repModel;
   }
 
-  public WorkbasketSummary toEntityModel(WorkbasketSummaryRepresentationModel repModel) {
+  @Nullable
+  public WorkbasketSummary toEntityModel(@Nullable WorkbasketSummaryRepresentationModel repModel) {
+    if (repModel == null) {
+      return null;
+    }
     WorkbasketSummaryImpl workbasket =
         (WorkbasketSummaryImpl)
             workbasketService.newWorkbasket(repModel.getKey(), repModel.getDomain()).asSummary();

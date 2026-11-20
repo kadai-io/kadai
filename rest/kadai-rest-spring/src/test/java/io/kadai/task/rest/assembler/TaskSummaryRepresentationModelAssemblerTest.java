@@ -418,4 +418,24 @@ class TaskSummaryRepresentationModelAssemblerTest {
     // then
     assertThat(task).hasNoNullFieldsOrProperties().isNotSameAs(task2).isEqualTo(task2);
   }
+
+  @Test
+  void should_ReturnEntityWithNullFields_When_ConvertingRepresentationModelWithoutNestedObjects() {
+    AttachmentSummaryRepresentationModel attachment = new AttachmentSummaryRepresentationModel();
+    attachment.setAttachmentId("attachmentId");
+    TaskSummaryRepresentationModel repModel = new TaskSummaryRepresentationModel();
+    repModel.setTaskId("taskId");
+    repModel.setAttachmentSummaries(List.of(attachment));
+
+    TaskSummary taskSummary = assembler.toEntityModel(repModel);
+
+    assertThat(taskSummary.getPrimaryObjRef()).isNull();
+    assertThat(taskSummary.getClassificationSummary()).isNull();
+    assertThat(taskSummary.getAttachmentSummaries())
+        .singleElement()
+        .satisfies(a -> {
+          assertThat(a.getClassificationSummary()).isNull();
+          assertThat(a.getObjectReference()).isNull();
+        });
+  }
 }

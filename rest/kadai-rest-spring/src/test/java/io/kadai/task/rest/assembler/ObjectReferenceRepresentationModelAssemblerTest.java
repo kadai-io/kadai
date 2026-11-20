@@ -78,4 +78,9 @@ class ObjectReferenceRepresentationModelAssemblerTest {
 
     testEquality(entity, representationModel);
   }
+
+  @Test
+  void should_ReturnNull_When_ConvertingNullRepresentationModelToEntity() {
+    assertThat(assembler.toEntity(null)).isNull();
+  }
 }

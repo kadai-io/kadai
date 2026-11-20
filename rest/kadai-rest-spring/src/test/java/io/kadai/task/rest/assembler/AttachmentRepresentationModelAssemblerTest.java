@@ -131,4 +131,15 @@ class AttachmentRepresentationModelAssemblerTest {
 
     assertThat(attachment.getCustomAttributeMap()).isEqualTo(repModel.getCustomAttributes());
   }
+
+  @Test
+  void should_ReturnEntityWithNullFields_When_ConvertingRepresentationModelWithoutNestedObjects() {
+    AttachmentRepresentationModel repModel = new AttachmentRepresentationModel();
+    repModel.setAttachmentId("id");
+
+    Attachment attachment = assembler.toEntityModel(repModel);
+
+    assertThat(attachment.getClassificationSummary()).isNull();
+    assertThat(attachment.getObjectReference()).isNull();
+  }
 }

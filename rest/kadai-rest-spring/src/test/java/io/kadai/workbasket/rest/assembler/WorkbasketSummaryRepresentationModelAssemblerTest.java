@@ -164,4 +164,9 @@ class WorkbasketSummaryRepresentationModelAssemblerTest {
         .isNotSameAs(workbasketSummary2)
         .isEqualTo(workbasketSummary2);
   }
+
+  @Test
+  void should_ReturnNull_When_ConvertingNullRepresentationModelToEntity() {
+    assertThat(assembler.toEntityModel(null)).isNull();
+  }
 }
