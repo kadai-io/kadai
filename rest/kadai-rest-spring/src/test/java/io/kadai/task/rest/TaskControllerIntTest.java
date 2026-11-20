@@ -3697,7 +3697,7 @@ class TaskControllerIntTest {
               .toEntity(TaskRepresentationModel.class)
               .getBody();
       assertThat(createdTask).isNotNull();
-      String workbasketId = createdTask.getWorkbasketSummary().getWorkbasketId();
+      final String workbasketId = createdTask.getWorkbasketSummary().getWorkbasketId();
       String url = restHelper.toUrl(RestEndpoints.URL_TASKS_ID, createdTask.getTaskId());
       createdTask.setWorkbasketSummary(null);
 

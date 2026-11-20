@@ -1781,11 +1781,9 @@ public class TaskServiceImpl implements TaskService {
     return task;
   }
 
-  /**
-   * The Workbasket of a Task cannot be changed via update. Missing or partial Workbasket
-   * information is replaced by the persisted Workbasket, so that neither Classifications are
-   * resolved without a domain nor null Workbasket references are persisted.
-   */
+  // The Workbasket of a Task cannot be changed via update. Missing or partial Workbasket
+  // information is replaced by the persisted Workbasket, so that neither Classifications are
+  // resolved without a domain nor null Workbasket references are persisted.
   private static void keepPersistedWorkbasket(TaskImpl oldTaskImpl, TaskImpl newTaskImpl) {
     WorkbasketSummary oldWorkbasket = oldTaskImpl.getWorkbasketSummary();
     WorkbasketSummary newWorkbasket = newTaskImpl.getWorkbasketSummary();

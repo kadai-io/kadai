@@ -149,13 +149,13 @@ public class TaskRepresentationModelAssembler
   }
 
   public Task toEntityModel(TaskRepresentationModel repModel) throws InvalidArgumentException {
-    List<CustomAttribute> customAttributes =
+    final List<CustomAttribute> customAttributes =
         requireNonNullElements(repModel.getCustomAttributes(), "customAttributes");
-    List<CustomAttribute> callbackInfo =
+    final List<CustomAttribute> callbackInfo =
         requireNonNullElements(repModel.getCallbackInfo(), "callbackInfo");
-    List<AttachmentRepresentationModel> attachments =
+    final List<AttachmentRepresentationModel> attachments =
         requireNonNullElements(repModel.getAttachments(), "attachments");
-    List<ObjectReferenceRepresentationModel> secondaryObjectReferences =
+    final List<ObjectReferenceRepresentationModel> secondaryObjectReferences =
         requireNonNullElements(
             repModel.getSecondaryObjectReferences(), "secondaryObjectReferences");
     verifyCorrectCustomAttributesFormat(customAttributes);
@@ -312,10 +312,8 @@ public class TaskRepresentationModelAssembler
     return builder.build();
   }
 
-  /**
-   * Treats a missing list as empty and rejects lists containing null elements, which would
-   * otherwise fail with a {@link NullPointerException} while being mapped.
-   */
+  // Treats a missing list as empty and rejects lists containing null elements, which would
+  // otherwise fail with a NullPointerException while being mapped.
   private static <T> List<T> requireNonNullElements(List<T> list, String fieldName) {
     if (list == null) {
       return List.of();
