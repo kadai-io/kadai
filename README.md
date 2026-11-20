@@ -350,17 +350,18 @@ Every change is checked by [SonarQube Cloud](https://sonarcloud.io/summary/new_c
 </a>
 
 [KADAI](https://www.blauer-engel.de/de/produkte/kadai-open-source-software-for-task-management)
-successfully underwent [certification](docs/Urkunde-Blauer-Engel-KADAI.pdf) for the
+has been [certified](docs/Urkunde-Blauer-Engel-KADAI.pdf) for the
 [*Blauer Engel for Software*](https://www.blauer-engel.de/en/productworld/software), an eco-label
 for resource- and energy-efficient software products awarded by the
-[German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en).
+[German Environment Agency (Umweltbundesamt)](https://www.umweltbundesamt.de/en), since 2025. The
+certification requires an annual re-measurement, which was passed again in 2026.
 
 A central part of the certification is the definition of a standard usage scenario, which reflects
-typical user interactions. These badges show the energy cost of this scenario, performed by 100
-virtual users:
+typical user interactions. These badges show the energy cost of this scenario from the 2026
+re-measurement, performed by 100 virtual users:
 
-<a href="https://metrics.green-coding.io/stats.html?id=59ce2670-046e-4911-b1bc-a9f618616002"><img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=psu_energy_ac_mcp_machine" alt="Machine Energy Badge" loading="lazy"></a>
-<a href="https://metrics.green-coding.io/stats.html?id=59ce2670-046e-4911-b1bc-a9f618616002"><img src="https://api.green-coding.io/v1/badge/single/59ce2670-046e-4911-b1bc-a9f618616002?metric=cpu_energy_rapl_msr_component" alt="CPU Package Energy Badge" loading="lazy"></a>
+<a href="https://metrics.green-coding.io/stats.html?id=f4ceb3f7-28e5-4ce8-9217-c07859c4dbb0"><img src="https://api.green-coding.io/v1/badge/single/f4ceb3f7-28e5-4ce8-9217-c07859c4dbb0?metric=psu_energy_ac_mcp_machine" alt="Machine Energy Badge" loading="lazy"></a>
+<a href="https://metrics.green-coding.io/stats.html?id=f4ceb3f7-28e5-4ce8-9217-c07859c4dbb0"><img src="https://api.green-coding.io/v1/badge/single/f4ceb3f7-28e5-4ce8-9217-c07859c4dbb0?metric=cpu_energy_rapl_msr_component" alt="CPU Package Energy Badge" loading="lazy"></a>
 
 <details>
 <summary><b>What happens in the usage scenario?</b></summary>
@@ -387,8 +388,12 @@ Additionally, a single user retrieves the task status report (monitoring).
 
 </details>
 
-The full procedure for the measurement can be found [in this PDF file](docs/Messungen-Blauer-Engel-KADAI.pdf).
-The setup using the Green Metrics Tool is described [here](qa/gmt/README.md).
+Reports (German PDFs):
+
+- [Measurement report 2025](docs/Messungen-Blauer-Engel-KADAI-2025.pdf)
+- [Re-measurement 2026, including change log and comparison with 2025](docs/Messungen-Blauer-Engel-KADAI-2026.pdf)
+
+The setup using the Green Metrics Tool can be found [here in the repo](qa/gmt/README.md).
 
 <br clear="right">
 
