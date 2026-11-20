@@ -48,6 +48,7 @@ import io.kadai.task.api.models.TaskSummary;
 import io.kadai.task.rest.assembler.BulkOperationResultsRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskRepresentationModelAssembler;
 import io.kadai.task.rest.assembler.TaskSummaryRepresentationModelAssembler;
+import io.kadai.task.rest.models.AttachmentRepresentationModel;
 import io.kadai.task.rest.models.BulkOperationResultsRepresentationModel;
 import io.kadai.task.rest.models.DistributionTasksRepresentationModel;
 import io.kadai.task.rest.models.IsReadRepresentationModel;
@@ -125,14 +126,7 @@ public class TaskController implements TaskApi {
           ObjectReferencePersistenceException,
           NotAuthorizedOnWorkbasketException {
 
-    if (!taskRepresentationModel.getAttachments().stream()
-        .filter(att -> Objects.nonNull(att.getTaskId()))
-        .filter(att -> !att.getTaskId().equals(taskRepresentationModel.getTaskId()))
-        .toList()
-        .isEmpty()) {
-      throw new InvalidArgumentException(
-          "An attachments' taskId must be empty or equal to the id of the task it belongs to");
-    }
+    verifyAttachmentTaskIds(taskRepresentationModel);
 
     Task fromResource = taskRepresentationModelAssembler.toEntityModel(taskRepresentationModel);
     Task createdTask = taskService.createTask(fromResource);
@@ -729,14 +723,7 @@ public class TaskController implements TaskApi {
               taskId, taskRepresentationModel.getTaskId()));
     }
 
-    if (!taskRepresentationModel.getAttachments().stream()
-        .filter(att -> Objects.nonNull(att.getTaskId()))
-        .filter(att -> !att.getTaskId().equals(taskRepresentationModel.getTaskId()))
-        .toList()
-        .isEmpty()) {
-      throw new InvalidArgumentException(
-          "An attachments' taskId must be empty or equal to the id of the task it belongs to");
-    }
+    verifyAttachmentTaskIds(taskRepresentationModel);
 
     Task task = taskRepresentationModelAssembler.toEntityModel(taskRepresentationModel);
     task = taskService.updateTask(task);
@@ -889,6 +876,19 @@ public class TaskController implements TaskApi {
 
   private String getOwnerId(Map<String, String> body) {
     return body == null ? null : body.get("ownerId");
+  }
+
+  private static void verifyAttachmentTaskIds(TaskRepresentationModel taskRepresentationModel) {
+    List<AttachmentRepresentationModel> attachments = taskRepresentationModel.getAttachments();
+    if (attachments != null
+        && attachments.stream()
+            .filter(Objects::nonNull)
+            .map(AttachmentRepresentationModel::getTaskId)
+            .filter(Objects::nonNull)
+            .anyMatch(taskId -> !taskId.equals(taskRepresentationModel.getTaskId()))) {
+      throw new InvalidArgumentException(
+          "An attachments' taskId must be empty or equal to the id of the task it belongs to");
+    }
   }
 
   // endregion

@@ -126,12 +126,6 @@ class AttachmentRepresentationModelAssemblerTest {
         .isEqualTo(attachment2);
   }
 
-  void testEquality(Attachment attachment, AttachmentRepresentationModel repModel) {
-    AttachmentSummaryRepresentationModelAssemblerTest.testEquality(attachment, repModel);
-
-    assertThat(attachment.getCustomAttributeMap()).isEqualTo(repModel.getCustomAttributes());
-  }
-
   @Test
   void should_ReturnEntityWithNullFields_When_ConvertingRepresentationModelWithoutNestedObjects() {
     AttachmentRepresentationModel repModel = new AttachmentRepresentationModel();
@@ -141,5 +135,11 @@ class AttachmentRepresentationModelAssemblerTest {
 
     assertThat(attachment.getClassificationSummary()).isNull();
     assertThat(attachment.getObjectReference()).isNull();
+  }
+
+  void testEquality(Attachment attachment, AttachmentRepresentationModel repModel) {
+    AttachmentSummaryRepresentationModelAssemblerTest.testEquality(attachment, repModel);
+
+    assertThat(attachment.getCustomAttributeMap()).isEqualTo(repModel.getCustomAttributes());
   }
 }

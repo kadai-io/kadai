@@ -701,11 +701,7 @@ public class TaskServiceImpl implements TaskService {
             WorkbasketPermission.EDITTASKS);
       }
 
-      if (isWorkbasketSummaryMissing(newTaskImpl.getWorkbasketSummary())) {
-        // The Workbasket of a Task cannot be changed via update. Keep the persisted one instead of
-        // resolving Classifications without a domain and persisting null Workbasket references.
-        newTaskImpl.setWorkbasketSummary(oldTaskImpl.getWorkbasketSummary());
-      }
+      keepPersistedWorkbasket(oldTaskImpl, newTaskImpl);
 
       attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
       objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(newTaskImpl, oldTaskImpl);
@@ -1785,9 +1781,26 @@ public class TaskServiceImpl implements TaskService {
     return task;
   }
 
-  private static boolean isWorkbasketSummaryMissing(WorkbasketSummary workbasketSummary) {
-    return workbasketSummary == null
-        || (workbasketSummary.getId() == null && workbasketSummary.getKey() == null);
+  /**
+   * The Workbasket of a Task cannot be changed via update. Missing or partial Workbasket
+   * information is replaced by the persisted Workbasket, so that neither Classifications are
+   * resolved without a domain nor null Workbasket references are persisted.
+   */
+  private static void keepPersistedWorkbasket(TaskImpl oldTaskImpl, TaskImpl newTaskImpl) {
+    WorkbasketSummary oldWorkbasket = oldTaskImpl.getWorkbasketSummary();
+    WorkbasketSummary newWorkbasket = newTaskImpl.getWorkbasketSummary();
+    if (newWorkbasket != null
+        && (isChanged(newWorkbasket.getId(), oldWorkbasket.getId())
+            || isChanged(newWorkbasket.getKey(), oldWorkbasket.getKey())
+            || isChanged(newWorkbasket.getDomain(), oldWorkbasket.getDomain()))) {
+      throw new InvalidArgumentException(
+          "A task's Workbasket cannot be changed via update of the task");
+    }
+    newTaskImpl.setWorkbasketSummary(oldWorkbasket);
+  }
+
+  private static boolean isChanged(String newValue, String oldValue) {
+    return newValue != null && !newValue.equals(oldValue);
   }
 
   private Workbasket resolveWorkbasket(TaskImpl task)
@@ -2827,12 +2840,6 @@ public class TaskServiceImpl implements TaskService {
         || !oldTaskImpl.getExternalId().equals(newTaskImpl.getExternalId())) {
       throw new InvalidArgumentException(
           "A task's external Id cannot be changed via update of the task");
-    }
-
-    String newWorkbasketKey = newTaskImpl.getWorkbasketKey();
-    if (newWorkbasketKey != null && !newWorkbasketKey.equals(oldTaskImpl.getWorkbasketKey())) {
-      throw new InvalidArgumentException(
-          "A task's Workbasket cannot be changed via update of the task");
     }
 
     if (newTaskImpl.getClassificationSummary() == null) {
