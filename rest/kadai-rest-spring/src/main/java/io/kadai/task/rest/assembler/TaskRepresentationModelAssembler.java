@@ -33,6 +33,8 @@ import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.models.TaskImpl;
 import io.kadai.task.rest.TaskController;
+import io.kadai.task.rest.models.AttachmentRepresentationModel;
+import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
 import io.kadai.task.rest.models.TaskPatchRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel;
 import io.kadai.task.rest.models.TaskRepresentationModel.CustomAttribute;
@@ -147,7 +149,16 @@ public class TaskRepresentationModelAssembler
   }
 
   public Task toEntityModel(TaskRepresentationModel repModel) throws InvalidArgumentException {
-    verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
+    final List<CustomAttribute> customAttributes =
+        requireNonNullElements(repModel.getCustomAttributes(), "customAttributes");
+    final List<CustomAttribute> callbackInfo =
+        requireNonNullElements(repModel.getCallbackInfo(), "callbackInfo");
+    final List<AttachmentRepresentationModel> attachments =
+        requireNonNullElements(repModel.getAttachments(), "attachments");
+    final List<ObjectReferenceRepresentationModel> secondaryObjectReferences =
+        requireNonNullElements(
+            repModel.getSecondaryObjectReferences(), "secondaryObjectReferences");
+    verifyCorrectCustomAttributesFormat(customAttributes);
     TaskImpl task = (TaskImpl) taskService.newTask();
     task.setId(repModel.getTaskId());
     task.setExternalId(repModel.getExternalId());
@@ -207,17 +218,14 @@ public class TaskRepresentationModelAssembler
     task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_6, repModel.getCustomInt6());
     task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_7, repModel.getCustomInt7());
     task.setCustomIntField(TaskCustomIntField.CUSTOM_INT_8, repModel.getCustomInt8());
-    task.setAttachments(
-        repModel.getAttachments().stream().map(attachmentAssembler::toEntityModel).toList());
+    task.setAttachments(attachments.stream().map(attachmentAssembler::toEntityModel).toList());
     task.setSecondaryObjectReferences(
-        repModel.getSecondaryObjectReferences().stream()
-            .map(objectReferenceAssembler::toEntity)
-            .toList());
+        secondaryObjectReferences.stream().map(objectReferenceAssembler::toEntity).toList());
     task.setCustomAttributeMap(
-        repModel.getCustomAttributes().stream()
+        customAttributes.stream()
             .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
     task.setCallbackInfo(
-        repModel.getCallbackInfo().stream()
+        callbackInfo.stream()
             .filter(e -> Objects.nonNull(e.getKey()))
             .filter(not(e -> e.getKey().isEmpty()))
             .collect(Collectors.toMap(CustomAttribute::getKey, CustomAttribute::getValue)));
@@ -226,7 +234,14 @@ public class TaskRepresentationModelAssembler
 
   public TaskPatch toPatch(TaskPatchRepresentationModel repModel) {
     if (repModel.getCustomAttributes() != null) {
-      verifyCorrectCustomAttributesFormat(repModel.getCustomAttributes());
+      verifyCorrectCustomAttributesFormat(
+          requireNonNullElements(repModel.getCustomAttributes(), "customAttributes"));
+    }
+    if (repModel.getCallbackInfo() != null) {
+      requireNonNullElements(repModel.getCallbackInfo(), "callbackInfo");
+    }
+    if (repModel.getSecondaryObjectReferences() != null) {
+      requireNonNullElements(repModel.getSecondaryObjectReferences(), "secondaryObjectReferences");
     }
 
     TaskPatchBuilder builder = new TaskPatchBuilder();
@@ -295,6 +310,19 @@ public class TaskRepresentationModelAssembler
     }
 
     return builder.build();
+  }
+
+  // Treats a missing list as empty and rejects lists containing null elements, which would
+  // otherwise fail with a NullPointerException while being mapped.
+  private static <T> List<T> requireNonNullElements(List<T> list, String fieldName) {
+    if (list == null) {
+      return List.of();
+    }
+    if (list.stream().anyMatch(Objects::isNull)) {
+      throw new InvalidArgumentException(
+          String.format("'%s' must not contain null elements", fieldName));
+    }
+    return list;
   }
 
   private void verifyCorrectCustomAttributesFormat(List<CustomAttribute> customAttributes)

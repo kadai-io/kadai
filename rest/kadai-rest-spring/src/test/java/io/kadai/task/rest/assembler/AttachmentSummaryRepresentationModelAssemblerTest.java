@@ -141,5 +141,16 @@ class AttachmentSummaryRepresentationModelAssemblerTest {
         .isEqualTo(attachment2);
   }
 
+  @Test
+  void should_ReturnEntityWithNullFields_When_ConvertingRepresentationModelWithoutNestedObjects() {
+    AttachmentSummaryRepresentationModel repModel = new AttachmentSummaryRepresentationModel();
+    repModel.setAttachmentId("id");
+
+    AttachmentSummary attachment = assembler.toEntityModel(repModel);
+
+    assertThat(attachment.getClassificationSummary()).isNull();
+    assertThat(attachment.getObjectReference()).isNull();
+  }
+
   private void testLinks(AttachmentSummaryRepresentationModel repModel) {}
 }

@@ -36,6 +36,7 @@ import io.kadai.common.rest.assembler.PagedRepresentationModelAssembler;
 import io.kadai.common.rest.models.PageMetadata;
 import java.util.Collection;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -83,7 +84,12 @@ public class ClassificationSummaryRepresentationModelAssembler
     return repModel;
   }
 
-  public ClassificationSummary toEntityModel(ClassificationSummaryRepresentationModel repModel) {
+  @Nullable
+  public ClassificationSummary toEntityModel(
+      @Nullable ClassificationSummaryRepresentationModel repModel) {
+    if (repModel == null) {
+      return null;
+    }
     ClassificationSummaryImpl classification =
         (ClassificationSummaryImpl)
             classificationService

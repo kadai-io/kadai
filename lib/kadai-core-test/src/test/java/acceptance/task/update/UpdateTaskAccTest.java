@@ -69,6 +69,7 @@ import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
 import io.kadai.workbasket.api.exceptions.NotAuthorizedOnWorkbasketException;
 import io.kadai.workbasket.api.models.WorkbasketSummary;
+import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.List;
@@ -368,6 +369,91 @@ class UpdateTaskAccTest {
               .isInstanceOf(InvalidArgumentException.class);
         };
     return DynamicTest.stream(list.iterator(), Pair::getLeft, test);
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @TestFactory
+  Stream<DynamicTest> should_KeepPersistedWorkbasket_When_UpdatingTaskWithoutWorkbasketSummary() {
+    List<Pair<String, WorkbasketSummary>> list =
+        List.of(
+            Pair.of("When WorkbasketSummary is null", null),
+            Pair.of("When WorkbasketSummary is empty", new WorkbasketSummaryImpl()),
+            Pair.of(
+                "When WorkbasketSummary only contains the key",
+                workbasketSummary(null, defaultWorkbasketSummary.getKey(), null)),
+            Pair.of(
+                "When WorkbasketSummary only contains the id",
+                workbasketSummary(defaultWorkbasketSummary.getId(), null, null)));
+
+    ThrowingConsumer<Pair<String, WorkbasketSummary>> test =
+        pair -> {
+          Task task =
+              TaskBuilder.newTask()
+                  .classificationSummary(defaultClassificationSummary)
+                  .workbasketSummary(defaultWorkbasketSummary)
+                  .primaryObjRef(defaultObjectReference)
+                  .buildAndStore(taskService, "admin");
+          ClassificationSummary newClassificationSummary =
+              defaultTestClassification().buildAndStoreAsSummary(classificationService, "admin");
+          ((TaskImpl) task).setWorkbasketSummary(pair.getRight());
+          task.setClassificationKey(newClassificationSummary.getKey());
+
+          Task updatedTask = taskService.updateTask(task);
+
+          assertThat(updatedTask.getWorkbasketSummary().getId())
+              .isEqualTo(defaultWorkbasketSummary.getId());
+          assertThat(updatedTask.getClassificationSummary().getId())
+              .isEqualTo(newClassificationSummary.getId());
+          Task persistedTask = taskService.getTask(task.getId());
+          assertThat(persistedTask.getWorkbasketSummary()).isEqualTo(defaultWorkbasketSummary);
+          assertThat(persistedTask.getDomain()).isEqualTo(defaultWorkbasketSummary.getDomain());
+        };
+    return DynamicTest.stream(list.iterator(), Pair::getLeft, test);
+  }
+
+  @WithAccessId(user = "user-1-2")
+  @TestFactory
+  Stream<DynamicTest> should_ThrowException_When_UpdatingWorkbasketOfTask() {
+    List<Pair<String, WorkbasketSummary>> list =
+        List.of(
+            Pair.of(
+                "When Id of Workbasket differs",
+                workbasketSummary(wbWithoutEditTasks.getId(), null, null)),
+            Pair.of(
+                "When Key of Workbasket differs",
+                workbasketSummary(null, wbWithoutEditTasks.getKey(), null)),
+            Pair.of(
+                "When Domain of Workbasket differs",
+                workbasketSummary(
+                    defaultWorkbasketSummary.getId(),
+                    defaultWorkbasketSummary.getKey(),
+                    "OTHER_DOMAIN")));
+
+    ThrowingConsumer<Pair<String, WorkbasketSummary>> test =
+        pair -> {
+          Task task =
+              TaskBuilder.newTask()
+                  .classificationSummary(defaultClassificationSummary)
+                  .workbasketSummary(defaultWorkbasketSummary)
+                  .primaryObjRef(defaultObjectReference)
+                  .buildAndStore(taskService, "admin");
+          ((TaskImpl) task).setWorkbasketSummary(pair.getRight());
+
+          assertThatThrownBy(() -> taskService.updateTask(task))
+              .isInstanceOf(InvalidArgumentException.class)
+              .hasMessage("A task's Workbasket cannot be changed via update of the task");
+          assertThat(taskService.getTask(task.getId()).getWorkbasketSummary())
+              .isEqualTo(defaultWorkbasketSummary);
+        };
+    return DynamicTest.stream(list.iterator(), Pair::getLeft, test);
+  }
+
+  private static WorkbasketSummary workbasketSummary(String id, String key, String domain) {
+    WorkbasketSummaryImpl workbasketSummary = new WorkbasketSummaryImpl();
+    workbasketSummary.setId(id);
+    workbasketSummary.setKey(key);
+    workbasketSummary.setDomain(domain);
+    return workbasketSummary;
   }
 
   @WithAccessId(user = "user-taskrouter")

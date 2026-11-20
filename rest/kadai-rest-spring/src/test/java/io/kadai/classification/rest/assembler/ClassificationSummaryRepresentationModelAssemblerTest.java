@@ -166,4 +166,9 @@ class ClassificationSummaryRepresentationModelAssemblerTest {
         .isNotSameAs(secondClassification)
         .isEqualTo(secondClassification);
   }
+
+  @Test
+  void should_ReturnNull_When_ConvertingNullRepresentationModelToEntity() {
+    assertThat(assembler.toEntityModel(null)).isNull();
+  }
 }

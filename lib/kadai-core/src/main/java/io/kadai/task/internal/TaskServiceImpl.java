@@ -703,6 +703,7 @@ public class TaskServiceImpl implements TaskService {
 
       verifyServerOwnedTaskFieldsUnchanged(oldTaskImpl, newTaskImpl);
       restoreFieldsNotUpdatedByTaskMapper(oldTaskImpl, newTaskImpl);
+      keepPersistedWorkbasket(oldTaskImpl, newTaskImpl);
 
       attachmentHandler.insertAndDeleteAttachmentsOnTaskUpdate(newTaskImpl, oldTaskImpl);
       objectReferenceHandler.insertAndDeleteObjectReferencesOnTaskUpdate(newTaskImpl, oldTaskImpl);
@@ -1782,6 +1783,26 @@ public class TaskServiceImpl implements TaskService {
     return task;
   }
 
+  // The Workbasket of a Task cannot be changed via update. Missing or partial Workbasket
+  // information is replaced by the persisted Workbasket, so that neither Classifications are
+  // resolved without a domain nor null Workbasket references are persisted.
+  private static void keepPersistedWorkbasket(TaskImpl oldTaskImpl, TaskImpl newTaskImpl) {
+    WorkbasketSummary oldWorkbasket = oldTaskImpl.getWorkbasketSummary();
+    WorkbasketSummary newWorkbasket = newTaskImpl.getWorkbasketSummary();
+    if (newWorkbasket != null
+        && (isChanged(newWorkbasket.getId(), oldWorkbasket.getId())
+            || isChanged(newWorkbasket.getKey(), oldWorkbasket.getKey())
+            || isChanged(newWorkbasket.getDomain(), oldWorkbasket.getDomain()))) {
+      throw new InvalidArgumentException(
+          "A task's Workbasket cannot be changed via update of the task");
+    }
+    newTaskImpl.setWorkbasketSummary(oldWorkbasket);
+  }
+
+  private static boolean isChanged(String newValue, String oldValue) {
+    return newValue != null && !newValue.equals(oldValue);
+  }
+
   private Workbasket resolveWorkbasket(TaskImpl task)
       throws WorkbasketNotFoundException,
           InvalidArgumentException,
@@ -2851,12 +2872,6 @@ public class TaskServiceImpl implements TaskService {
         || !oldTaskImpl.getExternalId().equals(newTaskImpl.getExternalId())) {
       throw new InvalidArgumentException(
           "A task's external Id cannot be changed via update of the task");
-    }
-
-    String newWorkbasketKey = newTaskImpl.getWorkbasketKey();
-    if (newWorkbasketKey != null && !newWorkbasketKey.equals(oldTaskImpl.getWorkbasketKey())) {
-      throw new InvalidArgumentException(
-          "A task's Workbasket cannot be changed via update of the task");
     }
 
     if (newTaskImpl.getClassificationSummary() == null) {
