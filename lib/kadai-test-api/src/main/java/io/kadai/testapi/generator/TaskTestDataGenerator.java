@@ -37,8 +37,10 @@ import io.kadai.task.api.CallbackState;
 import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskCustomIntField;
 import io.kadai.task.api.TaskState;
+import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
+import io.kadai.task.internal.models.AttachmentImpl;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import io.kadai.task.internal.models.TaskImpl;
 import io.kadai.testapi.generator.exceptions.TestDataGenerationException;
@@ -158,6 +160,22 @@ public final class TaskTestDataGenerator {
           "Vorgang plausibilisieren");
   private static final EnumMap<WorkbasketType, Double> WORKBASKET_TYPE_WEIGHTS =
       createWorkbasketTypeWeights();
+  // Profile only: customer requests are answered within days, internal follow-ups take longer.
+  private static final Map<String, List<String>> PROFILE_SERVICE_LEVELS_BY_CATEGORY =
+      Map.of(
+          "EXTERNAL", List.of("P3D", "P5D"),
+          "MANUAL", List.of("P5D", "P10D"),
+          "AUTOMATIC", List.of("P2D", "P3D"),
+          "PROCESS", List.of("P10D", "P15D"));
+  private static final List<String> PROFILE_FALLBACK_SERVICE_LEVELS = List.of("P5D", "P10D");
+  private static final double PROFILE_MEAN_OPEN_TASK_AGE_DAYS = 7;
+  private static final double PROFILE_MAX_OPEN_TASK_AGE_DAYS = 365;
+  private static final long PROFILE_MIN_FINISHED_TASK_AGE_DAYS = 5;
+  private static final double PROFILE_GROUP_WORKBASKET_SHARE = 0.15;
+  private static final double PROFILE_TOPIC_WORKBASKET_SHARE = 0.05;
+  private static final List<String> DOCUMENT_CHANNELS =
+      List.of("Post", "Post", "Post", "E-Mail", "E-Mail", "Fax", "Kundenportal", "Maklerportal");
+  private static final List<String> SECONDARY_OBJECT_TYPES = List.of("KDNR", "VNR", "SDNR");
   private static final int COPY_BUFFER_SIZE_PER_TASK = 2_048;
   private static final int TASK_TABLE_COLUMN_COUNT = 61;
   private static final DateTimeFormatter POSTGRES_TIMESTAMP_FORMATTER =
@@ -181,33 +199,73 @@ public final class TaskTestDataGenerator {
           + ")";
   private static final String TASK_POSTGRES_COPY_SQL =
       "COPY TASK (" + TASK_TABLE_COLUMNS + ") " + "FROM STDIN WITH (FORMAT text)";
+  private static final String ATTACHMENT_TABLE_COLUMNS =
+      "ID, TASK_ID, CREATED, MODIFIED, CLASSIFICATION_KEY, CLASSIFICATION_ID, REF_COMPANY, "
+          + "REF_SYSTEM, REF_INSTANCE, REF_TYPE, REF_VALUE, CHANNEL, RECEIVED";
+  private static final String ATTACHMENT_INSERT_SQL =
+      "INSERT INTO ATTACHMENT("
+          + ATTACHMENT_TABLE_COLUMNS
+          + ") VALUES ("
+          + createPlaceholderList(13)
+          + ")";
+  private static final String ATTACHMENT_POSTGRES_COPY_SQL =
+      "COPY ATTACHMENT (" + ATTACHMENT_TABLE_COLUMNS + ") FROM STDIN WITH (FORMAT text)";
+  private static final String OBJECT_REFERENCE_TABLE_COLUMNS =
+      "ID, TASK_ID, COMPANY, SYSTEM, SYSTEM_INSTANCE, TYPE, VALUE";
+  private static final String OBJECT_REFERENCE_INSERT_SQL =
+      "INSERT INTO OBJECT_REFERENCE("
+          + OBJECT_REFERENCE_TABLE_COLUMNS
+          + ") VALUES ("
+          + createPlaceholderList(7)
+          + ")";
+  private static final String OBJECT_REFERENCE_POSTGRES_COPY_SQL =
+      "COPY OBJECT_REFERENCE ("
+          + OBJECT_REFERENCE_TABLE_COLUMNS
+          + ") FROM STDIN WITH (FORMAT text)";
 
   private final TaskGenerationEnvironment environment;
   private final Clock clock;
   private final long seed;
+  private final TaskGenerationProfile profile;
   private final KadaiEngine kadaiEngine;
   private final WorkingTimeCalculator workingTimeCalculator;
   private final Map<String, DomainFixtures> fixturesByDomain;
 
   /** Creates a generator from a previously resolved environment. */
   public TaskTestDataGenerator(TaskGenerationEnvironment environment) {
-    this(environment, Clock.systemUTC(), DEFAULT_SEED, null, null);
+    this(environment, Clock.systemUTC(), DEFAULT_SEED, null, null, null);
   }
 
   /** Creates a generator from a previously resolved environment using a custom clock and seed. */
   public TaskTestDataGenerator(TaskGenerationEnvironment environment, Clock clock, long seed) {
-    this(environment, clock, seed, null, null);
+    this(environment, clock, seed, null, null, null);
+  }
+
+  /**
+   * Creates a generator from a previously resolved environment using a custom clock, seed and
+   * profile.
+   *
+   * @param profile the shape of the generated data, or {@code null} for the default shape
+   */
+  public TaskTestDataGenerator(
+      TaskGenerationEnvironment environment,
+      Clock clock,
+      long seed,
+      TaskGenerationProfile profile) {
+    this(environment, clock, seed, profile, null, null);
   }
 
   private TaskTestDataGenerator(
       TaskGenerationEnvironment environment,
       Clock clock,
       long seed,
+      TaskGenerationProfile profile,
       KadaiEngine kadaiEngine,
       WorkingTimeCalculator workingTimeCalculator) {
     this.environment = sanitizeEnvironment(environment);
     this.clock = Objects.requireNonNull(clock, "clock must not be null");
     this.seed = seed;
+    this.profile = profile;
     this.kadaiEngine = kadaiEngine;
     this.workingTimeCalculator = workingTimeCalculator;
     this.fixturesByDomain = buildDomainFixtures(this.environment);
@@ -218,6 +276,16 @@ public final class TaskTestDataGenerator {
    * admin.
    */
   public static TaskTestDataGenerator from(KadaiEngine kadaiEngine) {
+    return from(kadaiEngine, null);
+  }
+
+  /**
+   * Creates a generator for the given engine and bootstraps missing compatible support data as
+   * admin.
+   *
+   * @param profile the shape of the generated data, or {@code null} for the default shape
+   */
+  public static TaskTestDataGenerator from(KadaiEngine kadaiEngine, TaskGenerationProfile profile) {
     Objects.requireNonNull(kadaiEngine, "kadaiEngine must not be null");
     try {
       TaskGenerationEnvironment environment =
@@ -225,11 +293,13 @@ public final class TaskTestDataGenerator {
               resolveEnvironment(
                   kadaiEngine.getConfiguration(),
                   kadaiEngine.getClassificationService(),
-                  kadaiEngine.getWorkbasketService()));
+                  kadaiEngine.getWorkbasketService(),
+                  profile));
       return new TaskTestDataGenerator(
           environment,
           Clock.systemUTC(),
           DEFAULT_SEED,
+          profile,
           kadaiEngine,
           kadaiEngine.getWorkingTimeCalculator());
     } catch (RuntimeException ex) {
@@ -246,6 +316,20 @@ public final class TaskTestDataGenerator {
       KadaiConfiguration configuration,
       ClassificationService classificationService,
       WorkbasketService workbasketService) {
+    return resolveEnvironment(configuration, classificationService, workbasketService, null);
+  }
+
+  /**
+   * Resolves a configuration-compatible generation environment and bootstraps missing support data
+   * shaped by the given profile.
+   *
+   * @param profile the shape of the generated data, or {@code null} for the default shape
+   */
+  public static TaskGenerationEnvironment resolveEnvironment(
+      KadaiConfiguration configuration,
+      ClassificationService classificationService,
+      WorkbasketService workbasketService,
+      TaskGenerationProfile profile) {
     Objects.requireNonNull(configuration, "configuration must not be null");
     Objects.requireNonNull(classificationService, "classificationService must not be null");
     Objects.requireNonNull(workbasketService, "workbasketService must not be null");
@@ -286,7 +370,8 @@ public final class TaskTestDataGenerator {
                     taskClassificationType,
                     category,
                     i,
-                    existingClassificationKeysByDomain));
+                    existingClassificationKeysByDomain,
+                    profile));
           }
         }
       }
@@ -308,7 +393,8 @@ public final class TaskTestDataGenerator {
                 domain,
                 candidateUsers,
                 workbaskets,
-                existingWorkbasketKeysByDomain));
+                existingWorkbasketKeysByDomain,
+                profile));
       }
 
       candidateUsers = extractCandidateUsers(configuration, workbaskets);
@@ -391,6 +477,17 @@ public final class TaskTestDataGenerator {
    * for the transaction. Other databases use a prepared-statement batch insert fallback.
    */
   public GenerationSummary persist(long numberOfTasks, int batchSize) {
+    return persist(0, numberOfTasks, batchSize);
+  }
+
+  /**
+   * Persists the generated tasks with the indices {@code firstIndex} to {@code firstIndex +
+   * numberOfTasks - 1} like {@link #persist(long, int)}.
+   *
+   * <p>Each task is derived from its index alone, so disjoint ranges can be persisted concurrently
+   * to load large data sets faster.
+   */
+  public GenerationSummary persist(long firstIndex, long numberOfTasks, int batchSize) {
     if (kadaiEngine == null) {
       throw new TestDataGenerationException(
           "Persisting tasks requires a generator created via TaskTestDataGenerator.from(...)"
@@ -399,6 +496,9 @@ public final class TaskTestDataGenerator {
 
     validateTaskCount(numberOfTasks);
     validateBatchSize(batchSize);
+    if (firstIndex < 0) {
+      throw new IllegalArgumentException("firstIndex must not be negative");
+    }
 
     if (numberOfTasks == 0) {
       return new GenerationSummary(
@@ -419,8 +519,8 @@ public final class TaskTestDataGenerator {
 
       GenerationSummary summary =
           copyManager != null
-              ? persistWithPostgreSqlCopy(numberOfTasks, batchSize, copyManager)
-              : persistWithJdbcBatch(numberOfTasks, batchSize, connection);
+              ? persistWithPostgreSqlCopy(firstIndex, numberOfTasks, batchSize, copyManager)
+              : persistWithJdbcBatch(firstIndex, numberOfTasks, batchSize, connection);
       connection.commit();
       return summary;
     } catch (Exception ex) {
@@ -440,17 +540,27 @@ public final class TaskTestDataGenerator {
     ClassificationSummary classification = pickClassification(fixtures, random);
     WorkbasketSummary workbasket = pickWorkbasket(fixtures, random);
 
-    TaskState state = pickTaskState(random);
+    TaskState state = profile == null ? pickTaskState(random) : pickProfileTaskState(random);
     String creator = pickCreator(random);
     long correlationGroup = index / 3;
-    Instant received =
-        random.nextDouble() < 0.15
-            ? null
-            : now.minus(Duration.ofHours(random.nextLong(24, 24L * 180)));
-    Instant created =
-        received == null
-            ? now.minus(Duration.ofHours(random.nextLong(12, 24L * 120)))
-            : received.plus(Duration.ofHours(random.nextLong(0, 48)));
+    Instant received;
+    Instant created;
+    if (profile == null) {
+      received =
+          random.nextDouble() < 0.15
+              ? null
+              : now.minus(Duration.ofHours(random.nextLong(24, 24L * 180)));
+      created =
+          received == null
+              ? now.minus(Duration.ofHours(random.nextLong(12, 24L * 120)))
+              : received.plus(Duration.ofHours(random.nextLong(0, 48)));
+    } else {
+      created = now.minus(determineProfileTaskAge(state, random));
+      received =
+          random.nextDouble() < 0.15
+              ? null
+              : created.minus(Duration.ofMinutes(random.nextLong(0, 48 * 60)));
+    }
     Instant planned = created.plus(Duration.ofHours(random.nextLong(1, 36)));
     Instant due = computeDue(planned, classification.getServiceLevel());
     String owner = determineOwner(state, workbasket, random);
@@ -525,7 +635,9 @@ public final class TaskTestDataGenerator {
     task.setOwner(owner);
     task.setNumberOfComments(determineNumberOfComments(state, random));
 
-    int manualPriority = determineManualPriority(classification.getPriority(), random);
+    // the priority job skips manual priorities, but a profile exposes every open task to it
+    int manualPriority =
+        profile == null ? determineManualPriority(classification.getPriority(), random) : -1;
     task.setManualPriority(manualPriority);
     int effectivePriority = manualPriority >= 0 ? manualPriority : classification.getPriority();
     task.setPriorityIgnoreFreeze(effectivePriority);
@@ -542,27 +654,39 @@ public final class TaskTestDataGenerator {
     }
 
     enrichCustomFields(task, classification, workbasket, referenceValue, random);
+    if (profile != null) {
+      addDocumentsAndReferences(task, fixtures, random);
+    }
     return task;
   }
 
   private GenerationSummary persistWithPostgreSqlCopy(
-      long numberOfTasks, int batchSize, CopyManager copyManager) throws SQLException, IOException {
+      long firstIndex, long numberOfTasks, int batchSize, CopyManager copyManager)
+      throws SQLException, IOException {
     StringBuilder buffer = new StringBuilder(estimateCopyBufferCapacity(batchSize));
+    StringBuilder attachmentBuffer = new StringBuilder();
+    StringBuilder objectReferenceBuffer = new StringBuilder();
     long emittedTaskCount = 0;
     long emittedBatchCount = 0;
 
-    for (long index = 0; index < numberOfTasks; index++) {
-      appendTaskAsPostgreSqlCopyRow(buffer, prepareTaskForDirectPersistence(generateTask(index)));
+    for (long index = firstIndex; index < firstIndex + numberOfTasks; index++) {
+      TaskImpl task = prepareTaskForDirectPersistence(generateTask(index));
+      appendTaskAsPostgreSqlCopyRow(buffer, task);
+      for (Attachment attachment : task.getAttachments()) {
+        appendPostgreSqlCopyRow(attachmentBuffer, attachmentRow(attachment));
+      }
+      for (ObjectReference objectReference : task.getSecondaryObjectReferences()) {
+        appendPostgreSqlCopyRow(objectReferenceBuffer, objectReferenceRow(objectReference));
+      }
       emittedTaskCount++;
       if (emittedTaskCount % batchSize == 0) {
-        copyBatch(copyManager, buffer);
+        copyBatch(copyManager, buffer, attachmentBuffer, objectReferenceBuffer);
         emittedBatchCount++;
-        buffer.setLength(0);
       }
     }
 
     if (!buffer.isEmpty()) {
-      copyBatch(copyManager, buffer);
+      copyBatch(copyManager, buffer, attachmentBuffer, objectReferenceBuffer);
       emittedBatchCount++;
     }
 
@@ -575,23 +699,37 @@ public final class TaskTestDataGenerator {
   }
 
   private GenerationSummary persistWithJdbcBatch(
-      long numberOfTasks, int batchSize, Connection connection) throws SQLException {
+      long firstIndex, long numberOfTasks, int batchSize, Connection connection)
+      throws SQLException {
     long emittedTaskCount = 0;
     long emittedBatchCount = 0;
 
-    try (PreparedStatement statement = connection.prepareStatement(TASK_INSERT_SQL)) {
-      for (long index = 0; index < numberOfTasks; index++) {
-        bindTask(statement, prepareTaskForDirectPersistence(generateTask(index)));
+    try (PreparedStatement statement = connection.prepareStatement(TASK_INSERT_SQL);
+        RowBatch attachments = new RowBatch(connection, ATTACHMENT_INSERT_SQL);
+        RowBatch objectReferences = new RowBatch(connection, OBJECT_REFERENCE_INSERT_SQL)) {
+      for (long index = firstIndex; index < firstIndex + numberOfTasks; index++) {
+        TaskImpl task = prepareTaskForDirectPersistence(generateTask(index));
+        bindTask(statement, task);
         statement.addBatch();
+        for (Attachment attachment : task.getAttachments()) {
+          attachments.add(attachmentRow(attachment));
+        }
+        for (ObjectReference objectReference : task.getSecondaryObjectReferences()) {
+          objectReferences.add(objectReferenceRow(objectReference));
+        }
         emittedTaskCount++;
         if (emittedTaskCount % batchSize == 0) {
           statement.executeLargeBatch();
+          attachments.execute();
+          objectReferences.execute();
           emittedBatchCount++;
         }
       }
 
       if (emittedTaskCount % batchSize != 0) {
         statement.executeLargeBatch();
+        attachments.execute();
+        objectReferences.execute();
         emittedBatchCount++;
       }
     }
@@ -612,7 +750,53 @@ public final class TaskTestDataGenerator {
     if (taskImpl.getExternalId() == null || taskImpl.getExternalId().isBlank()) {
       taskImpl.setExternalId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_EXT_TASK));
     }
+    for (Attachment attachment : taskImpl.getAttachments()) {
+      AttachmentImpl attachmentImpl = (AttachmentImpl) attachment;
+      if (attachmentImpl.getId() == null) {
+        attachmentImpl.setId(IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_ATTACHMENT));
+      }
+      attachmentImpl.setTaskId(taskImpl.getId());
+    }
+    for (ObjectReference objectReference : taskImpl.getSecondaryObjectReferences()) {
+      ObjectReferenceImpl objectReferenceImpl = (ObjectReferenceImpl) objectReference;
+      if (objectReferenceImpl.getId() == null) {
+        objectReferenceImpl.setId(
+            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_OBJECT_REFERENCE));
+      }
+      objectReferenceImpl.setTaskId(taskImpl.getId());
+    }
     return taskImpl;
+  }
+
+  private static Object[] attachmentRow(Attachment attachment) {
+    ObjectReference document = attachment.getObjectReference();
+    return new Object[] {
+      attachment.getId(),
+      attachment.getTaskId(),
+      attachment.getCreated(),
+      attachment.getModified(),
+      attachment.getClassificationSummary().getKey(),
+      attachment.getClassificationSummary().getId(),
+      document.getCompany(),
+      document.getSystem(),
+      document.getSystemInstance(),
+      document.getType(),
+      document.getValue(),
+      attachment.getChannel(),
+      attachment.getReceived()
+    };
+  }
+
+  private static Object[] objectReferenceRow(ObjectReference objectReference) {
+    return new Object[] {
+      objectReference.getId(),
+      objectReference.getTaskId(),
+      objectReference.getCompany(),
+      objectReference.getSystem(),
+      objectReference.getSystemInstance(),
+      objectReference.getType(),
+      objectReference.getValue()
+    };
   }
 
   private static void bindTask(PreparedStatement statement, TaskImpl task) throws SQLException {
@@ -844,12 +1028,37 @@ public final class TaskTestDataGenerator {
     }
   }
 
-  private static void copyBatch(CopyManager copyManager, StringBuilder buffer)
+  private static void appendPostgreSqlCopyRow(StringBuilder buffer, Object[] values) {
+    for (int i = 0; i < values.length; i++) {
+      if (i > 0) {
+        appendPostgreSqlCopySeparator(buffer);
+      }
+      appendPostgreSqlCopyValue(buffer, values[i]);
+    }
+    buffer.append('\n');
+  }
+
+  private static void copyBatch(
+      CopyManager copyManager,
+      StringBuilder tasks,
+      StringBuilder attachments,
+      StringBuilder objectReferences)
       throws SQLException, IOException {
+    copy(copyManager, TASK_POSTGRES_COPY_SQL, tasks);
+    copy(copyManager, ATTACHMENT_POSTGRES_COPY_SQL, attachments);
+    copy(copyManager, OBJECT_REFERENCE_POSTGRES_COPY_SQL, objectReferences);
+  }
+
+  private static void copy(CopyManager copyManager, String copySql, StringBuilder buffer)
+      throws SQLException, IOException {
+    if (buffer.isEmpty()) {
+      return;
+    }
     byte[] payload = buffer.toString().getBytes(StandardCharsets.UTF_8);
     try (ByteArrayInputStream inputStream = new ByteArrayInputStream(payload)) {
-      copyManager.copyIn(TASK_POSTGRES_COPY_SQL, inputStream);
+      copyManager.copyIn(copySql, inputStream);
     }
+    buffer.setLength(0);
   }
 
   private static String mapToJson(Map<String, ?> values) {
@@ -1095,7 +1304,8 @@ public final class TaskTestDataGenerator {
       String taskClassificationType,
       String category,
       int sequence,
-      Map<String, Set<String>> existingClassificationKeysByDomain)
+      Map<String, Set<String>> existingClassificationKeysByDomain,
+      TaskGenerationProfile profile)
       throws ClassificationAlreadyExistException,
           DomainNotFoundException,
           MalformedServiceLevelException,
@@ -1109,7 +1319,14 @@ public final class TaskTestDataGenerator {
     classification.setName(pickGeneratedClassificationName(category, sequence));
     classification.setDescription(classification.getName() + GENERATED_DESCRIPTION_SUFFIX);
     classification.setPriority(Math.max(1, sequence + 1));
-    classification.setServiceLevel("P" + (sequence + 1) + "D");
+    if (profile == null) {
+      classification.setServiceLevel("P" + (sequence + 1) + "D");
+    } else {
+      List<String> serviceLevels =
+          PROFILE_SERVICE_LEVELS_BY_CATEGORY.getOrDefault(
+              category.toUpperCase(Locale.ROOT), PROFILE_FALLBACK_SERVICE_LEVELS);
+      classification.setServiceLevel(serviceLevels.get(sequence % serviceLevels.size()));
+    }
     classification.setApplicationEntryPoint(sequence % 2 == 0 ? "load-test" : "workplace");
     classification.setIsValidInDomain(true);
     classification.setCustomField(ClassificationCustomField.CUSTOM_1, "VNR,RVNR,KOLVNR");
@@ -1124,7 +1341,8 @@ public final class TaskTestDataGenerator {
       String domain,
       List<String> candidateUsers,
       List<WorkbasketSummary> existingWorkbaskets,
-      Map<String, Set<String>> existingWorkbasketKeysByDomain)
+      Map<String, Set<String>> existingWorkbasketKeysByDomain,
+      TaskGenerationProfile profile)
       throws WorkbasketAlreadyExistException, DomainNotFoundException, NotAuthorizedException {
     List<WorkbasketSummary> created = new ArrayList<>();
     List<WorkbasketSummary> domainWorkbaskets =
@@ -1132,39 +1350,35 @@ public final class TaskTestDataGenerator {
             .filter(workbasket -> domain.equals(workbasket.getDomain()))
             .toList();
 
-    long personalCount =
-        domainWorkbaskets.stream().filter(wb -> wb.getType() == WorkbasketType.PERSONAL).count();
-    for (int i = (int) personalCount; i < GENERATED_PERSONAL_WORKBASKETS_PER_DOMAIN; i++) {
-      created.add(
-          createWorkbasket(
-              workbasketService,
-              domain,
-              WorkbasketType.PERSONAL,
-              i,
-              candidateUsers,
-              existingWorkbasketKeysByDomain));
+    int groupTarget = 1;
+    int topicTarget = 1;
+    int personalTarget = GENERATED_PERSONAL_WORKBASKETS_PER_DOMAIN;
+    if (profile != null) {
+      int total = Math.max(profile.workbasketsPerDomain(), personalTarget + 2);
+      groupTarget = Math.max(1, (int) Math.round(total * PROFILE_GROUP_WORKBASKET_SHARE));
+      topicTarget = Math.max(1, (int) Math.round(total * PROFILE_TOPIC_WORKBASKET_SHARE));
+      personalTarget = total - groupTarget - topicTarget;
     }
 
-    if (domainWorkbaskets.stream().noneMatch(wb -> wb.getType() == WorkbasketType.GROUP)) {
-      created.add(
-          createWorkbasket(
-              workbasketService,
-              domain,
-              WorkbasketType.GROUP,
-              0,
-              candidateUsers,
-              existingWorkbasketKeysByDomain));
-    }
-
-    if (domainWorkbaskets.stream().noneMatch(wb -> wb.getType() == WorkbasketType.TOPIC)) {
-      created.add(
-          createWorkbasket(
-              workbasketService,
-              domain,
-              WorkbasketType.TOPIC,
-              0,
-              candidateUsers,
-              existingWorkbasketKeysByDomain));
+    // creation order PERSONAL, GROUP, TOPIC is kept stable for reproducible keys
+    for (Map.Entry<WorkbasketType, Integer> target :
+        List.of(
+            Map.entry(WorkbasketType.PERSONAL, personalTarget),
+            Map.entry(WorkbasketType.GROUP, groupTarget),
+            Map.entry(WorkbasketType.TOPIC, topicTarget))) {
+      long existingCount =
+          domainWorkbaskets.stream().filter(wb -> wb.getType() == target.getKey()).count();
+      for (int i = (int) existingCount; i < target.getValue(); i++) {
+        created.add(
+            createWorkbasket(
+                workbasketService,
+                domain,
+                target.getKey(),
+                i,
+                candidateUsers,
+                existingWorkbasketKeysByDomain,
+                profile));
+      }
     }
 
     return created;
@@ -1176,11 +1390,19 @@ public final class TaskTestDataGenerator {
       WorkbasketType type,
       int sequence,
       List<String> candidateUsers,
-      Map<String, Set<String>> existingWorkbasketKeysByDomain)
+      Map<String, Set<String>> existingWorkbasketKeysByDomain,
+      TaskGenerationProfile profile)
       throws WorkbasketAlreadyExistException, DomainNotFoundException, NotAuthorizedException {
     String key = uniqueWorkbasketKey(domain, type, sequence, existingWorkbasketKeysByDomain);
     Workbasket workbasket = workbasketService.newWorkbasket(key, domain);
-    String owner = determineGeneratedWorkbasketOwner(type, sequence, candidateUsers);
+    // with a profile, every personal workbasket belongs to a clerk of its own
+    String owner =
+        profile != null && type == WorkbasketType.PERSONAL
+            ? "clerk-"
+                + sanitizeForKey(domain).toLowerCase(Locale.ROOT)
+                + "-"
+                + pad(sequence + 1, 4)
+            : determineGeneratedWorkbasketOwner(type, sequence, candidateUsers);
     workbasket.setType(type);
     workbasket.setName(generatedWorkbasketName(domain, type, sequence));
     workbasket.setDescription(workbasket.getName() + GENERATED_DESCRIPTION_SUFFIX);
@@ -1389,6 +1611,98 @@ public final class TaskTestDataGenerator {
     return TaskState.TERMINATED;
   }
 
+  private TaskState pickProfileTaskState(SplittableRandom random) {
+    boolean open = random.nextDouble() < profile.openTaskRatio();
+    double roll = random.nextDouble();
+    if (open) {
+      // same mix of open states as without a profile
+      if (roll < 0.65) {
+        return TaskState.READY;
+      }
+      if (roll < 0.87) {
+        return TaskState.CLAIMED;
+      }
+      return roll < 0.95 ? TaskState.READY_FOR_REVIEW : TaskState.IN_REVIEW;
+    }
+    // few tasks get withdrawn (duplicates, revoked requests) or aborted by the calling process
+    if (roll < 0.93) {
+      return TaskState.COMPLETED;
+    }
+    return roll < 0.98 ? TaskState.CANCELLED : TaskState.TERMINATED;
+  }
+
+  /**
+   * Open tasks are young: their age is exponentially distributed, so a few stay open for months
+   * (e.g. claims in litigation). Finished tasks spread evenly over the history that a steady inflow
+   * of tasks leaves behind: with a mean open age of m days and an open ratio of r, that history
+   * spans m / r days.
+   */
+  private Duration determineProfileTaskAge(TaskState state, SplittableRandom random) {
+    double ageInDays;
+    if (state.isEndState()) {
+      double historyInDays = PROFILE_MEAN_OPEN_TASK_AGE_DAYS / profile.openTaskRatio();
+      ageInDays =
+          PROFILE_MIN_FINISHED_TASK_AGE_DAYS
+              + random.nextDouble()
+                  * Math.max(0, historyInDays - PROFILE_MIN_FINISHED_TASK_AGE_DAYS);
+    } else {
+      ageInDays =
+          Math.min(
+              PROFILE_MAX_OPEN_TASK_AGE_DAYS,
+              -PROFILE_MEAN_OPEN_TASK_AGE_DAYS * Math.log(1 - random.nextDouble()));
+    }
+    return Duration.ofMinutes((long) (ageInDays * 24 * 60));
+  }
+
+  /**
+   * Most tasks are created by the input management from incoming mail, so they carry the scanned
+   * documents as attachments, and point to the customer, the policy or the claim they concern.
+   * Attachments use the task classifications, as no document classifications are bootstrapped.
+   */
+  private void addDocumentsAndReferences(
+      GeneratedTaskImpl task, DomainFixtures fixtures, SplittableRandom random) {
+    int attachments = pickCount(random, 0.25, 0.70, 0.90);
+    Instant received = task.getReceived() == null ? task.getCreated() : task.getReceived();
+    for (int i = 0; i < attachments; i++) {
+      AttachmentImpl attachment = new AttachmentImpl();
+      attachment.setClassificationSummary(pickClassification(fixtures, random));
+      attachment.setObjectReference(
+          new ObjectReferenceImpl(
+              task.getPrimaryObjRef().getCompany(),
+              "DMS",
+              "01",
+              "DOKID",
+              Long.toString(random.nextLong(1_000_000_000L, 10_000_000_000L))));
+      attachment.setChannel(pick(DOCUMENT_CHANNELS, random));
+      attachment.setReceived(received);
+      attachment.setCreated(task.getCreated());
+      attachment.setModified(task.getCreated());
+      task.addAttachment(attachment);
+    }
+
+    int references = pickCount(random, 0.40, 0.80);
+    int firstType = random.nextInt(SECONDARY_OBJECT_TYPES.size());
+    for (int i = 0; i < references; i++) {
+      task.addSecondaryObjectReference(
+          new ObjectReferenceImpl(
+              task.getPrimaryObjRef().getCompany(),
+              pick(SYSTEMS, random),
+              pick(SYSTEM_INSTANCES, random),
+              SECONDARY_OBJECT_TYPES.get((firstType + i) % SECONDARY_OBJECT_TYPES.size()),
+              eightDigits(random.nextLong(100_000_000L))));
+    }
+  }
+
+  /** Draws a count 0, 1, 2, ... whose cumulative probabilities are the given thresholds. */
+  private static int pickCount(SplittableRandom random, double... cumulativeProbabilities) {
+    double roll = random.nextDouble();
+    int count = 0;
+    while (count < cumulativeProbabilities.length && roll >= cumulativeProbabilities[count]) {
+      count++;
+    }
+    return count;
+  }
+
   private String determineOwner(
       TaskState state, WorkbasketSummary workbasket, SplittableRandom random) {
     if (state == TaskState.READY || state == TaskState.CANCELLED || state == TaskState.TERMINATED) {
@@ -1558,5 +1872,40 @@ public final class TaskTestDataGenerator {
 
   private static String createPlaceholderList(int placeholderCount) {
     return String.join(", ", Collections.nCopies(placeholderCount, "?"));
+  }
+
+  /** Batched insert of rows that consist of strings and timestamps only. */
+  private static final class RowBatch implements AutoCloseable {
+
+    private final PreparedStatement statement;
+    private int pendingRows;
+
+    private RowBatch(Connection connection, String insertSql) throws SQLException {
+      statement = connection.prepareStatement(insertSql);
+    }
+
+    private void add(Object[] row) throws SQLException {
+      for (int i = 0; i < row.length; i++) {
+        if (row[i] instanceof Instant instant) {
+          setTimestamp(statement, i + 1, instant);
+        } else {
+          statement.setString(i + 1, (String) row[i]);
+        }
+      }
+      statement.addBatch();
+      pendingRows++;
+    }
+
+    private void execute() throws SQLException {
+      if (pendingRows > 0) {
+        statement.executeLargeBatch();
+        pendingRows = 0;
+      }
+    }
+
+    @Override
+    public void close() throws SQLException {
+      statement.close();
+    }
   }
 }

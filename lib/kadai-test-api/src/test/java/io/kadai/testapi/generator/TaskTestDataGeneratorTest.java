@@ -20,6 +20,7 @@ package io.kadai.testapi.generator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.within;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -44,6 +45,7 @@ import io.kadai.workbasket.api.models.WorkbasketSummary;
 import io.kadai.workbasket.internal.models.WorkbasketImpl;
 import io.kadai.workbasket.internal.models.WorkbasketSummaryImpl;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
@@ -188,6 +190,113 @@ class TaskTestDataGeneratorTest {
 
   @Test
   void should_BootstrapCompatibleEnvironmentWhenNoSupportDataExists() throws Exception {
+    ClassificationService classificationService = emptyClassificationService();
+    WorkbasketService workbasketService = emptyWorkbasketService();
+
+    TaskGenerationEnvironment environment =
+        TaskTestDataGenerator.resolveEnvironment(
+            mockConfiguration(), classificationService, workbasketService);
+
+    assertThat(environment.classifications()).hasSize(8);
+    assertThat(environment.workbaskets()).hasSize(8);
+    assertThat(environment.candidateUsers()).contains("admin", "user-1-1", "user-b-1");
+    verify(classificationService, Mockito.times(8)).createClassification(any());
+    verify(workbasketService, Mockito.times(8)).createWorkbasket(any());
+  }
+
+  @Test
+  void should_ShapeTasksLikeAProductionSystem_When_ProfileIsGiven() {
+    TaskTestDataGenerator generator =
+        new TaskTestDataGenerator(
+            baseEnvironment(), fixedClock(), 23L, new TaskGenerationProfile(0.1, 0));
+    Instant now = fixedClock().instant();
+
+    List<Task> tasks = generator.stream(20_000).toList();
+    Map<Boolean, List<Task>> tasksByOpen =
+        tasks.stream().collect(Collectors.partitioningBy(task -> !task.getState().isEndState()));
+    List<Task> openTasks = tasksByOpen.get(true);
+    List<Task> finishedTasks = tasksByOpen.get(false);
+
+    assertThat(openTasks.size() / 20_000.0).isCloseTo(0.1, within(0.01));
+    assertThat(finishedTasks)
+        .filteredOn(task -> task.getState() == TaskState.COMPLETED)
+        .hasSizeGreaterThan((int) (finishedTasks.size() * 0.9));
+    // open tasks are a week old on average, finished ones span the 70 days of history
+    assertThat(averageAgeInDays(openTasks, now)).isBetween(5.0, 9.0);
+    assertThat(averageAgeInDays(finishedTasks, now)).isBetween(30.0, 45.0);
+    assertThat(openTasks)
+        .allSatisfy(task ->
+            assertThat(task.getCreated()).isAfterOrEqualTo(now.minus(Duration.ofDays(365))));
+    assertThat(tasks)
+        .allSatisfy(task -> {
+          assertThat(task.getManualPriority()).isEqualTo(-1);
+          assertThat(task.getPriority()).isEqualTo(task.getClassificationSummary().getPriority());
+        });
+    assertThat(tasks)
+        .filteredOn(task -> !task.getAttachments().isEmpty())
+        .hasSizeGreaterThan(14_000);
+    assertThat(tasks.stream().flatMap(task -> task.getAttachments().stream()))
+        .allSatisfy(attachment -> {
+          assertThat(attachment.getClassificationSummary()).isNotNull();
+          assertThat(attachment.getObjectReference().getType()).isEqualTo("DOKID");
+          assertThat(attachment.getChannel()).isNotBlank();
+          assertThat(attachment.getReceived()).isNotNull();
+        });
+    assertThat(tasks)
+        .filteredOn(task -> !task.getSecondaryObjectReferences().isEmpty())
+        .hasSizeGreaterThan(11_000);
+  }
+
+  @Test
+  void should_BootstrapWorkbasketsAndServiceLevels_When_ProfileIsGiven() throws Exception {
+    TaskGenerationEnvironment environment =
+        TaskTestDataGenerator.resolveEnvironment(
+            mockConfiguration(),
+            emptyClassificationService(),
+            emptyWorkbasketService(),
+            new TaskGenerationProfile(0.1, 20));
+
+    assertThat(environment.workbaskets()).hasSize(40);
+    assertThat(
+            environment.workbaskets().stream()
+                .filter(workbasket -> workbasket.getDomain().equals("DOMAIN_A"))
+                .collect(Collectors.groupingBy(WorkbasketSummary::getType, Collectors.counting())))
+        .containsExactlyInAnyOrderEntriesOf(
+            Map.of(
+                WorkbasketType.PERSONAL, 16L, WorkbasketType.GROUP, 3L, WorkbasketType.TOPIC, 1L));
+    assertThat(environment.workbaskets())
+        .filteredOn(workbasket -> workbasket.getType() == WorkbasketType.PERSONAL)
+        .extracting(WorkbasketSummary::getOwner)
+        .hasSize(32)
+        .doesNotHaveDuplicates();
+    assertThat(environment.classifications())
+        .extracting(ClassificationSummary::getServiceLevel)
+        .containsOnly("P3D", "P5D", "P10D");
+  }
+
+  @Test
+  void should_RejectInvalidArgumentsAndInvalidEnvironments() {
+    TaskTestDataGenerator generator =
+        new TaskTestDataGenerator(baseEnvironment(), fixedClock(), 5L);
+
+    assertThatThrownBy(() -> generator.stream(-1)).isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> generator.generate(1, 0, tasks -> {}))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> generator.generate(1, 1, null))
+        .isInstanceOf(NullPointerException.class);
+    assertThatThrownBy(() ->
+            new TaskTestDataGenerator(
+                new TaskGenerationEnvironment(
+                    List.of("DOMAIN_A"),
+                    List.of("admin"),
+                    "TASK",
+                    List.of("EXTERNAL"),
+                    List.of(),
+                    List.of())))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  private static ClassificationService emptyClassificationService() throws Exception {
     ClassificationService classificationService = Mockito.mock(ClassificationService.class);
     ClassificationQuery classificationQuery = Mockito.mock(ClassificationQuery.class);
     when(classificationService.createClassificationQuery()).thenReturn(classificationQuery);
@@ -211,7 +320,10 @@ class TaskTestDataGeneratorTest {
               .setId("CLI:GEN:" + classificationCounter.incrementAndGet());
           return classification;
         });
+    return classificationService;
+  }
 
+  private static WorkbasketService emptyWorkbasketService() throws Exception {
     WorkbasketService workbasketService = Mockito.mock(WorkbasketService.class);
     WorkbasketQuery workbasketQuery = Mockito.mock(WorkbasketQuery.class);
     when(workbasketService.createWorkbasketQuery()).thenReturn(workbasketQuery);
@@ -232,38 +344,7 @@ class TaskTestDataGeneratorTest {
           ((WorkbasketImpl) workbasket).setId("WBI:GEN:" + workbasketCounter.incrementAndGet());
           return workbasket;
         });
-
-    TaskGenerationEnvironment environment =
-        TaskTestDataGenerator.resolveEnvironment(
-            mockConfiguration(), classificationService, workbasketService);
-
-    assertThat(environment.classifications()).hasSize(8);
-    assertThat(environment.workbaskets()).hasSize(8);
-    assertThat(environment.candidateUsers()).contains("admin", "user-1-1", "user-b-1");
-    verify(classificationService, Mockito.times(8)).createClassification(any());
-    verify(workbasketService, Mockito.times(8)).createWorkbasket(any());
-  }
-
-  @Test
-  void should_RejectInvalidArgumentsAndInvalidEnvironments() {
-    TaskTestDataGenerator generator =
-        new TaskTestDataGenerator(baseEnvironment(), fixedClock(), 5L);
-
-    assertThatThrownBy(() -> generator.stream(-1)).isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> generator.generate(1, 0, tasks -> {}))
-        .isInstanceOf(IllegalArgumentException.class);
-    assertThatThrownBy(() -> generator.generate(1, 1, null))
-        .isInstanceOf(NullPointerException.class);
-    assertThatThrownBy(() ->
-            new TaskTestDataGenerator(
-                new TaskGenerationEnvironment(
-                    List.of("DOMAIN_A"),
-                    List.of("admin"),
-                    "TASK",
-                    List.of("EXTERNAL"),
-                    List.of(),
-                    List.of())))
-        .isInstanceOf(IllegalArgumentException.class);
+    return workbasketService;
   }
 
   private static TaskGenerationEnvironment baseEnvironment() {
@@ -328,6 +409,14 @@ class TaskTestDataGeneratorTest {
     workbasket.setName(key + "-name");
     workbasket.setDescription(key + "-description");
     return workbasket;
+  }
+
+  private static double averageAgeInDays(List<Task> tasks, Instant now) {
+    return tasks.stream()
+            .mapToLong(task -> Duration.between(task.getCreated(), now).toMinutes())
+            .average()
+            .orElseThrow()
+        / (24 * 60);
   }
 
   private static Clock fixedClock() {

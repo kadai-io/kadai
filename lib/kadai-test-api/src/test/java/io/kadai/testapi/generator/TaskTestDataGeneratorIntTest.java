@@ -23,6 +23,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.kadai.KadaiConfiguration;
 import io.kadai.common.api.KadaiEngine;
 import io.kadai.task.api.TaskService;
+import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.testapi.KadaiInject;
@@ -93,5 +94,37 @@ class TaskTestDataGeneratorIntTest {
     assertThat(persistedTask.getCustomField(io.kadai.task.api.TaskCustomField.CUSTOM_14))
         .isEqualTo("abc");
     assertThat(persistedTask.getPrimaryObjRef()).isNotNull();
+  }
+
+  @WithAccessId(user = "admin")
+  @Test
+  void should_PersistAttachmentsAndObjectReferences_When_ProfileIsGiven() throws Exception {
+    TaskTestDataGenerator generator =
+        TaskTestDataGenerator.from(kadaiEngine, new TaskGenerationProfile(0.5, 6));
+    long firstIndex = 1_000_000;
+
+    generator.persist(firstIndex, 40, 8);
+
+    long attachments = 0;
+    for (long index = firstIndex; index < firstIndex + 40; index++) {
+      Task expected = generator.generateTask(index);
+      TaskSummary summary =
+          taskService.createTaskQuery().externalIdIn(expected.getExternalId()).single();
+      Task persisted = taskService.getTask(summary.getId());
+      assertThat(persisted.getAttachments())
+          .extracting(attachment -> attachment.getObjectReference().getValue())
+          .containsExactlyInAnyOrderElementsOf(
+              expected.getAttachments().stream()
+                  .map(attachment -> attachment.getObjectReference().getValue())
+                  .toList());
+      assertThat(persisted.getSecondaryObjectReferences())
+          .extracting(ObjectReference::getValue)
+          .containsExactlyInAnyOrderElementsOf(
+              expected.getSecondaryObjectReferences().stream()
+                  .map(ObjectReference::getValue)
+                  .toList());
+      attachments += persisted.getAttachments().size();
+    }
+    assertThat(attachments).isPositive();
   }
 }
