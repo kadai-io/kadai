@@ -17,10 +17,11 @@ Design decisions for this setup are documented in [DECISIONS.md](./DECISIONS.md)
 
 * [usage_scenario_quick.yml](./usage_scenario_quick.yml): test/debug scenario, uses the moving `latest` image, seeds 1000 tasks
 * [usage_scenario_standard.yml](./usage_scenario_standard.yml): regular energy measurements, pins a `sha-<commit>` image that CI bumps automatically, seeds 100000 tasks
-* [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml): "Blauer Engel for Software" certification, pins a frozen `sha-<commit>` image (and the postgres/k6 images), seeds 100000 tasks
+* [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml): "Blauer Engel for Software" certification, pins a frozen image tag derived from the certification branch (and the postgres/k6 images), seeds 100000 tasks
 
-Only the quick scenario uses the moving `ghcr.io/kadai-io/kadai-gmt:latest` image; the standard and
-certification scenarios pin a `sha-<commit>` tag (standard auto-bumped by CI, certification manually).
+Only the quick scenario uses the moving `ghcr.io/kadai-io/kadai-gmt:latest` image; the standard scenario
+pins a `sha-<commit>` tag (auto-bumped by CI), while the certification scenario pins the
+`blauer-engel-v<version>` image tag of the certification branch (changed manually per measurement).
 Available application image tags are published on the [kadai-gmt package page](https://github.com/kadai-io/kadai/pkgs/container/kadai-gmt).
 
 ### Database Filling
@@ -77,7 +78,7 @@ A new measurement on the measurement cluster can be triggered via:
 
 For easier use of the API you can use the script [./scripts/submit_software.py](./scripts/submit_software.py). See the [./scripts/README.md](./scripts/README.md) for more information.
 
-We use the machine "CO2 Benchmarking (DVFS OFF, TB OFF, HT OFF) - TX1330 M2 [PREMIUM]", because this machine is tuned for reproducability. Details about the machine can be found in the [GMT documentation](https://docs.green-coding.io/docs/measuring/measurement-cluster/).
+We use the machine "CO2 Benchmarking 2.0 - TX1330 M2 [PREMIUM]" (GMT machine ID 14), because this machine is tuned for reproducability. Since the 2026 re-measurement a RAPL power limit (`power_limit_uw`) of 25 W is configured, and 1 CPU core plus 2 GiB RAM are reserved for the system. Details about the machine can be found in the [GMT documentation](https://docs.green-coding.io/docs/measuring/measurement-cluster/).
 
 The results of the runs that we made public can be seen here:
 <https://metrics.green-coding.io/runs.html?name=KADAI&show_archived=false&show_other_users=true>
@@ -100,5 +101,36 @@ The scenario is split into three phases:
 
    * realistic, parallel-user workflow covering the everyday task lifecycle (create, read, edit, assign/claim, move, comment, complete), workbasket operations (search/open), and a single monitoring report
    * steps are synchronized with short gaps to aid interpretation
+
+### Certification measurements
+
+The certification requires an annual re-measurement. Neither report contains the GMT run IDs, so the
+runs behind each measurement are recorded here.
+
+| Report | Measured | Measured code | App image | GMT | Runs |
+| :-- | :-- | :-- | :-- | :-- | :-- |
+| 2025 (external GitLab repo) | 2025-09-24 | `9a34415` | — | `52bf063` (v2.2) | `59ce2670` |
+| 2026 | 2026-10-27 / 28 | branch `blauer-engel/v12.1.0-r2`, `34cbd0a0` | `blauer-engel-v12.1.0-r2` | `ef23edcf` | scenario: `bb5d15d2`, `532a37f9`, `6a6776c7`, `ca9b7db4`, `a2ecdbdd`, `c7b9807e`, `45b37c8c`, `77243bcc`, `2d37c94d`, `f4ceb3f7`; baseline/idle: `8960aaf3` |
+
+### Re-measurement checklist
+
+**Preparation**
+
+1. Cut `blauer-engel/<version>` from the release tag, cherry-pick only the fixes the measurement needs, and push: the container workflow builds `blauer-engel-v<version>` from branches matching `blauer-engel/**`. Note the commit hash and the image digest.
+2. Bump the pin in [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml) on that branch, not on `master`.
+3. Check the standard usage scenario against the release before measuring — if typical usage changed (new steps, changed endpoints), the scenario needs an update; otherwise it stays untouched for comparability.
+4. Tag the frozen commit as `blauer-engel-v<version>` and push the tag. The image tag is only as immutable as the branch, so the tag has to exist before the runs; a later code change is a new tag (`-rN`), never a moved one.
+5. Request the measurement from Green Coding Solutions and confirm machine ID 14.
+
+**Measurement**
+
+6. Run the scenario 10 times plus one 60-minute baseline and one 60-minute idle run.
+7. Record the run IDs and check them before the report goes to RAL: the relative standard deviation of the energy demand has to stay within tolerance, and no run may have failed. A run outside tolerance is repeated.
+
+**After RAL accepted**
+
+8. Add the report as `docs/Messungen-Blauer-Engel-KADAI-<year>.pdf`.
+9. Update the badges in the README to a run of this measurement, the report links, the table above, [DECISIONS.md](./DECISIONS.md), and the link on the docs site.
+10. Keep the certification branch.
 
 To see the results, refer to the [🌱 Sustainability](../../README.md#-sustainability) section in the README file at the root of the repository.
