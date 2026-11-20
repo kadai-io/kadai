@@ -26,11 +26,14 @@ class TaskTestImpl extends TaskImpl {
 
   private boolean freezeState = false;
   private boolean freezeCreated = false;
+  private boolean freezeClaimed = false;
+  private boolean freezeCompleted = false;
   private boolean freezeModified = false;
   private boolean freezeRead = false;
   private boolean freezeTransferred = false;
   private boolean freezeReopened = false;
   private boolean freezePriority = false;
+  private boolean freezeNumberOfComments = false;
 
   @Override
   public void setState(TaskState state) {
@@ -52,6 +55,28 @@ class TaskTestImpl extends TaskImpl {
 
   public void setCreatedIgnoreFreeze(Instant created) {
     super.setCreated(created);
+  }
+
+  @Override
+  public void setClaimed(Instant claimed) {
+    if (!freezeClaimed) {
+      super.setClaimed(claimed);
+    }
+  }
+
+  public void setClaimedIgnoreFreeze(Instant claimed) {
+    super.setClaimed(claimed);
+  }
+
+  @Override
+  public void setCompleted(Instant completed) {
+    if (!freezeCompleted) {
+      super.setCompleted(completed);
+    }
+  }
+
+  public void setCompletedIgnoreFreeze(Instant completed) {
+    super.setCompleted(completed);
   }
 
   @Override
@@ -108,6 +133,17 @@ class TaskTestImpl extends TaskImpl {
     super.setPriority(priority);
   }
 
+  @Override
+  public void setNumberOfComments(int numberOfComments) {
+    if (!freezeNumberOfComments) {
+      super.setNumberOfComments(numberOfComments);
+    }
+  }
+
+  public void setNumberOfCommentsIgnoreFreeze(int numberOfComments) {
+    super.setNumberOfComments(numberOfComments);
+  }
+
   public void freezeState() {
     freezeState = true;
   }
@@ -122,6 +158,22 @@ class TaskTestImpl extends TaskImpl {
 
   public void unfreezeCreated() {
     freezeCreated = false;
+  }
+
+  public void freezeClaimed() {
+    freezeClaimed = true;
+  }
+
+  public void unfreezeClaimed() {
+    freezeClaimed = false;
+  }
+
+  public void freezeCompleted() {
+    freezeCompleted = true;
+  }
+
+  public void unfreezeCompleted() {
+    freezeCompleted = false;
   }
 
   public void freezeModified() {
@@ -162,5 +214,13 @@ class TaskTestImpl extends TaskImpl {
 
   public void unfreezePriority() {
     freezePriority = false;
+  }
+
+  public void freezeNumberOfComments() {
+    freezeNumberOfComments = true;
+  }
+
+  public void unfreezeNumberOfComments() {
+    freezeNumberOfComments = false;
   }
 }

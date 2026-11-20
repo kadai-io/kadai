@@ -35,7 +35,6 @@ import io.kadai.task.api.TaskCustomField;
 import io.kadai.task.api.TaskService;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.internal.jobs.TaskCleanupJob;
-import io.kadai.task.internal.models.TaskImpl;
 import io.kadai.workbasket.api.WorkbasketCustomField;
 import io.kadai.workbasket.api.WorkbasketPermission;
 import io.kadai.workbasket.api.WorkbasketService;
@@ -76,10 +75,9 @@ class UpdateObjectsUseUtcTimeStampsWithWorkingDaysCalculationAccTest extends Abs
     // associated Classification has ServiceLevel 'P1D'
     task.setDue(workingTimeCalculator.addWorkingTime(task.getPlanned(), Duration.ofDays(1)));
 
-    TaskImpl ti = (TaskImpl) task;
-    ti.setCompleted(now.plus(Duration.ofHours(27)));
     TimeZone originalZone = TimeZone.getDefault();
-    Task updatedTask = taskService.updateTask(task);
+    taskService.updateTask(task);
+    Task updatedTask = taskService.forceCompleteTask(task.getId());
     TimeZone.setDefault(TimeZone.getTimeZone("EST"));
     Task retrievedTask = taskService.getTask(updatedTask.getId());
     TimeZone.setDefault(originalZone);
