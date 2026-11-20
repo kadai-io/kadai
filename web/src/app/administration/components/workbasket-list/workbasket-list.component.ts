@@ -210,12 +210,14 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   }
 
   refreshWorkbasketList() {
-    this.pageParameter['page-size'] = this.orientationService.calculateNumberItemsList(
+    const cards = this.orientationService.calculateNumberItemsList(
       window.innerHeight,
       92,
       200 + (this.toolbarElement()?.nativeElement?.offsetHeight ?? 0),
       false
     );
+    // the backend rejects a 'page-size' below 1
+    this.pageParameter['page-size'] = Math.max(1, cards);
     this.performRequest();
   }
 
