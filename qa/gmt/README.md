@@ -112,4 +112,25 @@ runs behind each measurement are recorded here.
 | 2025 (external GitLab repo) | 2025-09-24 | `9a34415` | — | `52bf063` (v2.2) | `59ce2670` |
 | 2026 | 2026-10-27 / 28 | branch `blauer-engel/v12.1.0-r2`, `34cbd0a0` | `blauer-engel-v12.1.0-r2` | `ef23edcf` | scenario: `bb5d15d2`, `532a37f9`, `6a6776c7`, `ca9b7db4`, `a2ecdbdd`, `c7b9807e`, `45b37c8c`, `77243bcc`, `2d37c94d`, `f4ceb3f7`; baseline/idle: `8960aaf3` |
 
+### Re-measurement checklist
+
+**Preparation**
+
+1. Cut `blauer-engel/<version>` from the release tag, cherry-pick only the fixes the measurement needs, and push: the container workflow builds `blauer-engel-v<version>` from branches matching `blauer-engel/**`. Note the commit hash and the image digest.
+2. Bump the pin in [usage_scenario_blue_angel.yml](./usage_scenario_blue_angel.yml) on that branch, not on `master`.
+3. Check the standard usage scenario against the release before measuring — if typical usage changed (new steps, changed endpoints), the scenario needs an update; otherwise it stays untouched for comparability.
+4. Tag the frozen commit as `blauer-engel-v<version>` and push the tag. The image tag is only as immutable as the branch, so the tag has to exist before the runs; a later code change is a new tag (`-rN`), never a moved one.
+5. Request the measurement from Green Coding Solutions and confirm machine ID 14.
+
+**Measurement**
+
+6. Run the scenario 10 times plus one 60-minute baseline and one 60-minute idle run.
+7. Record the run IDs and check them before the report goes to RAL: the relative standard deviation of the energy demand has to stay within tolerance, and no run may have failed. A run outside tolerance is repeated.
+
+**After RAL accepted**
+
+8. Add the report as `docs/Messungen-Blauer-Engel-KADAI-<year>.pdf`.
+9. Update the badges in the README to a run of this measurement, the report links, the table above, [DECISIONS.md](./DECISIONS.md), and the link on the docs site.
+10. Keep the certification branch.
+
 To see the results, refer to the [🌱 Sustainability](../../README.md#-sustainability) section in the README file at the root of the repository.
