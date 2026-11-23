@@ -225,14 +225,14 @@ public class XlsxWorksheetConverter {
         .append("<rule id=\"excelRow")
         .append(ruleRow.getRaw().getR())
         .append("\">\n<description>")
-        .append(description.getTextContent())
+        .append(escapeXmlText(description.getTextContent()))
         .append("</description>\n");
     for (InputEntry inputEntry : rule.getInputEntries()) {
       serializedRules
           .append("<inputEntry id=\"")
           .append(inputEntry.getId())
           .append("\">\n<text>")
-          .append(inputEntry.getText().getTextContent())
+          .append(escapeXmlText(inputEntry.getText().getTextContent()))
           .append("</text>\n</inputEntry>\n");
     }
     for (OutputEntry outputEntry : rule.getOutputEntries()) {
@@ -240,10 +240,37 @@ public class XlsxWorksheetConverter {
           .append("<outputEntry id=\"")
           .append(outputEntry.getId())
           .append("\">\n<text>")
-          .append(outputEntry.getText().getTextContent())
+          .append(escapeXmlText(outputEntry.getText().getTextContent()))
           .append("</text>\n</outputEntry>\n");
     }
     serializedRules.append("</rule>\n");
+  }
+
+  /**
+   * Escapes text derived from cell content so that it can be appended as text of an XML element.
+   *
+   * <p>Without escaping, cell content containing XML markup would change the structure of the
+   * generated DMN and cell content containing an {@code &} or {@code <} would make it invalid.
+   * Carriage returns are escaped as well, because XML parsers would otherwise normalize them. The
+   * ids of the serialized elements need no escaping, because they consist of the column letters and
+   * the row number only.
+   *
+   * @param text the unescaped text content of a generated element
+   * @return the escaped text content
+   */
+  private static String escapeXmlText(String text) {
+    StringBuilder escapedText = new StringBuilder(text.length());
+    for (int i = 0; i < text.length(); i++) {
+      char character = text.charAt(i);
+      switch (character) {
+        case '&' -> escapedText.append("&amp;");
+        case '<' -> escapedText.append("&lt;");
+        case '>' -> escapedText.append("&gt;");
+        case '\r' -> escapedText.append("&#13;");
+        default -> escapedText.append(character);
+      }
+    }
+    return escapedText.toString();
   }
 
   protected String getDefaultCellContent() {
