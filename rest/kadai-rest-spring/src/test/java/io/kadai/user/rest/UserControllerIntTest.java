@@ -470,7 +470,7 @@ class UserControllerIntTest {
 
   @ParameterizedTest
   @CsvSource({
-    "FIRST_NAME,ASCENDING,0,5,5",
+    "FIRST_NAME,ASCENDING,1,5,5",
     "FIRST_NAME,DESCENDING,5,4,2",
     "LAST_NAME,ASCENDING,1,5,5",
     "LAST_NAME,DESCENDING,1,6,6",
@@ -520,7 +520,7 @@ class UserControllerIntTest {
   void should_ReturnBadRequest_When_InvalidSortByParameter() {
     String url =
         restHelper.toUrl(RestEndpoints.URL_USERS)
-            + "?sort-by=INVALID&order=ASCENDING&page=0&page-size=5";
+            + "?sort-by=INVALID&order=ASCENDING&page=1&page-size=5";
 
     ThrowingCallable httpCall =
         () ->
