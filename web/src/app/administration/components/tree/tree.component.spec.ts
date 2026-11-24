@@ -53,7 +53,8 @@ const requestInProgressServiceMock = {
 
 const locationMock = {
   path: vi.fn().mockReturnValue('/kadai/administration/classifications'),
-  go: vi.fn()
+  go: vi.fn(),
+  onUrlChange: vi.fn()
 };
 
 const classificationCategoriesServiceSpy: Partial<ClassificationCategoriesService> = {

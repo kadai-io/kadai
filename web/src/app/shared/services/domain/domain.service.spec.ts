@@ -18,13 +18,15 @@
 
 import { TestBed } from '@angular/core/testing';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, UrlSerializer } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { DomainService } from './domain.service';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { Subject } from 'rxjs';
+import { Location } from '@angular/common';
+import { provideLocationMocks, SpyLocation } from '@angular/common/testing';
 
 const REST_URL = 'http://localhost:8080/kadai';
 const DOMAINS_URL = `${REST_URL}/v1/domains`;
@@ -53,6 +55,7 @@ describe('DomainService', () => {
         DomainService,
         provideHttpClientTesting(),
         provideRouter([]),
+        provideLocationMocks(),
         { provide: SelectedRouteService, useValue: mockSelectedRouteService },
         { provide: RuntimeConfigService, useValue: runtimeConfigServiceMock },
         { provide: RequestInProgressService, useValue: mockRequestInProgressService }
@@ -133,6 +136,46 @@ describe('DomainService', () => {
       const req2 = httpTesting.expectOne(DOMAINS_URL);
       req2.flush(['DOMAIN_A', 'DOMAIN_B']);
     });
+
+    it('should select the domain the url asks for', () => {
+      const location = TestBed.inject(Location) as SpyLocation;
+      location.setInitialPath('/kadai/administration/workbaskets?domain=DOMAIN_B');
+      const serviceFromUrl = TestBed.runInInjectionContext(() => new DomainService());
+      serviceFromUrl.getDomains().subscribe();
+      const req = httpTesting.expectOne(DOMAINS_URL);
+      req.flush(['DOMAIN_A', 'DOMAIN_B', '']);
+      expect(serviceFromUrl.getSelectedDomainValue()).toEqual('DOMAIN_B');
+    });
+
+    it('should select the master domain the url asks for on classifications', () => {
+      const location = TestBed.inject(Location) as SpyLocation;
+      location.setInitialPath('/kadai/administration/classifications?domain=');
+      const serviceFromUrl = TestBed.runInInjectionContext(() => new DomainService());
+      serviceFromUrl.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B', '']);
+      expect(serviceFromUrl.getSelectedDomainValue()).toEqual('');
+    });
+
+    it('should select the first domain when the url asks for the master domain outside classifications', () => {
+      const location = TestBed.inject(Location) as SpyLocation;
+      location.setInitialPath('/kadai/administration/workbaskets?domain=');
+      const serviceFromUrl = TestBed.runInInjectionContext(() => new DomainService());
+      serviceFromUrl.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B', '']);
+      expect(serviceFromUrl.getSelectedDomainValue()).toEqual('DOMAIN_A');
+    });
+
+    it('should select the first domain when the url asks for one that is not offered', () => {
+      const location = TestBed.inject(Location) as SpyLocation;
+      location.setInitialPath('/kadai/administration/workbaskets?domain=WRONG_DOMAIN');
+      const serviceFromUrl = TestBed.runInInjectionContext(() => new DomainService());
+      serviceFromUrl.getDomains().subscribe();
+      const req = httpTesting.expectOne(DOMAINS_URL);
+      req.flush(['DOMAIN_A', 'DOMAIN_B', '']);
+      expect(serviceFromUrl.getSelectedDomainValue()).toEqual('DOMAIN_A');
+      const domainQuery = TestBed.inject(UrlSerializer).parse(location.path()).queryParams['domain'];
+      expect(domainQuery).toEqual('DOMAIN_A');
+    });
   });
 
   describe('getSelectedDomain()', () => {
@@ -161,6 +204,33 @@ describe('DomainService', () => {
       service.switchDomain('DOMAIN_B');
 
       expect(emitted).toEqual(['DOMAIN_A', 'DOMAIN_B']);
+    });
+
+    it('should write the selected domain to the url', () => {
+      const location = TestBed.inject(Location);
+      service.switchDomain('DOMAIN_B');
+      const domainQuery = TestBed.inject(UrlSerializer).parse(location.path()).queryParams['domain'];
+      expect(domainQuery).toEqual('DOMAIN_B');
+    });
+
+    it('should write the master domain to the url as an empty string', () => {
+      const location = TestBed.inject(Location);
+      service.switchDomain('');
+      const domainQuery = TestBed.inject(UrlSerializer).parse(location.path()).queryParams['domain'];
+      expect(domainQuery).toEqual('');
+    });
+  });
+
+  describe('url synchronisation', () => {
+    it('should restore the selected domain after the url is rewritten', () => {
+      const location = TestBed.inject(Location);
+      service.switchDomain('DOMAIN_B');
+
+      location.go('/kadai/administration/workbaskets/(detail:WBI:1)?tab=information');
+
+      const queryParams = TestBed.inject(UrlSerializer).parse(location.path()).queryParams;
+      expect(queryParams['domain']).toBe('DOMAIN_B');
+      expect(queryParams['tab']).toBe('information');
     });
   });
 
