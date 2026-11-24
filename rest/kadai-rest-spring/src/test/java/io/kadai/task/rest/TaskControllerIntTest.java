@@ -56,6 +56,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -1904,6 +1905,120 @@ class TaskControllerIntTest {
           .isNotNull()
           .extracting(TaskSummaryRepresentationModel::getReceived)
           .isNotNull();
+    }
+  }
+
+  @Nested
+  @TestInstance(Lifecycle.PER_CLASS)
+  class GetTasksByClassificationCustomAttributes {
+
+    // The Classification 'CLI:100000000000000000000000000000000005' has the value 'TEXT_1' for
+    // custom2. It is the only Classification in the sample-data with a value like '%EXT_%' that is
+    // referenced by Tasks.
+    private static final List<String> TASK_IDS_WITH_CLASSIFICATION_CUSTOM_2_TEXT_1 =
+        List.of(
+            "TKI:000000000000000000000000000000000001", "TKI:000000000000000000000000000000000042");
+
+    private Collection<String> getTaskIds(String queryParameters) {
+      ResponseEntity<TaskIdPagedRepresentationModel> response =
+          restClient
+              .get()
+              .uri(restHelper.toUrl(RestEndpoints.URL_TASKS_IDS) + queryParameters)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskIdPagedRepresentationModel.class);
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+      return response.getBody().getTaskIds();
+    }
+
+    @Test
+    void should_ReturnTasks_For_ClassificationCustomAttributeIn() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS)
+              + "?classification-custom-2=TEXT_1&classification-custom-2=NO_SUCH_VALUE";
+
+      ResponseEntity<TaskSummaryPagedRepresentationModel> response =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+              .retrieve()
+              .toEntity(TaskSummaryPagedRepresentationModel.class);
+
+      assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+      assertThat(response.getBody()).isNotNull();
+      assertThat(response.getBody().getLink(IanaLinkRelations.SELF)).isNotNull();
+      assertThat(response.getBody().getContent())
+          .extracting(TaskSummaryRepresentationModel::getTaskId)
+          .containsExactlyInAnyOrderElementsOf(TASK_IDS_WITH_CLASSIFICATION_CUSTOM_2_TEXT_1);
+    }
+
+    @Test
+    void should_ReturnTaskIds_For_ClassificationCustomAttributeIn() {
+      Collection<String> taskIds = getTaskIds("?classification-custom-2=TEXT_1");
+
+      assertThat(taskIds)
+          .containsExactlyInAnyOrderElementsOf(TASK_IDS_WITH_CLASSIFICATION_CUSTOM_2_TEXT_1);
+    }
+
+    @Test
+    void should_ReturnAllOtherTasks_For_ClassificationCustomAttributeNotIn() {
+      Collection<String> allTaskIds = getTaskIds("");
+
+      Collection<String> taskIds = getTaskIds("?classification-custom-2-not=TEXT_1");
+
+      assertThat(taskIds)
+          .doesNotContainAnyElementsOf(TASK_IDS_WITH_CLASSIFICATION_CUSTOM_2_TEXT_1)
+          .hasSize(allTaskIds.size() - TASK_IDS_WITH_CLASSIFICATION_CUSTOM_2_TEXT_1.size());
+      assertThat(allTaskIds).containsAll(taskIds);
+    }
+
+    @Test
+    void should_ReturnTasks_For_ClassificationCustomAttributeLike() {
+      Collection<String> taskIds = getTaskIds("?classification-custom-2-like=ext_");
+
+      assertThat(taskIds)
+          .containsExactlyInAnyOrderElementsOf(TASK_IDS_WITH_CLASSIFICATION_CUSTOM_2_TEXT_1);
+    }
+
+    @Test
+    void should_ExcludeTasks_For_ClassificationCustomAttributeNotLike() {
+      Collection<String> taskIds = getTaskIds("?classification-custom-2-not-like=ext_");
+
+      assertThat(taskIds)
+          .isNotEmpty()
+          .doesNotContainAnyElementsOf(TASK_IDS_WITH_CLASSIFICATION_CUSTOM_2_TEXT_1);
+    }
+
+    @Test
+    void should_CombineClassificationCustomAttributeFilters_With_OtherFilters() {
+      Collection<String> taskIds =
+          getTaskIds(
+              "?classification-custom-2=TEXT_1"
+                  + "&task-id=TKI:000000000000000000000000000000000042");
+
+      assertThat(taskIds).containsExactly("TKI:000000000000000000000000000000000042");
+    }
+
+    @Test
+    void should_ReturnBadRequest_For_UnknownClassificationCustomAttribute() {
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS) + "?classification-custom-9=TEXT_1";
+
+      ThrowingCallable httpCall =
+          () ->
+              restClient
+                  .get()
+                  .uri(url)
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                  .retrieve()
+                  .toEntity(TaskSummaryPagedRepresentationModel.class);
+
+      assertThatThrownBy(httpCall)
+          .isInstanceOf(HttpStatusCodeException.class)
+          .extracting(HttpStatusCodeException.class::cast)
+          .extracting(HttpStatusCodeException::getStatusCode)
+          .isEqualTo(HttpStatus.BAD_REQUEST);
     }
   }
 

@@ -50,7 +50,7 @@ public class SqlProviderUtil {
         .append("</when>")
         .append("<otherwise>0=1</otherwise>")
         .append("</choose>");
-    if (column.matches("t.CUSTOM_\\d+") || column.matches("t.OWNER")) {
+    if (isNullableCustomColumn(column) || column.matches("t.OWNER")) {
       sb.append("<if test='" + collection + "ContainsNull'> OR " + column + " IS NULL </if>");
     }
     return sb.append(")</if> ");
@@ -73,7 +73,7 @@ public class SqlProviderUtil {
         .append("</when>")
         .append("<otherwise>1=1</otherwise>")
         .append("</choose>");
-    if (column.matches("t.CUSTOM_\\d+")) {
+    if (isNullableCustomColumn(column)) {
       sb.append("<if test='" + collection + "ContainsNull'> AND " + column + " IS NOT NULL </if>");
       sb.append("<if test='!" + collection + "ContainsNull'> OR " + column + " IS NULL </if>");
     }
@@ -179,5 +179,17 @@ public class SqlProviderUtil {
           whereNotInInterval(baseCollection + x + "NotWithin", column, sb);
         });
     return sb;
+  }
+
+  /**
+   * Checks whether the given column is a custom column of a Task ({@code t.CUSTOM_X}) or of the
+   * Classification of a Task ({@code c.CUSTOM_X}). For these columns the queries support filtering
+   * for null values via the corresponding {@code ...ContainsNull} flags.
+   *
+   * @param column the qualified name of the column
+   * @return true if null values of the column can be filtered for, false otherwise
+   */
+  private static boolean isNullableCustomColumn(String column) {
+    return column.matches("[tc]\\.CUSTOM_\\d+");
   }
 }

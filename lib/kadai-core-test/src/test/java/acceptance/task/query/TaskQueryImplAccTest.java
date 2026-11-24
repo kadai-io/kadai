@@ -26,11 +26,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowableOfType;
 
+import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationService;
+import io.kadai.classification.api.models.Classification;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.KeyDomain;
 import io.kadai.common.api.TimeInterval;
+import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.SystemException;
 import io.kadai.common.api.security.CurrentUserContext;
 import io.kadai.common.api.security.UserPrincipal;
@@ -49,6 +52,7 @@ import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
+import io.kadai.testapi.builder.ClassificationBuilder;
 import io.kadai.testapi.builder.ObjectReferenceBuilder;
 import io.kadai.testapi.builder.TaskAttachmentBuilder;
 import io.kadai.testapi.builder.TaskBuilder;
@@ -60,10 +64,12 @@ import io.kadai.workbasket.api.exceptions.NotAuthorizedToQueryWorkbasketExceptio
 import io.kadai.workbasket.api.models.WorkbasketSummary;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -1684,6 +1690,224 @@ class TaskQueryImplAccTest {
                 .list();
 
         assertThat(list).containsExactly(taskSummary1);
+      }
+    }
+
+    @Nested
+    @TestInstance(Lifecycle.PER_CLASS)
+    class ClassificationCustomAttributes {
+      WorkbasketSummary wb;
+      TaskSummary taskSummary1;
+      TaskSummary taskSummary2;
+      TaskSummary taskSummary3;
+
+      @WithAccessId(user = "user-1-1")
+      @BeforeAll
+      void setup() throws Exception {
+        wb = createWorkbasketWithPermission();
+        ClassificationBuilder classificationBuilder1 = defaultTestClassification();
+        ClassificationBuilder classificationBuilder2 = defaultTestClassification();
+        for (ClassificationCustomField customField : ClassificationCustomField.values()) {
+          classificationBuilder1.customAttribute(customField, "Neuschaden");
+          classificationBuilder2.customAttribute(customField, "Bestandsschaden");
+        }
+        ClassificationSummary classification1 =
+            classificationBuilder1.buildAndStoreAsSummary(classificationService, "businessadmin");
+        ClassificationSummary classification2 =
+            classificationBuilder2.buildAndStoreAsSummary(classificationService, "businessadmin");
+        ClassificationSummary classification3 =
+            defaultTestClassification()
+                .buildAndStoreAsSummary(classificationService, "businessadmin");
+
+        taskSummary1 =
+            taskInWorkbasket(wb)
+                .classificationSummary(classification1)
+                .buildAndStoreAsSummary(taskService);
+        taskSummary2 =
+            taskInWorkbasket(wb)
+                .classificationSummary(classification2)
+                .buildAndStoreAsSummary(taskService);
+        taskSummary3 =
+            taskInWorkbasket(wb)
+                .classificationSummary(classification3)
+                .buildAndStoreAsSummary(taskService);
+      }
+
+      private Stream<DynamicTest> testForAllCustomFields(
+          Function<ClassificationCustomField, TaskQuery> queryFunction,
+          TaskSummary... expectedTaskSummaries) {
+        ThrowingConsumer<ClassificationCustomField> test =
+            customField -> {
+              TaskQuery query = queryFunction.apply(customField).workbasketIdIn(wb.getId());
+              assertThat(query.list()).containsExactlyInAnyOrder(expectedTaskSummaries);
+              assertThat(query.count()).isEqualTo(expectedTaskSummaries.length);
+            };
+        return DynamicTest.stream(
+            Arrays.stream(ClassificationCustomField.values()), Enum::name, test);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest> should_ApplyFilter_When_QueryingForClassificationCustomAttributeIn() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeIn(customField, "Neuschaden"),
+            taskSummary1);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest>
+          should_ApplyFilter_When_QueryingForClassificationCustomAttributeInIncludingNull() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeIn(customField, "Neuschaden", null),
+            taskSummary1,
+            taskSummary3);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest> should_ApplyFilter_When_QueryingForClassificationCustomAttributeInNull() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeIn(customField, (String) null),
+            taskSummary3);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest> should_ApplyFilter_When_QueryingForClassificationCustomAttributeNotIn() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeNotIn(customField, "Neuschaden"),
+            taskSummary2,
+            taskSummary3);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest>
+          should_ApplyFilter_When_QueryingForClassificationCustomAttributeNotInIncludingNull() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeNotIn(customField, "Neuschaden", null),
+            taskSummary2);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest> should_ApplyFilter_When_QueryingForClassificationCustomAttributeLike() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeLike(customField, "NEU%", "%stand%"),
+            taskSummary1,
+            taskSummary2);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest>
+          should_ApplyFilter_When_QueryingForClassificationCustomAttributeNotLike() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeNotLike(customField, "neu%"),
+            taskSummary2);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest>
+          should_ApplyAllFilters_When_CombiningClassificationCustomAttributeFilters() {
+        return testForAllCustomFields(
+            customField ->
+                taskService
+                    .createTaskQuery()
+                    .classificationCustomAttributeIn(customField, "Neuschaden", "Bestandsschaden")
+                    .classificationCustomAttributeNotLike(customField, "%bestand%"),
+            taskSummary1);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @TestFactory
+      Stream<DynamicTest>
+          should_ThrowException_When_QueryingForClassificationCustomAttributeWithoutValues() {
+        List<Pair<String, BiConsumer<TaskQuery, ClassificationCustomField>>> testCases =
+            List.of(
+                Pair.of("In", TaskQuery::classificationCustomAttributeIn),
+                Pair.of("NotIn", TaskQuery::classificationCustomAttributeNotIn),
+                Pair.of("Like", TaskQuery::classificationCustomAttributeLike),
+                Pair.of("NotLike", TaskQuery::classificationCustomAttributeNotLike));
+
+        ThrowingConsumer<Pair<String, BiConsumer<TaskQuery, ClassificationCustomField>>> test =
+            p -> {
+              for (ClassificationCustomField customField : ClassificationCustomField.values()) {
+                ThrowingCallable call =
+                    () -> p.getRight().accept(taskService.createTaskQuery(), customField);
+                assertThatThrownBy(call)
+                    .isInstanceOf(InvalidArgumentException.class)
+                    .hasMessage("At least one string has to be provided as a search parameter");
+              }
+            };
+
+        return DynamicTest.stream(testCases.iterator(), Pair::getLeft, test);
+      }
+
+      @WithAccessId(user = "admin")
+      @Test
+      void should_ApplyFilterOnCurrentClassification_When_ClassificationCustomAttributeChanged()
+          throws Exception {
+        WorkbasketSummary workbasket = createWorkbasketWithPermission();
+        Classification classification =
+            defaultTestClassification()
+                .customAttribute(ClassificationCustomField.CUSTOM_1, "Vorlagen")
+                .buildAndStore(classificationService);
+        TaskSummary taskSummary =
+            taskInWorkbasket(workbasket)
+                .classificationSummary(classification.asSummary())
+                .buildAndStoreAsSummary(taskService);
+
+        assertThat(
+                taskService
+                    .createTaskQuery()
+                    .workbasketIdIn(workbasket.getId())
+                    .classificationCustomAttributeIn(ClassificationCustomField.CUSTOM_1, "Vorlagen")
+                    .list())
+            .containsExactly(taskSummary);
+
+        classification.setCustomField(ClassificationCustomField.CUSTOM_1, "Sonstiges");
+        classificationService.updateClassification(classification);
+
+        assertThat(
+                taskService
+                    .createTaskQuery()
+                    .workbasketIdIn(workbasket.getId())
+                    .classificationCustomAttributeIn(ClassificationCustomField.CUSTOM_1, "Vorlagen")
+                    .list())
+            .isEmpty();
+        assertThat(
+                taskService
+                    .createTaskQuery()
+                    .workbasketIdIn(workbasket.getId())
+                    .classificationCustomAttributeIn(
+                        ClassificationCustomField.CUSTOM_1, "Sonstiges")
+                    .list())
+            .extracting(TaskSummary::getId)
+            .containsExactly(taskSummary.getId());
       }
     }
 

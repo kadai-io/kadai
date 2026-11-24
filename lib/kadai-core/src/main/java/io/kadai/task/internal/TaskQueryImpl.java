@@ -20,6 +20,7 @@ package io.kadai.task.internal;
 
 import static io.kadai.common.api.BaseQuery.toLowerCopy;
 
+import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.KadaiRole;
 import io.kadai.common.api.KeyDomain;
@@ -48,6 +49,7 @@ import io.kadai.workbasket.internal.WorkbasketQueryImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import org.apache.ibatis.exceptions.PersistenceException;
 import org.apache.ibatis.session.RowBounds;
 import org.slf4j.Logger;
@@ -150,6 +152,54 @@ public class TaskQueryImpl implements TaskQuery {
   private String[] classificationNameNotIn;
   private String[] classificationNameLike;
   private String[] classificationNameNotLike;
+  private String[] classificationCustom1In;
+  private boolean classificationCustom1InContainsNull;
+  private String[] classificationCustom1NotIn;
+  private boolean classificationCustom1NotInContainsNull;
+  private String[] classificationCustom1Like;
+  private String[] classificationCustom1NotLike;
+  private String[] classificationCustom2In;
+  private boolean classificationCustom2InContainsNull;
+  private String[] classificationCustom2NotIn;
+  private boolean classificationCustom2NotInContainsNull;
+  private String[] classificationCustom2Like;
+  private String[] classificationCustom2NotLike;
+  private String[] classificationCustom3In;
+  private boolean classificationCustom3InContainsNull;
+  private String[] classificationCustom3NotIn;
+  private boolean classificationCustom3NotInContainsNull;
+  private String[] classificationCustom3Like;
+  private String[] classificationCustom3NotLike;
+  private String[] classificationCustom4In;
+  private boolean classificationCustom4InContainsNull;
+  private String[] classificationCustom4NotIn;
+  private boolean classificationCustom4NotInContainsNull;
+  private String[] classificationCustom4Like;
+  private String[] classificationCustom4NotLike;
+  private String[] classificationCustom5In;
+  private boolean classificationCustom5InContainsNull;
+  private String[] classificationCustom5NotIn;
+  private boolean classificationCustom5NotInContainsNull;
+  private String[] classificationCustom5Like;
+  private String[] classificationCustom5NotLike;
+  private String[] classificationCustom6In;
+  private boolean classificationCustom6InContainsNull;
+  private String[] classificationCustom6NotIn;
+  private boolean classificationCustom6NotInContainsNull;
+  private String[] classificationCustom6Like;
+  private String[] classificationCustom6NotLike;
+  private String[] classificationCustom7In;
+  private boolean classificationCustom7InContainsNull;
+  private String[] classificationCustom7NotIn;
+  private boolean classificationCustom7NotInContainsNull;
+  private String[] classificationCustom7Like;
+  private String[] classificationCustom7NotLike;
+  private String[] classificationCustom8In;
+  private boolean classificationCustom8InContainsNull;
+  private String[] classificationCustom8NotIn;
+  private boolean classificationCustom8NotInContainsNull;
+  private String[] classificationCustom8Like;
+  private String[] classificationCustom8NotLike;
   private String[] workbasketIdIn;
   private String[] workbasketIdNotIn;
   private KeyDomain[] workbasketKeyDomainIn;
@@ -841,6 +891,148 @@ public class TaskQueryImpl implements TaskQuery {
             && kadaiEngine.getEngine().getConfiguration().isUseSpecificDb2Taskquery())
         ? addOrderCriteria("CNAME", sortDirection)
         : addOrderCriteria("c.NAME", sortDirection);
+  }
+
+  @Override
+  public TaskQuery classificationCustomAttributeIn(
+      ClassificationCustomField customField, String... strings) throws InvalidArgumentException {
+    if (strings.length == 0) {
+      throw new InvalidArgumentException(
+          "At least one string has to be provided as a search parameter");
+    }
+    String[] values = Arrays.stream(strings).filter(Objects::nonNull).toArray(String[]::new);
+    boolean containsNull = values.length != strings.length;
+    switch (customField) {
+      case CUSTOM_1 -> {
+        classificationCustom1In = values;
+        classificationCustom1InContainsNull = containsNull;
+      }
+      case CUSTOM_2 -> {
+        classificationCustom2In = values;
+        classificationCustom2InContainsNull = containsNull;
+      }
+      case CUSTOM_3 -> {
+        classificationCustom3In = values;
+        classificationCustom3InContainsNull = containsNull;
+      }
+      case CUSTOM_4 -> {
+        classificationCustom4In = values;
+        classificationCustom4InContainsNull = containsNull;
+      }
+      case CUSTOM_5 -> {
+        classificationCustom5In = values;
+        classificationCustom5InContainsNull = containsNull;
+      }
+      case CUSTOM_6 -> {
+        classificationCustom6In = values;
+        classificationCustom6InContainsNull = containsNull;
+      }
+      case CUSTOM_7 -> {
+        classificationCustom7In = values;
+        classificationCustom7InContainsNull = containsNull;
+      }
+      case CUSTOM_8 -> {
+        classificationCustom8In = values;
+        classificationCustom8InContainsNull = containsNull;
+      }
+      default -> throw new SystemException("Unknown custom field '" + customField + "'");
+    }
+    joinWithClassifications = true;
+    return this;
+  }
+
+  @Override
+  public TaskQuery classificationCustomAttributeNotIn(
+      ClassificationCustomField customField, String... strings) throws InvalidArgumentException {
+    if (strings.length == 0) {
+      throw new InvalidArgumentException(
+          "At least one string has to be provided as a search parameter");
+    }
+    String[] values = Arrays.stream(strings).filter(Objects::nonNull).toArray(String[]::new);
+    boolean containsNull = values.length != strings.length;
+    switch (customField) {
+      case CUSTOM_1 -> {
+        classificationCustom1NotIn = values;
+        classificationCustom1NotInContainsNull = containsNull;
+      }
+      case CUSTOM_2 -> {
+        classificationCustom2NotIn = values;
+        classificationCustom2NotInContainsNull = containsNull;
+      }
+      case CUSTOM_3 -> {
+        classificationCustom3NotIn = values;
+        classificationCustom3NotInContainsNull = containsNull;
+      }
+      case CUSTOM_4 -> {
+        classificationCustom4NotIn = values;
+        classificationCustom4NotInContainsNull = containsNull;
+      }
+      case CUSTOM_5 -> {
+        classificationCustom5NotIn = values;
+        classificationCustom5NotInContainsNull = containsNull;
+      }
+      case CUSTOM_6 -> {
+        classificationCustom6NotIn = values;
+        classificationCustom6NotInContainsNull = containsNull;
+      }
+      case CUSTOM_7 -> {
+        classificationCustom7NotIn = values;
+        classificationCustom7NotInContainsNull = containsNull;
+      }
+      case CUSTOM_8 -> {
+        classificationCustom8NotIn = values;
+        classificationCustom8NotInContainsNull = containsNull;
+      }
+      default -> throw new SystemException("Unknown custom field '" + customField + "'");
+    }
+    joinWithClassifications = true;
+    return this;
+  }
+
+  @Override
+  public TaskQuery classificationCustomAttributeLike(
+      ClassificationCustomField customField, String... strings) throws InvalidArgumentException {
+    if (strings.length == 0) {
+      throw new InvalidArgumentException(
+          "At least one string has to be provided as a search parameter");
+    }
+    String[] values = toLowerCopy(strings);
+    switch (customField) {
+      case CUSTOM_1 -> classificationCustom1Like = values;
+      case CUSTOM_2 -> classificationCustom2Like = values;
+      case CUSTOM_3 -> classificationCustom3Like = values;
+      case CUSTOM_4 -> classificationCustom4Like = values;
+      case CUSTOM_5 -> classificationCustom5Like = values;
+      case CUSTOM_6 -> classificationCustom6Like = values;
+      case CUSTOM_7 -> classificationCustom7Like = values;
+      case CUSTOM_8 -> classificationCustom8Like = values;
+      default -> throw new SystemException("Unknown custom field '" + customField + "'");
+    }
+    joinWithClassifications = true;
+    return this;
+  }
+
+  @Override
+  public TaskQuery classificationCustomAttributeNotLike(
+      ClassificationCustomField customField, String... strings) throws InvalidArgumentException {
+    if (strings.length == 0) {
+      throw new InvalidArgumentException(
+          "At least one string has to be provided as a search parameter");
+    }
+    String[] values = toLowerCopy(strings);
+    switch (customField) {
+      case CUSTOM_1 -> classificationCustom1NotLike = values;
+      case CUSTOM_2 -> classificationCustom2NotLike = values;
+      case CUSTOM_3 -> classificationCustom3NotLike = values;
+      case CUSTOM_4 -> classificationCustom4NotLike = values;
+      case CUSTOM_5 -> classificationCustom5NotLike = values;
+      case CUSTOM_6 -> classificationCustom6NotLike = values;
+      case CUSTOM_7 -> classificationCustom7NotLike = values;
+      case CUSTOM_8 -> classificationCustom8NotLike = values;
+      default -> throw new SystemException("Unknown custom field '" + customField + "'");
+    }
+    joinWithClassifications = true;
+    return this;
   }
 
   @Override
@@ -2625,6 +2817,102 @@ public class TaskQueryImpl implements TaskQuery {
         + Arrays.toString(classificationNameLike)
         + ", classificationNameNotLike="
         + Arrays.toString(classificationNameNotLike)
+        + ", classificationCustom1In="
+        + Arrays.toString(classificationCustom1In)
+        + ", classificationCustom1InContainsNull="
+        + classificationCustom1InContainsNull
+        + ", classificationCustom1NotIn="
+        + Arrays.toString(classificationCustom1NotIn)
+        + ", classificationCustom1NotInContainsNull="
+        + classificationCustom1NotInContainsNull
+        + ", classificationCustom1Like="
+        + Arrays.toString(classificationCustom1Like)
+        + ", classificationCustom1NotLike="
+        + Arrays.toString(classificationCustom1NotLike)
+        + ", classificationCustom2In="
+        + Arrays.toString(classificationCustom2In)
+        + ", classificationCustom2InContainsNull="
+        + classificationCustom2InContainsNull
+        + ", classificationCustom2NotIn="
+        + Arrays.toString(classificationCustom2NotIn)
+        + ", classificationCustom2NotInContainsNull="
+        + classificationCustom2NotInContainsNull
+        + ", classificationCustom2Like="
+        + Arrays.toString(classificationCustom2Like)
+        + ", classificationCustom2NotLike="
+        + Arrays.toString(classificationCustom2NotLike)
+        + ", classificationCustom3In="
+        + Arrays.toString(classificationCustom3In)
+        + ", classificationCustom3InContainsNull="
+        + classificationCustom3InContainsNull
+        + ", classificationCustom3NotIn="
+        + Arrays.toString(classificationCustom3NotIn)
+        + ", classificationCustom3NotInContainsNull="
+        + classificationCustom3NotInContainsNull
+        + ", classificationCustom3Like="
+        + Arrays.toString(classificationCustom3Like)
+        + ", classificationCustom3NotLike="
+        + Arrays.toString(classificationCustom3NotLike)
+        + ", classificationCustom4In="
+        + Arrays.toString(classificationCustom4In)
+        + ", classificationCustom4InContainsNull="
+        + classificationCustom4InContainsNull
+        + ", classificationCustom4NotIn="
+        + Arrays.toString(classificationCustom4NotIn)
+        + ", classificationCustom4NotInContainsNull="
+        + classificationCustom4NotInContainsNull
+        + ", classificationCustom4Like="
+        + Arrays.toString(classificationCustom4Like)
+        + ", classificationCustom4NotLike="
+        + Arrays.toString(classificationCustom4NotLike)
+        + ", classificationCustom5In="
+        + Arrays.toString(classificationCustom5In)
+        + ", classificationCustom5InContainsNull="
+        + classificationCustom5InContainsNull
+        + ", classificationCustom5NotIn="
+        + Arrays.toString(classificationCustom5NotIn)
+        + ", classificationCustom5NotInContainsNull="
+        + classificationCustom5NotInContainsNull
+        + ", classificationCustom5Like="
+        + Arrays.toString(classificationCustom5Like)
+        + ", classificationCustom5NotLike="
+        + Arrays.toString(classificationCustom5NotLike)
+        + ", classificationCustom6In="
+        + Arrays.toString(classificationCustom6In)
+        + ", classificationCustom6InContainsNull="
+        + classificationCustom6InContainsNull
+        + ", classificationCustom6NotIn="
+        + Arrays.toString(classificationCustom6NotIn)
+        + ", classificationCustom6NotInContainsNull="
+        + classificationCustom6NotInContainsNull
+        + ", classificationCustom6Like="
+        + Arrays.toString(classificationCustom6Like)
+        + ", classificationCustom6NotLike="
+        + Arrays.toString(classificationCustom6NotLike)
+        + ", classificationCustom7In="
+        + Arrays.toString(classificationCustom7In)
+        + ", classificationCustom7InContainsNull="
+        + classificationCustom7InContainsNull
+        + ", classificationCustom7NotIn="
+        + Arrays.toString(classificationCustom7NotIn)
+        + ", classificationCustom7NotInContainsNull="
+        + classificationCustom7NotInContainsNull
+        + ", classificationCustom7Like="
+        + Arrays.toString(classificationCustom7Like)
+        + ", classificationCustom7NotLike="
+        + Arrays.toString(classificationCustom7NotLike)
+        + ", classificationCustom8In="
+        + Arrays.toString(classificationCustom8In)
+        + ", classificationCustom8InContainsNull="
+        + classificationCustom8InContainsNull
+        + ", classificationCustom8NotIn="
+        + Arrays.toString(classificationCustom8NotIn)
+        + ", classificationCustom8NotInContainsNull="
+        + classificationCustom8NotInContainsNull
+        + ", classificationCustom8Like="
+        + Arrays.toString(classificationCustom8Like)
+        + ", classificationCustom8NotLike="
+        + Arrays.toString(classificationCustom8NotLike)
         + ", workbasketIdIn="
         + Arrays.toString(workbasketIdIn)
         + ", workbasketIdNotIn="

@@ -629,6 +629,7 @@ public class TaskQuerySqlProvider {
     whereLike("ownerLongNameLike", "owner_info.LONG_NAME", sb);
     whereNotLike("ownerLongNameNotLike", "owner_info.LONG_NAME", sb);
     whereCustomStatements("custom", "t.CUSTOM", 16, sb);
+    whereCustomStatements("classificationCustom", "c.CUSTOM", 8, sb);
     whereCustomIntStatements("customInt", "t.CUSTOM_INT", 8, sb);
 
     sb.append(
