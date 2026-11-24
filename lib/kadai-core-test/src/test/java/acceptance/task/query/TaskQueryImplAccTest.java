@@ -1887,6 +1887,26 @@ class TaskQueryImplAccTest {
 
       @WithAccessId(user = "user-1-1")
       @Test
+      void should_ContainClassificationCustomAttributeFilters_When_ConvertingQueryToString() {
+        TaskQuery query =
+            taskService
+                .createTaskQuery()
+                .classificationCustomAttributeIn(ClassificationCustomField.CUSTOM_1, "A", null)
+                .classificationCustomAttributeNotIn(ClassificationCustomField.CUSTOM_8, "B")
+                .classificationCustomAttributeLike(ClassificationCustomField.CUSTOM_4, "C%");
+
+        assertThat(query.toString())
+            .contains(
+                "classificationCustom1In=[A]",
+                "classificationCustom1InContainsNull=true",
+                "classificationCustom8NotIn=[B]",
+                "classificationCustom8NotInContainsNull=false",
+                "classificationCustom4Like=[c%]",
+                "classificationCustom2NotLike=null");
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
       void should_LockResults_When_FilteringForClassificationCustomAttribute() {
         List<TaskSummary> list =
             taskService
