@@ -56,11 +56,13 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.DynamicTest;
@@ -143,7 +145,58 @@ class TaskControllerIntTest {
     assertThat(theUpdatedTaskRepresentationModel.getOwner()).isEqualTo("dummyUser");
   }
 
-  private TaskRepresentationModel getTaskResourceSample() {
+  private static Stream<MissingNestedObjectCase> missingNestedObjectCases() {
+    return Stream.of(
+        new MissingNestedObjectCase(
+            "primaryObjRef",
+            task -> task.setPrimaryObjRef(null),
+            "primary ObjectReference of Task must not be null."),
+        new MissingNestedObjectCase(
+            "attachments[0].classificationSummary",
+            task -> {
+              AttachmentRepresentationModel attachment = getAttachmentResourceSample();
+              attachment.setClassificationSummary(null);
+              task.setAttachments(List.of(attachment));
+            },
+            "Classification of Attachment must not be null."),
+        new MissingNestedObjectCase(
+            "attachments[0].objectReference",
+            task -> {
+              AttachmentRepresentationModel attachment = getAttachmentResourceSample();
+              attachment.setObjectReference(null);
+              task.setAttachments(List.of(attachment));
+            },
+            "ObjectReference of Attachment must not be null."));
+  }
+
+  private static void assertInvalidArgument(ThrowingCallable httpCall, String expectedMessage) {
+    assertThatThrownBy(httpCall)
+        .isInstanceOf(HttpClientErrorException.BadRequest.class)
+        .extracting(HttpClientErrorException.BadRequest.class::cast)
+        .extracting(HttpClientErrorException::getResponseBodyAsString)
+        .asString()
+        .contains("INVALID_ARGUMENT")
+        .contains(expectedMessage)
+        .doesNotContain("NullPointerException");
+  }
+
+  private static Map<String, Object> getTaskRequestBodySample() {
+    Map<String, Object> requestBody = new HashMap<>();
+    requestBody.put("classificationSummary", Map.of("key", "L11010"));
+    requestBody.put(
+        "workbasketSummary", Map.of("workbasketId", "WBI:100000000000000000000000000000000004"));
+    requestBody.put(
+        "primaryObjRef",
+        Map.of(
+            "company", "MyCompany1",
+            "system", "MySystem1",
+            "systemInstance", "MyInstance1",
+            "type", "MyType1",
+            "value", "00000001"));
+    return requestBody;
+  }
+
+  private static TaskRepresentationModel getTaskResourceSample() {
     ClassificationSummaryRepresentationModel classificationResource =
         new ClassificationSummaryRepresentationModel();
     classificationResource.setKey("L11010");
@@ -165,7 +218,7 @@ class TaskControllerIntTest {
     return taskRepresentationModel;
   }
 
-  private ObjectReferenceRepresentationModel getObjectReferenceResourceSample() {
+  private static ObjectReferenceRepresentationModel getObjectReferenceResourceSample() {
     ObjectReferenceRepresentationModel objectReference = new ObjectReferenceRepresentationModel();
     objectReference.setCompany("MyCompany1");
     objectReference.setSystem("MySystem1");
@@ -175,7 +228,7 @@ class TaskControllerIntTest {
     return objectReference;
   }
 
-  private AttachmentRepresentationModel getAttachmentResourceSample() {
+  private static AttachmentRepresentationModel getAttachmentResourceSample() {
     AttachmentRepresentationModel attachmentRepresentationModel =
         new AttachmentRepresentationModel();
     attachmentRepresentationModel.setAttachmentId("A11010");
@@ -3251,6 +3304,101 @@ class TaskControllerIntTest {
   @TestInstance(Lifecycle.PER_CLASS)
   class CreateTasks {
 
+    @TestFactory
+    Stream<DynamicTest> should_ReturnBadRequest_When_CreatingTaskWithMissingNestedObject() {
+      Stream<MissingNestedObjectCase> cases =
+          Stream.concat(
+              missingNestedObjectCases(),
+              Stream.of(
+                  new MissingNestedObjectCase(
+                      "classificationSummary",
+                      task -> task.setClassificationSummary(null),
+                      "classificationKey of task must not be empty")));
+
+      ThrowingConsumer<MissingNestedObjectCase> test =
+          testCase -> {
+            TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
+            testCase.removeObject().accept(taskRepresentationModel);
+            String url = restHelper.toUrl(RestEndpoints.URL_TASKS);
+
+            ThrowingCallable httpCall =
+                () ->
+                    restClient
+                        .post()
+                        .uri(url)
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .body(taskRepresentationModel)
+                        .retrieve()
+                        .toEntity(TaskRepresentationModel.class);
+
+            assertInvalidArgument(httpCall, testCase.expectedMessage());
+          };
+
+      return DynamicTest.stream(cases, c -> "missing " + c.field(), test);
+    }
+
+    @TestFactory
+    Stream<DynamicTest> should_ReturnBadRequest_When_CreatingTaskWithNullListElement() {
+      Stream<String> listFields =
+          Stream.of("attachments", "secondaryObjectReferences", "customAttributes", "callbackInfo");
+
+      ThrowingConsumer<String> test =
+          field -> {
+            Map<String, Object> requestBody = getTaskRequestBodySample();
+            requestBody.put(field, Collections.singletonList(null));
+
+            ThrowingCallable httpCall =
+                () ->
+                    restClient
+                        .post()
+                        .uri(restHelper.toUrl(RestEndpoints.URL_TASKS))
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .body(requestBody)
+                        .retrieve()
+                        .toEntity(TaskRepresentationModel.class);
+
+            assertInvalidArgument(httpCall, "'" + field + "' must not contain null elements");
+          };
+
+      return DynamicTest.stream(listFields, field -> field + ": [null]", test);
+    }
+
+    @Test
+    void should_CreateTask_When_ListsAreExplicitlyNull() {
+      Map<String, Object> requestBody = getTaskRequestBodySample();
+      requestBody.put("attachments", null);
+      requestBody.put("secondaryObjectReferences", null);
+      requestBody.put("customAttributes", null);
+      requestBody.put("callbackInfo", null);
+
+      ResponseEntity<TaskRepresentationModel> responseCreate =
+          restClient
+              .post()
+              .uri(restHelper.toUrl(RestEndpoints.URL_TASKS))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .contentType(MediaType.APPLICATION_JSON)
+              .body(requestBody)
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class);
+
+      assertThat(responseCreate.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+      TaskRepresentationModel createdTask = responseCreate.getBody();
+      assertThat(createdTask).isNotNull();
+      restClient
+          .delete()
+          .uri(restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, createdTask.getTaskId()))
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .retrieve()
+          .toBodilessEntity();
+      assertThat(createdTask.getAttachments()).isEmpty();
+      assertThat(createdTask.getSecondaryObjectReferences()).isEmpty();
+      assertThat(createdTask.getCustomAttributes()).isEmpty();
+      assertThat(createdTask.getCallbackInfo()).isEmpty();
+    }
+
     @Test
     void should_CreateAndDeleteTask() {
       TaskRepresentationModel taskRepresentationModel = getTaskResourceSample();
@@ -3536,6 +3684,88 @@ class TaskControllerIntTest {
   @Nested
   @TestInstance(Lifecycle.PER_CLASS)
   class UpdateTasks {
+
+    @TestFactory
+    Stream<DynamicTest> should_ReturnBadRequest_When_UpdatingTaskWithMissingNestedObject() {
+      String url =
+          restHelper.toUrl(RestEndpoints.URL_TASKS_ID, "TKI:100000000000000000000000000000000000");
+
+      ThrowingConsumer<MissingNestedObjectCase> test =
+          testCase -> {
+            TaskRepresentationModel task =
+                restClient
+                    .get()
+                    .uri(url)
+                    .headers(headers ->
+                        headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                    .retrieve()
+                    .toEntity(TaskRepresentationModel.class)
+                    .getBody();
+            assertThat(task).isNotNull();
+            testCase.removeObject().accept(task);
+
+            ThrowingCallable httpCall =
+                () ->
+                    restClient
+                        .put()
+                        .uri(url)
+                        .headers(headers ->
+                            headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+                        .body(task)
+                        .retrieve()
+                        .toEntity(TaskRepresentationModel.class);
+
+            assertInvalidArgument(httpCall, testCase.expectedMessage());
+          };
+
+      return DynamicTest.stream(missingNestedObjectCases(), c -> "missing " + c.field(), test);
+    }
+
+    @Test
+    void should_KeepWorkbasket_When_UpdatingTaskWithoutWorkbasketSummary() {
+      TaskRepresentationModel createdTask =
+          restClient
+              .post()
+              .uri(restHelper.toUrl(RestEndpoints.URL_TASKS))
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .body(getTaskResourceSample())
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class)
+              .getBody();
+      assertThat(createdTask).isNotNull();
+      final String workbasketId = createdTask.getWorkbasketSummary().getWorkbasketId();
+      String url = restHelper.toUrl(RestEndpoints.URL_TASKS_ID, createdTask.getTaskId());
+      createdTask.setWorkbasketSummary(null);
+
+      TaskRepresentationModel updatedTask =
+          restClient
+              .put()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .body(createdTask)
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class)
+              .getBody();
+      TaskRepresentationModel persistedTask =
+          restClient
+              .get()
+              .uri(url)
+              .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("teamlead-1")))
+              .retrieve()
+              .toEntity(TaskRepresentationModel.class)
+              .getBody();
+      restClient
+          .delete()
+          .uri(restHelper.toUrl(RestEndpoints.URL_TASKS_ID_FORCE, createdTask.getTaskId()))
+          .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+          .retrieve()
+          .toBodilessEntity();
+
+      assertThat(updatedTask).isNotNull();
+      assertThat(updatedTask.getWorkbasketSummary().getWorkbasketId()).isEqualTo(workbasketId);
+      assertThat(persistedTask).isNotNull();
+      assertThat(persistedTask.getWorkbasketSummary().getWorkbasketId()).isEqualTo(workbasketId);
+    }
 
     @Test
     void should_RejectServerMetadataChangesAndReturnAuthoritativeTaskAfterAllowedUpdate() {
@@ -4142,6 +4372,29 @@ class TaskControllerIntTest {
 
       assertThat(ex.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
       assertThat(ex.getResponseBodyAsString()).contains("fieldsToUpdate must not be null");
+    }
+
+    @Test
+    void should_ThrowBadRequest_When_SecondaryObjectReferencesContainNull() {
+      Map<String, Object> fieldsToUpdate = new HashMap<>();
+      fieldsToUpdate.put("secondaryObjectReferences", Collections.singletonList(null));
+      Map<String, Object> requestBody = new HashMap<>();
+      requestBody.put("taskIds", List.of("TKI:000000000000000000000000000000000003"));
+      requestBody.put("fieldsToUpdate", fieldsToUpdate);
+
+      ThrowingCallable httpCall =
+          () ->
+              restClient
+                  .patch()
+                  .uri(restHelper.toUrl("/api/v1/tasks/bulkupdate"))
+                  .headers(headers -> headers.addAll(RestHelper.generateHeadersForUser("admin")))
+                  .contentType(MediaType.APPLICATION_JSON)
+                  .body(requestBody)
+                  .retrieve()
+                  .toEntity(BULK_RESULT_TASKS_MODEL_TYPE);
+
+      assertInvalidArgument(
+          httpCall, "'secondaryObjectReferences' must not contain null elements");
     }
 
     @Test
@@ -6387,4 +6640,7 @@ class TaskControllerIntTest {
           .isEqualTo(HttpStatus.FORBIDDEN);
     }
   }
+
+  private record MissingNestedObjectCase(
+      String field, Consumer<TaskRepresentationModel> removeObject, String expectedMessage) {}
 }

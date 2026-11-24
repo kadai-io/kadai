@@ -22,6 +22,7 @@ import io.kadai.task.api.models.ObjectReference;
 import io.kadai.task.internal.models.ObjectReferenceImpl;
 import io.kadai.task.rest.models.ObjectReferenceRepresentationModel;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Controller;
 
@@ -43,7 +44,11 @@ public class ObjectReferenceRepresentationModelAssembler
     return repModel;
   }
 
-  public ObjectReference toEntity(ObjectReferenceRepresentationModel repModel) {
+  @Nullable
+  public ObjectReference toEntity(@Nullable ObjectReferenceRepresentationModel repModel) {
+    if (repModel == null) {
+      return null;
+    }
     ObjectReferenceImpl objectReference = new ObjectReferenceImpl();
     objectReference.setId(repModel.getId());
     objectReference.setTaskId(repModel.getTaskId());

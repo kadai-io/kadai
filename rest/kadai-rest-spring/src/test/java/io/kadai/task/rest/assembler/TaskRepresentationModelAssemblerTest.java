@@ -557,6 +557,27 @@ class TaskRepresentationModelAssemblerTest {
     assertThat(taskPatch.customInt8()).isNull();
   }
 
+  @Test
+  void should_ReturnEntityWithNullFields_When_ConvertingRepresentationModelWithoutNestedObjects()
+      throws Exception {
+    AttachmentRepresentationModel attachment = new AttachmentRepresentationModel();
+    attachment.setAttachmentId("attachmentId");
+    TaskRepresentationModel repModel = new TaskRepresentationModel();
+    repModel.setTaskId("taskId");
+    repModel.setAttachments(List.of(attachment));
+
+    Task task = assembler.toEntityModel(repModel);
+
+    assertThat(task.getPrimaryObjRef()).isNull();
+    assertThat(task.getClassificationSummary()).isNull();
+    assertThat(task.getAttachments())
+        .singleElement()
+        .satisfies(a -> {
+          assertThat(a.getClassificationSummary()).isNull();
+          assertThat(a.getObjectReference()).isNull();
+        });
+  }
+
   private void testEquality(Task task, TaskRepresentationModel repModel) throws Exception {
     TaskSummaryRepresentationModelAssemblerTest.testEquality(task, repModel);
 
