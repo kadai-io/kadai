@@ -68,7 +68,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom1 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom1 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-1-not-like")
   private final String[] classificationCustom1NotLike;
 
@@ -104,7 +105,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom2 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom2 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-2-not-like")
   private final String[] classificationCustom2NotLike;
 
@@ -140,7 +142,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom3 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom3 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-3-not-like")
   private final String[] classificationCustom3NotLike;
 
@@ -176,7 +179,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom4 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom4 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-4-not-like")
   private final String[] classificationCustom4NotLike;
 
@@ -212,7 +216,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom5 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom5 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-5-not-like")
   private final String[] classificationCustom5NotLike;
 
@@ -248,7 +253,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom6 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom6 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-6-not-like")
   private final String[] classificationCustom6NotLike;
 
@@ -284,7 +290,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom7 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom7 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-7-not-like")
   private final String[] classificationCustom7NotLike;
 
@@ -320,7 +327,8 @@ public class TaskQueryFilterClassificationCustomFields implements QueryParameter
           "Filter by what the custom8 field of the Classification of the Task shouldn't be. This "
               + "results in a substring search (% is appended to the front and end of the "
               + "requested value). Further SQL \"LIKE\" wildcard characters will be resolved "
-              + "correctly.")
+              + "correctly. Tasks whose Classification has no value for custom8 are filtered "
+              + "out, too.")
   @JsonProperty("classification-custom-8-not-like")
   private final String[] classificationCustom8NotLike;
 

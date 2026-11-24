@@ -183,13 +183,13 @@ public class SqlProviderUtil {
 
   /**
    * Checks whether the given column is a custom column of a Task ({@code t.CUSTOM_X}) or of the
-   * Classification of a Task ({@code c.CUSTOM_X}). For these columns the queries support filtering
+   * Classification of a Task ({@code cc.CUSTOM_X}). For these columns the queries support filtering
    * for null values via the corresponding {@code ...ContainsNull} flags.
    *
    * @param column the qualified name of the column
    * @return true if null values of the column can be filtered for, false otherwise
    */
   private static boolean isNullableCustomColumn(String column) {
-    return column.matches("[tc]\\.CUSTOM_\\d+");
+    return column.matches("(t|cc)\\.CUSTOM_\\d+");
   }
 }

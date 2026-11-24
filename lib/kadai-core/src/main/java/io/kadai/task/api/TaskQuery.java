@@ -870,6 +870,9 @@ public interface TaskQuery extends BaseQuery<TaskSummary, TaskQueryColumnName> {
    * be compared in SQL with the LIKE operator. You may use a wildcard like % to specify the
    * pattern. If you specify multiple arguments they are combined with the OR keyword.
    *
+   * <p>{@linkplain Task Tasks} with a {@linkplain Classification} where the {@linkplain
+   * ClassificationCustomField} is not set are excluded, too.
+   *
    * @param customField identifies which {@linkplain ClassificationCustomField} is affected
    * @param searchArguments the values of the {@linkplain ClassificationCustomField} of the
    *     {@linkplain Classification} of the {@linkplain Task Tasks} which should be excluded

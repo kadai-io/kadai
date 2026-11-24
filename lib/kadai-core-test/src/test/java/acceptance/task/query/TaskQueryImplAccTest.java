@@ -30,6 +30,7 @@ import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.Classification;
 import io.kadai.classification.api.models.ClassificationSummary;
+import io.kadai.common.api.BaseQuery.SortDirection;
 import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.KeyDomain;
 import io.kadai.common.api.TimeInterval;
@@ -49,6 +50,7 @@ import io.kadai.task.api.TaskState;
 import io.kadai.task.api.WildcardSearchField;
 import io.kadai.task.api.models.Attachment;
 import io.kadai.task.api.models.ObjectReference;
+import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
 import io.kadai.testapi.KadaiInject;
 import io.kadai.testapi.KadaiIntegrationTest;
@@ -68,6 +70,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -1865,6 +1868,92 @@ class TaskQueryImplAccTest {
             };
 
         return DynamicTest.stream(testCases.iterator(), Pair::getLeft, test);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_CombiningWithOtherClassificationFilterAndSorting() {
+        List<TaskSummary> list =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .classificationCustomAttributeIn(ClassificationCustomField.CUSTOM_1, "Neuschaden")
+                .classificationKeyIn(taskSummary1.getClassificationSummary().getKey())
+                .orderByClassificationName(SortDirection.ASCENDING)
+                .list();
+
+        assertThat(list).containsExactly(taskSummary1);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_ApplyFilter_When_GroupingByPrimaryObjectReference() {
+        List<TaskSummary> list =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .classificationCustomAttributeIn(ClassificationCustomField.CUSTOM_1, "Neuschaden")
+                .groupByPor()
+                .list();
+
+        assertThat(list).extracting(TaskSummary::getId).containsExactly(taskSummary1.getId());
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_LockResults_When_FilteringForClassificationCustomAttribute() {
+        List<TaskSummary> list =
+            taskService
+                .createTaskQuery()
+                .workbasketIdIn(wb.getId())
+                .classificationCustomAttributeNotIn(
+                    ClassificationCustomField.CUSTOM_1, "Neuschaden")
+                .orderByTaskId(SortDirection.ASCENDING)
+                .lockResultsEquals(5)
+                .list();
+
+        assertThat(list).containsExactlyInAnyOrder(taskSummary2, taskSummary3);
+      }
+
+      @WithAccessId(user = "user-1-1")
+      @Test
+      void should_SelectAndClaimTask_When_FilteringForClassificationCustomAttribute()
+          throws Exception {
+        WorkbasketSummary workbasket =
+            defaultTestWorkbasket().buildAndStoreAsSummary(workbasketService, "businessadmin");
+        WorkbasketAccessItemBuilder.newWorkbasketAccessItem()
+            .workbasketId(workbasket.getId())
+            .accessId(currentUserContext.getUserId())
+            .permission(WorkbasketPermission.OPEN)
+            .permission(WorkbasketPermission.READ)
+            .permission(WorkbasketPermission.APPEND)
+            .permission(WorkbasketPermission.READTASKS)
+            .permission(WorkbasketPermission.EDITTASKS)
+            .buildAndStore(workbasketService, "businessadmin");
+        ClassificationSummary classification =
+            defaultTestClassification()
+                .customAttribute(ClassificationCustomField.CUSTOM_1, "Vorlagen")
+                .buildAndStoreAsSummary(classificationService, "businessadmin");
+        taskInWorkbasket(workbasket).state(TaskState.READY).buildAndStoreAsSummary(taskService);
+        TaskSummary taskSummary =
+            taskInWorkbasket(workbasket)
+                .classificationSummary(classification)
+                .state(TaskState.READY)
+                .buildAndStoreAsSummary(taskService);
+        taskInWorkbasket(workbasket).state(TaskState.READY).buildAndStoreAsSummary(taskService);
+
+        Optional<Task> selectedAndClaimedTask =
+            taskService.selectAndClaim(
+                taskService
+                    .createTaskQuery()
+                    .workbasketIdIn(workbasket.getId())
+                    .classificationCustomAttributeIn(
+                        ClassificationCustomField.CUSTOM_1, "Vorlagen"));
+
+        assertThat(selectedAndClaimedTask).isPresent();
+        assertThat(selectedAndClaimedTask.get().getId()).isEqualTo(taskSummary.getId());
+        assertThat(selectedAndClaimedTask.get().getState()).isEqualTo(TaskState.CLAIMED);
+        assertThat(selectedAndClaimedTask.get().getOwner()).isEqualTo("user-1-1");
       }
 
       @WithAccessId(user = "admin")

@@ -937,7 +937,6 @@ public class TaskQueryImpl implements TaskQuery {
       }
       default -> throw new SystemException("Unknown custom field '" + customField + "'");
     }
-    joinWithClassifications = true;
     return this;
   }
 
@@ -985,7 +984,6 @@ public class TaskQueryImpl implements TaskQuery {
       }
       default -> throw new SystemException("Unknown custom field '" + customField + "'");
     }
-    joinWithClassifications = true;
     return this;
   }
 
@@ -1008,7 +1006,6 @@ public class TaskQueryImpl implements TaskQuery {
       case CUSTOM_8 -> classificationCustom8Like = values;
       default -> throw new SystemException("Unknown custom field '" + customField + "'");
     }
-    joinWithClassifications = true;
     return this;
   }
 
@@ -1031,7 +1028,6 @@ public class TaskQueryImpl implements TaskQuery {
       case CUSTOM_8 -> classificationCustom8NotLike = values;
       default -> throw new SystemException("Unknown custom field '" + customField + "'");
     }
-    joinWithClassifications = true;
     return this;
   }
 
