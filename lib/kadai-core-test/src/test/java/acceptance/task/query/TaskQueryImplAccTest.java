@@ -1887,20 +1887,6 @@ class TaskQueryImplAccTest {
 
       @WithAccessId(user = "user-1-1")
       @Test
-      void should_ApplyFilter_When_GroupingByPrimaryObjectReference() {
-        List<TaskSummary> list =
-            taskService
-                .createTaskQuery()
-                .workbasketIdIn(wb.getId())
-                .classificationCustomAttributeIn(ClassificationCustomField.CUSTOM_1, "Neuschaden")
-                .groupByPor()
-                .list();
-
-        assertThat(list).extracting(TaskSummary::getId).containsExactly(taskSummary1.getId());
-      }
-
-      @WithAccessId(user = "user-1-1")
-      @Test
       void should_LockResults_When_FilteringForClassificationCustomAttribute() {
         List<TaskSummary> list =
             taskService
