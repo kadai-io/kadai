@@ -308,6 +308,8 @@ public interface TaskApi {
    * @throws InvalidOwnerException if the Task is already claimed by someone else.
    * @throws NotAuthorizedOnWorkbasketException if the current user has no read permissions for the
    *     requested Task.
+   * @throws ConcurrencyException if the Task was modified concurrently on every attempt to claim
+   *     it.
    * @title Claim a Task
    */
   @Operation(
@@ -349,7 +351,11 @@ public interface TaskApi {
         @ApiResponse(
             responseCode = "404",
             description = "TASK_NOT_FOUND",
-            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))})
+            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))}),
+        @ApiResponse(
+            responseCode = "409",
+            description = "ENTITY_NOT_UP_TO_DATE",
+            content = {@Content(schema = @Schema(implementation = ConcurrencyException.class))})
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM)
   @Transactional(rollbackFor = Exception.class)
@@ -357,7 +363,8 @@ public interface TaskApi {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ConcurrencyException;
 
   /**
    * This endpoint force claims a Task if possible even if it is already claimed by someone else.
@@ -369,6 +376,8 @@ public interface TaskApi {
    * @throws InvalidOwnerException cannot be thrown.
    * @throws NotAuthorizedOnWorkbasketException if the current user has no read permissions for the
    *     requested Task.
+   * @throws ConcurrencyException if the Task was modified concurrently on every attempt to claim
+   *     it.
    * @title Force claim a Task
    */
   @Operation(
@@ -412,7 +421,11 @@ public interface TaskApi {
         @ApiResponse(
             responseCode = "404",
             description = "TASK_NOT_FOUND",
-            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))})
+            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))}),
+        @ApiResponse(
+            responseCode = "409",
+            description = "ENTITY_NOT_UP_TO_DATE",
+            content = {@Content(schema = @Schema(implementation = ConcurrencyException.class))})
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_CLAIM_FORCE)
   @Transactional(rollbackFor = Exception.class)
@@ -420,7 +433,8 @@ public interface TaskApi {
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
-          NotAuthorizedOnWorkbasketException;
+          NotAuthorizedOnWorkbasketException,
+          ConcurrencyException;
 
   /**
    * This endpoint selects the first Task returned by the Task Query and claims it.
@@ -1264,6 +1278,8 @@ public interface TaskApi {
    * @throws InvalidTaskStateException if Task wasn't claimed previously.
    * @throws NotAuthorizedOnWorkbasketException if the current user has no read permission for the
    *     Workbasket the Task is in
+   * @throws ConcurrencyException if the Task was modified concurrently on every attempt to complete
+   *     it.
    * @title Complete a Task
    */
   @Operation(
@@ -1304,7 +1320,11 @@ public interface TaskApi {
         @ApiResponse(
             responseCode = "404",
             description = "TASK_NOT_FOUND",
-            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))})
+            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))}),
+        @ApiResponse(
+            responseCode = "409",
+            description = "ENTITY_NOT_UP_TO_DATE",
+            content = {@Content(schema = @Schema(implementation = ConcurrencyException.class))})
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_COMPLETE)
   @Transactional(rollbackFor = Exception.class)
@@ -1312,7 +1332,8 @@ public interface TaskApi {
       throws TaskNotFoundException,
           InvalidOwnerException,
           InvalidTaskStateException,
-          NotAuthorizedOnWorkbasketException;
+          NotAuthorizedOnWorkbasketException,
+          ConcurrencyException;
 
   /**
    * This endpoint completes multiple Tasks.
@@ -1372,6 +1393,8 @@ public interface TaskApi {
    *     CANCELED
    * @throws NotAuthorizedOnWorkbasketException if the current user has no read permission for the
    *     Workbasket the Task is in
+   * @throws ConcurrencyException if the Task was modified concurrently on every attempt to complete
+   *     it.
    * @title Force complete a Task
    */
   @Operation(
@@ -1412,7 +1435,11 @@ public interface TaskApi {
         @ApiResponse(
             responseCode = "404",
             description = "TASK_NOT_FOUND",
-            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))})
+            content = {@Content(schema = @Schema(implementation = TaskNotFoundException.class))}),
+        @ApiResponse(
+            responseCode = "409",
+            description = "ENTITY_NOT_UP_TO_DATE",
+            content = {@Content(schema = @Schema(implementation = ConcurrencyException.class))})
       })
   @PostMapping(path = RestEndpoints.URL_TASKS_ID_COMPLETE_FORCE)
   @Transactional(rollbackFor = Exception.class)
@@ -1420,7 +1447,8 @@ public interface TaskApi {
       throws TaskNotFoundException,
           InvalidOwnerException,
           InvalidTaskStateException,
-          NotAuthorizedOnWorkbasketException;
+          NotAuthorizedOnWorkbasketException,
+          ConcurrencyException;
 
   /**
    * This endpoint force completes multiple Tasks.
@@ -1652,6 +1680,8 @@ public interface TaskApi {
    *     the Task.
    * @throws InvalidTaskStateException if the Task is in a state which does not allow transferring.
    * @throws TransferCheckException if the transfer is denied
+   * @throws ConcurrencyException if the Task was modified concurrently on every attempt to transfer
+   *     it.
    */
   @Operation(
       summary = "Transfer a Task to another Workbasket",
@@ -1717,6 +1747,10 @@ public interface TaskApi {
                           anyOf = {WorkbasketNotFoundException.class, TaskNotFoundException.class}))
             }),
         @ApiResponse(
+            responseCode = "409",
+            description = "ENTITY_NOT_UP_TO_DATE",
+            content = {@Content(schema = @Schema(implementation = ConcurrencyException.class))}),
+        @ApiResponse(
             responseCode = "412",
             description = "TASK_TRANSFER_CHECK_FAILED",
             content = {@Content(schema = @Schema(implementation = TransferCheckException.class))})
@@ -1732,7 +1766,8 @@ public interface TaskApi {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException;
+          TransferCheckException,
+          ConcurrencyException;
 
   /**
    * This endpoint transfers a given Task to a given Workbasket, if possible.
@@ -1750,6 +1785,8 @@ public interface TaskApi {
    *     the Task.
    * @throws InvalidTaskStateException if the Task is in a state which does not allow transferring.
    * @throws TransferCheckException if the transfer is denied
+   * @throws ConcurrencyException if the Task was modified concurrently on every attempt to transfer
+   *     it.
    */
   @Operation(
       summary = "Transfer a Task to another Workbasket",
@@ -1807,6 +1844,10 @@ public interface TaskApi {
                               WorkbasketNotFoundException.class
                             }))),
         @ApiResponse(
+            responseCode = "409",
+            description = "ENTITY_NOT_UP_TO_DATE",
+            content = {@Content(schema = @Schema(implementation = ConcurrencyException.class))}),
+        @ApiResponse(
             responseCode = "412",
             description = "TASK_TRANSFER_CHECK_FAILED",
             content = @Content(schema = @Schema(implementation = TransferCheckException.class)))
@@ -1823,7 +1864,8 @@ public interface TaskApi {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException;
+          TransferCheckException,
+          ConcurrencyException;
 
   /**
    * This endpoint transfers a list of Tasks listed in the body to a given Workbasket, if possible.

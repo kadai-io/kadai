@@ -231,7 +231,8 @@ public class TaskController implements TaskApi {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          ConcurrencyException {
     Task updatedTask = taskService.claim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
@@ -243,7 +244,8 @@ public class TaskController implements TaskApi {
       throws TaskNotFoundException,
           InvalidTaskStateException,
           InvalidOwnerException,
-          NotAuthorizedOnWorkbasketException {
+          NotAuthorizedOnWorkbasketException,
+          ConcurrencyException {
     Task updatedTask = taskService.forceClaim(taskId);
     return ResponseEntity.ok(taskRepresentationModelAssembler.toModel(updatedTask));
   }
@@ -475,7 +477,8 @@ public class TaskController implements TaskApi {
       throws TaskNotFoundException,
           InvalidOwnerException,
           InvalidTaskStateException,
-          NotAuthorizedOnWorkbasketException {
+          NotAuthorizedOnWorkbasketException,
+          ConcurrencyException {
 
     Task updatedTask = taskService.completeTask(taskId);
 
@@ -504,7 +507,8 @@ public class TaskController implements TaskApi {
       throws TaskNotFoundException,
           InvalidOwnerException,
           InvalidTaskStateException,
-          NotAuthorizedOnWorkbasketException {
+          NotAuthorizedOnWorkbasketException,
+          ConcurrencyException {
 
     Task updatedTask = taskService.forceCompleteTask(taskId);
 
@@ -576,7 +580,8 @@ public class TaskController implements TaskApi {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     Task updatedTask;
     if (transferTaskRepresentationModel == null) {
       updatedTask = taskService.transfer(taskId, workbasketId);
@@ -604,7 +609,8 @@ public class TaskController implements TaskApi {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     Task updatedTask;
     if (transferTaskRepresentationModel == null) {
       updatedTask = taskService.transfer(taskId, workbasketKey, domain);
