@@ -515,9 +515,11 @@ final class TaskTransferrer {
     }
     // some Tasks have been modified concurrently. Find out which ones were updated by us.
     Set<String> updatedTaskIds =
-        taskMapper
-            .findExistingTasks(taskSummaries.stream().map(TaskSummary::getId).toList(), null)
+        CollectionUtil.partitionBasedOnSize(
+                taskSummaries.stream().map(TaskSummary::getId).toList(),
+                TaskModifiedTimestamps.GUARDED_UPDATE_BATCH_SIZE)
             .stream()
+            .flatMap(batch -> taskMapper.findExistingTasks(batch, null).stream())
             .filter(persisted -> isTransferredBy(persisted, updateObject))
             .map(MinimalTaskSummary::getTaskId)
             .collect(Collectors.toSet());

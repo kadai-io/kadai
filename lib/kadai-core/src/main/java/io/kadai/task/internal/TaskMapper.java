@@ -134,8 +134,9 @@ public interface TaskMapper {
   void insert(TaskImpl task);
 
   /**
-   * The condition of a guarded update of a single Task, see {@link ExpectedTaskModification}. Must
-   * be used inside a script with the {@link ExpectedTaskModification} bound to "expected".
+   * The condition which a single Task row must fulfill to be updated by a guarded update, see {@link
+   * ExpectedTaskModification}. Must be used inside a script with the {@link
+   * ExpectedTaskModification} bound to "expected", e.g. as item of a foreach for bulk updates.
    */
   String EXPECTED_MODIFIED_CONDITION =
       "(ID = #{expected.taskId} AND "

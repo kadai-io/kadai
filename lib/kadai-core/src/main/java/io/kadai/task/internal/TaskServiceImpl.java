@@ -617,7 +617,7 @@ public class TaskServiceImpl implements TaskService {
       kadaiEngine.openConnection();
       task = (TaskImpl) getTask(taskId);
       task.setRead(isRead);
-      task.setModified(Instant.now());
+      task.setModified(TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Method setTaskRead() set read property of Task '{}' to {} ", task, isRead);
@@ -874,7 +874,11 @@ public class TaskServiceImpl implements TaskService {
         }
       }
 
-      reopenActionsOnTask(task, userId, userLongName, Instant.now());
+      reopenActionsOnTask(
+          task,
+          userId,
+          userLongName,
+          TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' reopened by user '{}'.", task.getId(), userId);
@@ -1696,7 +1700,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private static void terminateCancelCommonActions(TaskImpl task, TaskState targetState) {
-    Instant now = Instant.now();
+    Instant now = TaskModifiedTimestamps.next(Instant.now(), task.getModified());
     task.setModified(now);
     task.setCompleted(now);
     task.setState(targetState);
@@ -2021,7 +2025,7 @@ public class TaskServiceImpl implements TaskService {
         || !Objects.equals(oldTaskImpl.getState(), newTaskImpl.getState())) {
       throw new ConcurrencyException(newTaskImpl.getId());
     }
-    newTaskImpl.setModified(Instant.now());
+    newTaskImpl.setModified(TaskModifiedTimestamps.next(Instant.now(), oldTaskImpl.getModified()));
   }
 
   private void verifyServerOwnedTaskFieldsUnchanged(
@@ -2146,7 +2150,7 @@ public class TaskServiceImpl implements TaskService {
 
       task.setState(READY_FOR_REVIEW);
       task.setOwner(ownerId);
-      task.setModified(Instant.now());
+      task.setModified(TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
 
       taskMapper.requestReview(task);
       if (LOGGER.isDebugEnabled()) {
@@ -2194,7 +2198,7 @@ public class TaskServiceImpl implements TaskService {
 
       task.setState(READY);
       task.setOwner(ownerId);
-      task.setModified(Instant.now());
+      task.setModified(TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
 
       taskMapper.requestChanges(task);
       if (LOGGER.isDebugEnabled()) {
@@ -2281,7 +2285,7 @@ public class TaskServiceImpl implements TaskService {
       if (state.isClaimedState() && !forceUnclaim && !userId.equals(task.getOwner())) {
         throw new InvalidOwnerException(userId, taskId);
       }
-      Instant now = Instant.now();
+      Instant now = TaskModifiedTimestamps.next(Instant.now(), task.getModified());
       cancelClaimActionsOnTask(task, now, keepOwner);
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
@@ -2645,9 +2649,11 @@ public class TaskServiceImpl implements TaskService {
     if (updatedRows != taskSummaryList.size()) {
       // some Tasks have been modified concurrently. Find out which ones were updated by us.
       Set<String> completedTaskIds =
-          taskMapper
-              .findExistingTasks(taskSummaryList.stream().map(TaskSummary::getId).toList(), null)
+          CollectionUtil.partitionBasedOnSize(
+                  taskSummaryList.stream().map(TaskSummary::getId).toList(),
+                  TaskModifiedTimestamps.GUARDED_UPDATE_BATCH_SIZE)
               .stream()
+              .flatMap(batch -> taskMapper.findExistingTasks(batch, null).stream())
               .filter(persisted -> isCompletedBy(persisted, completedReference))
               .map(MinimalTaskSummary::getTaskId)
               .collect(Collectors.toSet());

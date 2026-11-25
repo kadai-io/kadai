@@ -41,6 +41,9 @@ public interface ReviewRequiredProvider extends KadaiInitializable {
    * and {@linkplain io.kadai.common.api.security.GroupPrincipal} as in {@linkplain
    * io.kadai.task.api.TaskService#completeTask(String)}.
    *
+   * <p>If the {@linkplain Task} is modified concurrently, the operation reads the {@linkplain Task}
+   * again and retries. Therefore, this SPI may be called more than once per operation.
+   *
    * @param task the {@linkplain Task} before {@linkplain
    *     io.kadai.task.api.TaskService#completeTask(String)} has started
    * @return true, if {@linkplain io.kadai.task.api.TaskService#requestReview(String)} should be
