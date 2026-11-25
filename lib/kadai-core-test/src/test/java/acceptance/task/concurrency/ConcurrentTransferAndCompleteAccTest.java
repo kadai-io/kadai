@@ -72,6 +72,7 @@ import org.junit.jupiter.api.Test;
 class ConcurrentTransferAndCompleteAccTest {
 
   private static final String USER = "user-1-1";
+  private static final Instant CLAIMED_AT = Instant.parse("2026-01-01T08:00:00Z");
 
   @KadaiInject KadaiEngine kadaiEngine;
   @KadaiInject TaskService taskService;
@@ -395,7 +396,7 @@ class ConcurrentTransferAndCompleteAccTest {
             .primaryObjRef(objectReference)
             .state(state);
     if (state.isClaimedState()) {
-      builder.owner(USER).claimed(Instant.now());
+      builder.owner(USER).claimed(CLAIMED_AT);
     }
     return builder.buildAndStore(taskService);
   }

@@ -55,8 +55,8 @@ public class ConcurrentTaskUpdateInterferer implements Interceptor {
   private final KadaiEngine kadaiEngine;
   private final AtomicInteger interferenceCount = new AtomicInteger();
   private final AtomicInteger remainingInterferences = new AtomicInteger();
-  private volatile Thread armedThread;
-  private volatile Interference interference;
+  private final AtomicReference<Thread> armedThread = new AtomicReference<>();
+  private final AtomicReference<Interference> interference = new AtomicReference<>();
 
   private ConcurrentTaskUpdateInterferer(KadaiEngine kadaiEngine) {
     this.kadaiEngine = kadaiEngine;
@@ -93,8 +93,8 @@ public class ConcurrentTaskUpdateInterferer implements Interceptor {
   }
 
   public void disarm() {
-    armedThread = null;
-    interference = null;
+    armedThread.set(null);
+    interference.set(null);
     remainingInterferences.set(0);
     interferenceCount.set(0);
   }
@@ -107,20 +107,20 @@ public class ConcurrentTaskUpdateInterferer implements Interceptor {
   public Object intercept(Invocation invocation) throws Throwable {
     MappedStatement mappedStatement = (MappedStatement) invocation.getArgs()[0];
     if (shouldInterfere(mappedStatement)) {
-      runInSeparateThread(interference);
+      runInSeparateThread(interference.get());
     }
     return invocation.proceed();
   }
 
   private void arm(Interference interference, int times) {
-    this.interference = interference;
+    this.interference.set(interference);
     this.remainingInterferences.set(times);
     this.interferenceCount.set(0);
-    this.armedThread = Thread.currentThread();
+    this.armedThread.set(Thread.currentThread());
   }
 
   private boolean shouldInterfere(MappedStatement mappedStatement) {
-    return Thread.currentThread() == armedThread
+    return Thread.currentThread() == armedThread.get()
         && mappedStatement.getSqlCommandType() == SqlCommandType.UPDATE
         && mappedStatement.getId().startsWith(TASK_MAPPER_PREFIX)
         && remainingInterferences.getAndUpdate(remaining -> Math.max(0, remaining - 1)) > 0;
@@ -132,18 +132,9 @@ public class ConcurrentTaskUpdateInterferer implements Interceptor {
         new Thread(
             () -> {
               try {
-                kadaiEngine.runAsAdmin(
-                    () -> {
-                      try {
-                        interference.run();
-                        return null;
-                      } catch (Exception e) {
-                        throw new IllegalStateException(e);
-                      }
-                    },
-                    CONCURRENT_USER);
-              } catch (Throwable t) {
-                failure.set(t);
+                kadaiEngine.runAsAdmin(() -> run(interference), CONCURRENT_USER);
+              } catch (RuntimeException | AssertionError e) {
+                failure.set(e);
               }
             },
             "concurrent-task-modification");
@@ -158,6 +149,18 @@ public class ConcurrentTaskUpdateInterferer implements Interceptor {
       throw new IllegalStateException("The concurrent Task modification failed", failure.get());
     }
     interferenceCount.incrementAndGet();
+  }
+
+  private static Void run(Interference interference) {
+    try {
+      interference.run();
+      return null;
+    } catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new IllegalStateException(e);
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
   }
 
   /** A modification which is executed concurrently to the operation under test. */
