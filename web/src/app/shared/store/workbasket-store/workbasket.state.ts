@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright [2026] [envite consulting GmbH]
  *
  *    Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,6 +77,7 @@ export class WorkbasketState implements NgxsAfterBootstrap {
   private domainService = inject(DomainService);
   private route = inject(ActivatedRoute);
   private requestInProgressService = inject(RequestInProgressService);
+  private previousDomain?: string;
 
   @Action(InitializeStore)
   initializeStore(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
@@ -108,6 +109,16 @@ export class WorkbasketState implements NgxsAfterBootstrap {
       });
 
       ctx.dispatch(new SelectComponent(tab));
+    });
+
+    this.domainService.getSelectedDomain().subscribe((domain) => {
+      const domainSwitched = this.previousDomain !== undefined && this.previousDomain !== domain;
+      this.previousDomain = domain;
+
+      const workbasketDomain = ctx.getState().selectedWorkbasket?.domain;
+      if (domainSwitched && workbasketDomain && workbasketDomain !== domain) {
+        ctx.dispatch(new DeselectWorkbasket());
+      }
     });
     return of(null);
   }
@@ -176,7 +187,9 @@ export class WorkbasketState implements NgxsAfterBootstrap {
 
   @Action(DeselectWorkbasket)
   deselectWorkbasket(ctx: StateContext<WorkbasketStateModel>): Observable<any> {
-    this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
+    if (this.location.path().includes('workbaskets')) {
+      this.location.go(this.location.path().replace(/(workbaskets).*/g, 'workbaskets'));
+    }
     ctx.patchState({
       selectedWorkbasket: undefined,
       action: ACTION.READ
