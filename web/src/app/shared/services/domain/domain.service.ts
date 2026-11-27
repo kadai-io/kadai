@@ -22,7 +22,7 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
-import { UrlSerializer } from '@angular/router';
+import { UrlSerializer, UrlTree } from '@angular/router';
 import { Location } from '@angular/common';
 
 @Injectable({
@@ -37,9 +37,7 @@ export class DomainService {
   private runtimeConfigService = inject(RuntimeConfigService);
 
   // the url is only read at startup, so back to an entry with another domain doesn't switch it
-  private readonly domainFromUrl: string | undefined = this.urlSerializer.parse(this.location.path()).queryParams[
-    'domain'
-  ];
+  private readonly domainFromUrl: string | undefined = this.parseUrl()?.queryParams['domain'];
   private domainRestValue: Array<string> = new Array<string>();
   private domainValue: Array<string> = new Array<string>();
   private domainSelectedValue: string | undefined;
@@ -80,7 +78,7 @@ export class DomainService {
             if (
               this.domainFromUrl !== undefined &&
               domains.includes(this.domainFromUrl) &&
-              (this.domainFromUrl !== '' || this.location.path().includes('/administration/classifications'))
+              (this.domainFromUrl !== '' || this.location.path().startsWith('/kadai/administration/classifications'))
             ) {
               this.selectDomain(this.domainFromUrl);
             } else if (this.domainValue.length > 0) {
@@ -145,13 +143,21 @@ export class DomainService {
   private writeDomainToUrl() {
     const domain = this.domainSelectedValue;
     const path = this.location.path();
-    if (domain === undefined || !(path.includes('/administration') || path.includes('/monitor'))) {
+    if (domain === undefined || !(path.startsWith('/kadai/administration') || path.startsWith('/kadai/monitor'))) {
       return;
     }
-    const tree = this.urlSerializer.parse(path);
-    if (tree.queryParams['domain'] !== domain) {
+    const tree = this.parseUrl();
+    if (tree !== undefined && tree.queryParams['domain'] !== domain) {
       tree.queryParams = { ...tree.queryParams, domain: domain };
       this.location.replaceState(this.urlSerializer.serialize(tree), '', this.location.getState());
+    }
+  }
+
+  private parseUrl(): UrlTree | undefined {
+    try {
+      return this.urlSerializer.parse(this.location.path());
+    } catch {
+      return undefined;
     }
   }
 }

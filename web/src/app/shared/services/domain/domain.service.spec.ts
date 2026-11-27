@@ -176,6 +176,15 @@ describe('DomainService', () => {
       const domainQuery = TestBed.inject(UrlSerializer).parse(location.path()).queryParams['domain'];
       expect(domainQuery).toEqual('DOMAIN_A');
     });
+
+    it('should select the first domain when the url cannot be parsed', () => {
+      const location = TestBed.inject(Location) as SpyLocation;
+      location.setInitialPath('/kadai/administration/workbaskets/(detail:WBI:00');
+      const serviceFromUrl = TestBed.runInInjectionContext(() => new DomainService());
+      serviceFromUrl.getDomains().subscribe();
+      httpTesting.expectOne(DOMAINS_URL).flush(['DOMAIN_A', 'DOMAIN_B', '']);
+      expect(serviceFromUrl.getSelectedDomainValue()).toEqual('DOMAIN_A');
+    });
   });
 
   describe('getSelectedDomain()', () => {
