@@ -24,6 +24,7 @@ import static io.kadai.testapi.DefaultTestEntities.defaultTestWorkbasket;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.kadai.KadaiConfiguration;
+import io.kadai.classification.api.ClassificationCustomField;
 import io.kadai.classification.api.ClassificationService;
 import io.kadai.classification.api.models.ClassificationSummary;
 import io.kadai.common.api.BaseQuery.SortDirection;
@@ -156,6 +157,33 @@ class TaskQueryImplGroupByAccTest implements KadaiConfigurationModifier {
         .containsExactly(taskSummary3)
         .extracting("groupByCount")
         .containsExactly(3);
+  }
+
+  @WithAccessId(user = "user-1-1")
+  @Test
+  void should_GroupByPor_When_FilteringByClassificationCustomAttribute() throws Exception {
+    WorkbasketSummary workbasket = createWorkbasketWithPermission();
+    ClassificationSummary classification =
+        defaultTestClassification()
+            .customAttribute(ClassificationCustomField.CUSTOM_1, "Neuschaden")
+            .buildAndStoreAsSummary(classificationService, "businessadmin");
+    taskInWorkbasket(workbasket).classificationSummary(classification).buildAndStore(taskService);
+    taskInWorkbasket(workbasket).classificationSummary(classification).buildAndStore(taskService);
+    taskInWorkbasket(workbasket).buildAndStore(taskService);
+
+    List<TaskSummary> list =
+        taskService
+            .createTaskQuery()
+            .workbasketIdIn(workbasket.getId())
+            .classificationCustomAttributeIn(ClassificationCustomField.CUSTOM_1, "Neuschaden")
+            .groupByPor()
+            .list();
+
+    assertThat(list).extracting(TaskSummary::getGroupByCount).containsExactly(2);
+    assertThat(list)
+        .extracting(TaskSummary::getClassificationSummary)
+        .extracting(ClassificationSummary::getId)
+        .containsExactly(classification.getId());
   }
 
   @WithAccessId(user = "user-1-1")

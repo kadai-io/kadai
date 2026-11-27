@@ -35,6 +35,7 @@ import static io.kadai.common.internal.util.SqlProviderUtil.whereNotLike;
 import io.kadai.task.api.TaskQueryColumnName;
 import java.util.Arrays;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class TaskQuerySqlProvider {
   private TaskQuerySqlProvider() {}
@@ -541,6 +542,37 @@ public class TaskQuerySqlProvider {
         + "</if>";
   }
 
+  /**
+   * Filters by the custom attributes of the Classification of a Task. In contrast to the other
+   * Classification filters this uses a sub-select instead of joining the CLASSIFICATION table. A
+   * join requires the DISTINCT keyword, which can't be combined with FOR UPDATE. Thus, these
+   * filters can also be used with selectAndClaim and lockResults.
+   *
+   * @param sb the StringBuilder the statements are appended to
+   */
+  private static void whereClassificationCustomStatements(StringBuilder sb) {
+    IntStream.rangeClosed(1, 8)
+        .forEach(x -> {
+          String collection = "classificationCustom" + x;
+          String column = "cc.CUSTOM_" + x;
+          whereClassificationIdIn(collection + "In", whereIn(collection + "In", column), sb);
+          whereClassificationIdIn(
+              collection + "NotIn", whereNotIn(collection + "NotIn", column), sb);
+          whereClassificationIdIn(collection + "Like", whereLike(collection + "Like", column), sb);
+          whereClassificationIdIn(
+              collection + "NotLike", whereNotLike(collection + "NotLike", column), sb);
+        });
+  }
+
+  private static void whereClassificationIdIn(
+      String collection, StringBuilder classificationCondition, StringBuilder sb) {
+    sb.append("<if test='")
+        .append(collection)
+        .append(" != null'>AND t.CLASSIFICATION_ID IN (SELECT cc.ID FROM CLASSIFICATION cc <where>")
+        .append(classificationCondition)
+        .append("</where>)</if> ");
+  }
+
   private static void commonWhereClauses(String filter, String channel, StringBuilder sb) {
     whereIn(filter + "In", channel, sb);
     whereNotIn(filter + "NotIn", channel, sb);
@@ -629,6 +661,7 @@ public class TaskQuerySqlProvider {
     whereLike("ownerLongNameLike", "owner_info.LONG_NAME", sb);
     whereNotLike("ownerLongNameNotLike", "owner_info.LONG_NAME", sb);
     whereCustomStatements("custom", "t.CUSTOM", 16, sb);
+    whereClassificationCustomStatements(sb);
     whereCustomIntStatements("customInt", "t.CUSTOM_INT", 8, sb);
 
     sb.append(

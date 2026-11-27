@@ -18,6 +18,8 @@
 
 package io.kadai.task.api;
 
+import io.kadai.classification.api.ClassificationCustomField;
+import io.kadai.classification.api.models.Classification;
 import io.kadai.common.api.BaseQuery;
 import io.kadai.common.api.IntInterval;
 import io.kadai.common.api.KeyDomain;
@@ -804,6 +806,82 @@ public interface TaskQuery extends BaseQuery<TaskSummary, TaskQueryColumnName> {
    * @return the query
    */
   TaskQuery orderByClassificationName(SortDirection sortDirection);
+
+  // endregion
+  // region classificationCustomAttributes
+
+  /**
+   * Add the values of the specified {@linkplain ClassificationCustomField} of the {@linkplain
+   * Classification} of the {@linkplain Task Tasks} for exact matching to your query.
+   *
+   * <p>The values are always read from the current {@linkplain Classification} of a {@linkplain
+   * Task}. Thus, changing the custom attribute of a {@linkplain Classification} immediately affects
+   * which {@linkplain Task Tasks} are matched.
+   *
+   * @param customField identifies which {@linkplain ClassificationCustomField} is affected
+   * @param searchArguments the values of the {@linkplain ClassificationCustomField} of the
+   *     {@linkplain Classification} of the searched for {@linkplain Task Tasks}. If null is
+   *     contained, {@linkplain Task Tasks} with a {@linkplain Classification} where the {@linkplain
+   *     ClassificationCustomField} is not set are matched, too.
+   * @return the query
+   * @throws InvalidArgumentException if searchArguments are not given
+   */
+  TaskQuery classificationCustomAttributeIn(
+      ClassificationCustomField customField, String... searchArguments)
+      throws InvalidArgumentException;
+
+  /**
+   * Exclude these values of the specified {@linkplain ClassificationCustomField} of the {@linkplain
+   * Classification} of the {@linkplain Task Tasks} from your query.
+   *
+   * <p>{@linkplain Task Tasks} with a {@linkplain Classification} where the {@linkplain
+   * ClassificationCustomField} is not set are not excluded, unless null is contained in the
+   * searchArguments.
+   *
+   * @param customField identifies which {@linkplain ClassificationCustomField} is affected
+   * @param searchArguments the values of the {@linkplain ClassificationCustomField} of the
+   *     {@linkplain Classification} of the {@linkplain Task Tasks} which should be excluded
+   * @return the query
+   * @throws InvalidArgumentException if searchArguments are not given
+   */
+  TaskQuery classificationCustomAttributeNotIn(
+      ClassificationCustomField customField, String... searchArguments)
+      throws InvalidArgumentException;
+
+  /**
+   * Add the values of the specified {@linkplain ClassificationCustomField} of the {@linkplain
+   * Classification} of the {@linkplain Task Tasks} for pattern matching to your query. They will be
+   * compared in SQL with the LIKE operator. You may use a wildcard like % to specify the pattern.
+   * If you specify multiple arguments they are combined with the OR keyword.
+   *
+   * @param customField identifies which {@linkplain ClassificationCustomField} is affected
+   * @param searchArguments the values of the {@linkplain ClassificationCustomField} of the
+   *     {@linkplain Classification} of the searched for {@linkplain Task Tasks}
+   * @return the query
+   * @throws InvalidArgumentException if searchArguments are not given
+   */
+  TaskQuery classificationCustomAttributeLike(
+      ClassificationCustomField customField, String... searchArguments)
+      throws InvalidArgumentException;
+
+  /**
+   * Exclude the values of the specified {@linkplain ClassificationCustomField} of the {@linkplain
+   * Classification} of the {@linkplain Task Tasks} for pattern matching from your query. They will
+   * be compared in SQL with the LIKE operator. You may use a wildcard like % to specify the
+   * pattern. If you specify multiple arguments they are combined with the OR keyword.
+   *
+   * <p>{@linkplain Task Tasks} with a {@linkplain Classification} where the {@linkplain
+   * ClassificationCustomField} is not set are excluded, too.
+   *
+   * @param customField identifies which {@linkplain ClassificationCustomField} is affected
+   * @param searchArguments the values of the {@linkplain ClassificationCustomField} of the
+   *     {@linkplain Classification} of the {@linkplain Task Tasks} which should be excluded
+   * @return the query
+   * @throws InvalidArgumentException if searchArguments are not given
+   */
+  TaskQuery classificationCustomAttributeNotLike(
+      ClassificationCustomField customField, String... searchArguments)
+      throws InvalidArgumentException;
 
   // endregion
   // region workbasketId

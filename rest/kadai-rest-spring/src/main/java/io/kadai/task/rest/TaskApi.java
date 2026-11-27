@@ -215,7 +215,9 @@ public interface TaskApi {
    * @param request the HTTP request
    * @param filterParameter the filter parameters
    * @param filterCustomFields the filter parameters regarding TaskCustomFields
-   * @param filterCustomIntFields the filter parameters regarding TaskCustomIntFields * @param
+   * @param filterCustomIntFields the filter parameters regarding TaskCustomIntFields
+   * @param filterClassificationCustomFields the filter parameters regarding the
+   *     ClassificationCustomFields of the Classification of the Tasks
    * @param groupByParameter the group by parameters
    * @param sortParameter the sort parameters
    * @param pagingParameter the paging parameters
@@ -246,6 +248,7 @@ public interface TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields,
       @ParameterObject TaskQueryGroupByParameter groupByParameter,
       @ParameterObject TaskQuerySortParameter sortParameter,
       @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter);
@@ -260,6 +263,8 @@ public interface TaskApi {
    * @param filterParameter the filter parameters
    * @param filterCustomFields the filter parameters regarding TaskCustomFields
    * @param filterCustomIntFields the filter parameters regarding TaskCustomIntFields
+   * @param filterClassificationCustomFields the filter parameters regarding the
+   *     ClassificationCustomFields of the Classification of the Tasks
    * @param sortParameter the sort parameters
    * @param pagingParameter the paging parameters
    * @return the Task IDs with the given filter, sort and paging options.
@@ -291,6 +296,7 @@ public interface TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields,
       @ParameterObject TaskQuerySortParameter sortParameter,
       @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter);
 
@@ -428,6 +434,8 @@ public interface TaskApi {
    * @param filterParameter the filter parameters
    * @param filterCustomFields the filter parameters regarding TaskCustomFields
    * @param filterCustomIntFields the filter parameters regarding TaskCustomIntFields
+   * @param filterClassificationCustomFields the filter parameters regarding the
+   *     ClassificationCustomFields of the Classification of the Tasks
    * @param sortParameter the sort parameters
    * @return the claimed Task or 404 if no Task is found
    * @throws InvalidOwnerException if the Task is already claimed by someone else
@@ -472,6 +480,7 @@ public interface TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields,
       @ParameterObject TaskQuerySortParameter sortParameter)
       throws InvalidOwnerException, NotAuthorizedOnWorkbasketException;
 
@@ -2783,6 +2792,8 @@ public interface TaskApi {
    * @param filterParameter the filter parameters
    * @param filterCustomFields the filter parameters regarding TaskCustomFields
    * @param filterCustomIntFields the filter parameters regarding TaskCustomIntFields
+   * @param filterClassificationCustomFields the filter parameters regarding the
+   *     ClassificationCustomFields of the Classification of the Tasks
    * @return the deleted task summaries
    * @throws NotAuthorizedException if the current user is not authorized to delete the requested
    *     Tasks.
@@ -2820,6 +2831,7 @@ public interface TaskApi {
   ResponseEntity<TaskSummaryCollectionRepresentationModel> deleteTasks(
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
-      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
+      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields)
       throws NotAuthorizedException;
 }

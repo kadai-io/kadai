@@ -154,6 +154,7 @@ public class TaskController implements TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields,
       @ParameterObject TaskQueryGroupByParameter groupByParameter,
       @ParameterObject TaskQuerySortParameter sortParameter,
       @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter) {
@@ -162,6 +163,7 @@ public class TaskController implements TaskApi {
         TaskQueryFilterParameter.class,
         TaskQueryFilterCustomFields.class,
         TaskQueryFilterCustomIntFields.class,
+        TaskQueryFilterClassificationCustomFields.class,
         TaskQueryGroupByParameter.class,
         QuerySortParameter.class,
         QueryPagingParameter.class);
@@ -171,6 +173,7 @@ public class TaskController implements TaskApi {
     filterParameter.apply(query);
     filterCustomFields.apply(query);
     filterCustomIntFields.apply(query);
+    filterClassificationCustomFields.apply(query);
     groupByParameter.apply(query);
     sortParameter.apply(query);
 
@@ -188,6 +191,7 @@ public class TaskController implements TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields,
       @ParameterObject TaskQuerySortParameter sortParameter,
       @ParameterObject QueryPagingParameter<TaskSummary, TaskQuery> pagingParameter) {
     QueryParamsValidator.validateParams(
@@ -195,6 +199,7 @@ public class TaskController implements TaskApi {
         TaskQueryFilterParameter.class,
         TaskQueryFilterCustomFields.class,
         TaskQueryFilterCustomIntFields.class,
+        TaskQueryFilterClassificationCustomFields.class,
         QuerySortParameter.class,
         QueryPagingParameter.class);
 
@@ -203,6 +208,7 @@ public class TaskController implements TaskApi {
     filterParameter.apply(query);
     filterCustomFields.apply(query);
     filterCustomIntFields.apply(query);
+    filterClassificationCustomFields.apply(query);
     sortParameter.apply(query);
 
     List<TaskSummary> taskSummaries = pagingParameter.apply(query);
@@ -254,6 +260,7 @@ public class TaskController implements TaskApi {
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
       @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields,
       @ParameterObject TaskQuerySortParameter sortParameter)
       throws InvalidOwnerException, NotAuthorizedOnWorkbasketException {
     TaskQuery query = taskService.createTaskQuery();
@@ -261,6 +268,7 @@ public class TaskController implements TaskApi {
     filterParameter.apply(query);
     filterCustomFields.apply(query);
     filterCustomIntFields.apply(query);
+    filterClassificationCustomFields.apply(query);
     sortParameter.apply(query);
 
     Optional<Task> selectedAndClaimedTask = taskService.selectAndClaim(query);
@@ -834,12 +842,14 @@ public class TaskController implements TaskApi {
   public ResponseEntity<TaskSummaryCollectionRepresentationModel> deleteTasks(
       @ParameterObject TaskQueryFilterParameter filterParameter,
       @ParameterObject TaskQueryFilterCustomFields filterCustomFields,
-      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields)
+      @ParameterObject TaskQueryFilterCustomIntFields filterCustomIntFields,
+      @ParameterObject TaskQueryFilterClassificationCustomFields filterClassificationCustomFields)
       throws NotAuthorizedException {
     TaskQuery query = taskService.createTaskQuery();
     filterParameter.apply(query);
     filterCustomFields.apply(query);
     filterCustomIntFields.apply(query);
+    filterClassificationCustomFields.apply(query);
 
     List<TaskSummary> taskSummaries = query.list();
 
