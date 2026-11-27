@@ -208,6 +208,7 @@ describe('DomainService', () => {
 
     it('should write the selected domain to the url', () => {
       const location = TestBed.inject(Location);
+      location.go('/kadai/administration/workbaskets');
       service.switchDomain('DOMAIN_B');
       const domainQuery = TestBed.inject(UrlSerializer).parse(location.path()).queryParams['domain'];
       expect(domainQuery).toEqual('DOMAIN_B');
@@ -215,6 +216,7 @@ describe('DomainService', () => {
 
     it('should write the master domain to the url as an empty string', () => {
       const location = TestBed.inject(Location);
+      location.go('/kadai/administration/classifications');
       service.switchDomain('');
       const domainQuery = TestBed.inject(UrlSerializer).parse(location.path()).queryParams['domain'];
       expect(domainQuery).toEqual('');
@@ -231,6 +233,24 @@ describe('DomainService', () => {
       const queryParams = TestBed.inject(UrlSerializer).parse(location.path()).queryParams;
       expect(queryParams['domain']).toBe('DOMAIN_B');
       expect(queryParams['tab']).toBe('information');
+    });
+
+    it('should not write the domain to the url outside administration and monitor', () => {
+      const location = TestBed.inject(Location);
+      service.switchDomain('DOMAIN_B');
+
+      location.go('/kadai/workplace/tasks');
+
+      expect(TestBed.inject(UrlSerializer).parse(location.path()).queryParams['domain']).toBeUndefined();
+    });
+
+    it('should keep the history state when writing the domain to the url', () => {
+      const location = TestBed.inject(Location);
+      location.go('/kadai/administration/workbaskets', '', { navigationId: 1 });
+
+      service.switchDomain('DOMAIN_B');
+
+      expect(location.getState()).toEqual({ navigationId: 1 });
     });
   });
 

@@ -36,6 +36,7 @@ export class DomainService {
   private selectedRouteService = inject(SelectedRouteService);
   private runtimeConfigService = inject(RuntimeConfigService);
 
+  // the url is only read at startup, so back to an entry with another domain doesn't switch it
   private readonly domainFromUrl: string | undefined = this.urlSerializer.parse(this.location.path()).queryParams[
     'domain'
   ];
@@ -143,13 +144,14 @@ export class DomainService {
 
   private writeDomainToUrl() {
     const domain = this.domainSelectedValue;
-    if (domain === undefined) {
+    const path = this.location.path();
+    if (domain === undefined || !(path.includes('/administration') || path.includes('/monitor'))) {
       return;
     }
-    const tree = this.urlSerializer.parse(this.location.path());
+    const tree = this.urlSerializer.parse(path);
     if (tree.queryParams['domain'] !== domain) {
       tree.queryParams = { ...tree.queryParams, domain: domain };
-      this.location.replaceState(this.urlSerializer.serialize(tree));
+      this.location.replaceState(this.urlSerializer.serialize(tree), '', this.location.getState());
     }
   }
 }
