@@ -29,7 +29,6 @@ import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
@@ -134,19 +133,43 @@ public interface TaskMapper {
   @Options(keyProperty = "id", keyColumn = "ID")
   void insert(TaskImpl task);
 
-  @Update(
-      "UPDATE TASK SET CLAIMED = #{claimed}, COMPLETED = #{completed}, MODIFIED = #{modified}, PLANNED = #{planned}, RECEIVED = #{received}, DUE = #{due}, NAME = #{name}, DESCRIPTION = #{description}, NOTE = #{note}, "
-          + " PRIORITY = #{priority}, MANUAL_PRIORITY = #{manualPriority}, STATE = #{state}, CLASSIFICATION_CATEGORY = #{classificationSummary.category}, CLASSIFICATION_KEY = #{classificationSummary.key}, CLASSIFICATION_ID = #{classificationSummary.id}, "
-          + "WORKBASKET_ID = #{workbasketSummary.id}, WORKBASKET_KEY = #{workbasketSummary.key}, DOMAIN = #{workbasketSummary.domain}, "
-          + "BUSINESS_PROCESS_ID = #{businessProcessId}, PARENT_BUSINESS_PROCESS_ID = #{parentBusinessProcessId}, OWNER = #{owner}, POR_COMPANY = #{primaryObjRef.company}, POR_SYSTEM = #{primaryObjRef.system}, "
-          + "POR_INSTANCE = #{primaryObjRef.systemInstance}, POR_TYPE = #{primaryObjRef.type}, POR_VALUE = #{primaryObjRef.value}, IS_READ = #{isRead}, IS_TRANSFERRED = #{isTransferred}, IS_REOPENED = #{isReopened}, "
-          + "CALLBACK_INFO = #{callbackInfo,jdbcType=CLOB,javaType=java.util.Map,typeHandler=io.kadai.common.internal.persistence.MapTypeHandler}, "
-          + "CUSTOM_ATTRIBUTES = #{customAttributes,jdbcType=CLOB,javaType=java.util.Map,typeHandler=io.kadai.common.internal.persistence.MapTypeHandler}, CUSTOM_1 = #{custom1}, CUSTOM_2 = #{custom2}, "
-          + "CUSTOM_3 = #{custom3}, CUSTOM_4 = #{custom4}, CUSTOM_5 = #{custom5}, CUSTOM_6 = #{custom6}, CUSTOM_7 = #{custom7}, CUSTOM_8 = #{custom8}, "
-          + "CUSTOM_9 = #{custom9}, CUSTOM_10 = #{custom10}, CUSTOM_11 = #{custom11}, CUSTOM_12 = #{custom12}, CUSTOM_13 = #{custom13}, CUSTOM_14 = #{custom14}, CUSTOM_15 = #{custom15}, CUSTOM_16 = #{custom16}, "
-          + "CUSTOM_INT_1 = #{customInt1}, CUSTOM_INT_2 = #{customInt2}, CUSTOM_INT_3 = #{customInt3}, CUSTOM_INT_4 = #{customInt4}, CUSTOM_INT_5 = #{customInt5}, CUSTOM_INT_6 = #{customInt6}, CUSTOM_INT_7 = #{customInt7}, CUSTOM_INT_8 = #{customInt8} "
-          + "WHERE ID = #{id}")
-  void update(TaskImpl task);
+  /**
+   * The condition which a single Task row must fulfill to be updated by a guarded update, see {@link
+   * ExpectedTaskModification}. Must be used inside a script with the {@link
+   * ExpectedTaskModification} bound to "expected", e.g. as item of a foreach for bulk updates.
+   */
+  String EXPECTED_MODIFIED_CONDITION =
+      "(ID = #{expected.taskId} AND "
+          + "<choose><when test='expected.modifiedFrom == null'>MODIFIED IS NULL</when>"
+          + "<otherwise>MODIFIED &gt;= #{expected.modifiedFrom} "
+          + "AND MODIFIED &lt; #{expected.modifiedUntil}</otherwise></choose>)";
+
+  /** Sets all updatable columns of a Task. The Task must be bound to "task". */
+  String UPDATE_TASK =
+      "UPDATE TASK SET CLAIMED = #{task.claimed}, COMPLETED = #{task.completed}, MODIFIED = #{task.modified}, PLANNED = #{task.planned}, RECEIVED = #{task.received}, DUE = #{task.due}, NAME = #{task.name}, DESCRIPTION = #{task.description}, NOTE = #{task.note}, "
+          + " PRIORITY = #{task.priority}, MANUAL_PRIORITY = #{task.manualPriority}, STATE = #{task.state}, CLASSIFICATION_CATEGORY = #{task.classificationSummary.category}, CLASSIFICATION_KEY = #{task.classificationSummary.key}, CLASSIFICATION_ID = #{task.classificationSummary.id}, "
+          + "WORKBASKET_ID = #{task.workbasketSummary.id}, WORKBASKET_KEY = #{task.workbasketSummary.key}, DOMAIN = #{task.workbasketSummary.domain}, "
+          + "BUSINESS_PROCESS_ID = #{task.businessProcessId}, PARENT_BUSINESS_PROCESS_ID = #{task.parentBusinessProcessId}, OWNER = #{task.owner}, POR_COMPANY = #{task.primaryObjRef.company}, POR_SYSTEM = #{task.primaryObjRef.system}, "
+          + "POR_INSTANCE = #{task.primaryObjRef.systemInstance}, POR_TYPE = #{task.primaryObjRef.type}, POR_VALUE = #{task.primaryObjRef.value}, IS_READ = #{task.isRead}, IS_TRANSFERRED = #{task.isTransferred}, IS_REOPENED = #{task.isReopened}, "
+          + "CALLBACK_INFO = #{task.callbackInfo,jdbcType=CLOB,javaType=java.util.Map,typeHandler=io.kadai.common.internal.persistence.MapTypeHandler}, "
+          + "CUSTOM_ATTRIBUTES = #{task.customAttributes,jdbcType=CLOB,javaType=java.util.Map,typeHandler=io.kadai.common.internal.persistence.MapTypeHandler}, CUSTOM_1 = #{task.custom1}, CUSTOM_2 = #{task.custom2}, "
+          + "CUSTOM_3 = #{task.custom3}, CUSTOM_4 = #{task.custom4}, CUSTOM_5 = #{task.custom5}, CUSTOM_6 = #{task.custom6}, CUSTOM_7 = #{task.custom7}, CUSTOM_8 = #{task.custom8}, "
+          + "CUSTOM_9 = #{task.custom9}, CUSTOM_10 = #{task.custom10}, CUSTOM_11 = #{task.custom11}, CUSTOM_12 = #{task.custom12}, CUSTOM_13 = #{task.custom13}, CUSTOM_14 = #{task.custom14}, CUSTOM_15 = #{task.custom15}, CUSTOM_16 = #{task.custom16}, "
+          + "CUSTOM_INT_1 = #{task.customInt1}, CUSTOM_INT_2 = #{task.customInt2}, CUSTOM_INT_3 = #{task.customInt3}, CUSTOM_INT_4 = #{task.customInt4}, CUSTOM_INT_5 = #{task.customInt5}, CUSTOM_INT_6 = #{task.customInt6}, CUSTOM_INT_7 = #{task.customInt7}, CUSTOM_INT_8 = #{task.customInt8} ";
+
+  @Update(UPDATE_TASK + "WHERE ID = #{task.id}")
+  void update(@Param("task") TaskImpl task);
+
+  /**
+   * Updates the given Task only if it has not been modified since it was read.
+   *
+   * @param task the Task to update
+   * @param expected the expected modification state of the Task
+   * @return the number of updated rows, which is 0 if the Task was modified concurrently
+   */
+  @Update("<script>" + UPDATE_TASK + "WHERE " + EXPECTED_MODIFIED_CONDITION + "</script>")
+  int updateIfUnmodified(
+      @Param("task") TaskImpl task, @Param("expected") ExpectedTaskModification expected);
 
   @Update(
       "UPDATE TASK SET MODIFIED = #{modified}, STATE = #{state}, OWNER = #{owner} WHERE ID = #{id}")
@@ -181,18 +204,24 @@ public interface TaskMapper {
       "<script>"
           + " UPDATE TASK SET MODIFIED = #{referencetask.modified}, STATE = #{referencetask.state}, WORKBASKET_KEY = #{referencetask.workbasketSummary.key}, WORKBASKET_ID= #{referencetask.workbasketSummary.id}, "
           + " DOMAIN = #{referencetask.domain}, OWNER = #{referencetask.owner}, IS_READ = #{referencetask.isRead}, IS_TRANSFERRED = #{referencetask.isTransferred}"
-          + " WHERE ID IN <foreach item='taskId' index='index' separator=',' open='(' close=')' collection='taskIds'>#{taskId}</foreach>"
+          + " WHERE <foreach item='expected' collection='expectedModifications' separator=' OR '>"
+          + EXPECTED_MODIFIED_CONDITION
+          + "</foreach>"
           + "</script>")
-  void updateTransfered(
-      @Param("taskIds") Set<String> taskIds, @Param("referencetask") TaskImpl referencetask);
+  int updateTransfered(
+      @Param("expectedModifications") Collection<ExpectedTaskModification> expectedModifications,
+      @Param("referencetask") TaskImpl referencetask);
 
   @Update(
       "<script>"
           + " UPDATE TASK SET COMPLETED = #{referenceTask.completed}, MODIFIED = #{referenceTask.modified}, STATE = #{referenceTask.state}, OWNER = #{referenceTask.owner}"
-          + " WHERE ID IN <foreach item='taskId' index='index' separator=',' open='(' close=')' collection='taskIds'>#{taskId}</foreach>"
+          + " WHERE <foreach item='expected' collection='expectedModifications' separator=' OR '>"
+          + EXPECTED_MODIFIED_CONDITION
+          + "</foreach>"
           + "</script>")
-  void updateCompleted(
-      @Param("taskIds") List<String> taskIds, @Param("referenceTask") TaskSummary referenceTask);
+  int updateCompleted(
+      @Param("expectedModifications") Collection<ExpectedTaskModification> expectedModifications,
+      @Param("referenceTask") TaskSummary referenceTask);
 
   @Update(
       "<script>"

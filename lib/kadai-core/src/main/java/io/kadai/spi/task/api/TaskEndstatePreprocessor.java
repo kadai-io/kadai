@@ -43,6 +43,9 @@ public interface TaskEndstatePreprocessor {
    * <p>This SPI is executed with the same {@linkplain io.kadai.common.api.security.UserPrincipal}
    * and {@linkplain io.kadai.common.api.security.GroupPrincipal} as in the methods mentioned above.
    *
+   * <p>If the {@linkplain Task} is modified concurrently, the operation reads the {@linkplain Task}
+   * again and retries. Therefore, this SPI may be called more than once per operation.
+   *
    * @param taskToProcess the {@linkplain Task} to preprocess
    * @return the modified {@linkplain Task}. <b>IMPORTANT:</b> persistent changes to the {@linkplain
    *     Task} have to be managed by the service provider

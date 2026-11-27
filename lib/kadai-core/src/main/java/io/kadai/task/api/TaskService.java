@@ -187,12 +187,15 @@ public interface TaskService {
    * @throws InvalidOwnerException if the {@linkplain Task} with taskId is claimed by some else
    * @throws NotAuthorizedOnWorkbasketException if the current user has no {@linkplain
    *     WorkbasketPermission#READ} for the {@linkplain Workbasket} the {@linkplain Task} is in
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to claim it
    */
   Task claim(String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ConcurrencyException;
 
   /**
    * Claim an existing {@linkplain Task} for the current user even if it is already claimed by
@@ -206,12 +209,15 @@ public interface TaskService {
    * @throws InvalidOwnerException cannot be thrown
    * @throws NotAuthorizedOnWorkbasketException if the current user has no {@linkplain
    *     WorkbasketPermission#READ} for the {@linkplain Workbasket} the {@linkplain Task} is in
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to claim it
    */
   Task forceClaim(String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ConcurrencyException;
 
   /**
    * Selects and claims the first {@linkplain Task} which is returned by the {@linkplain TaskQuery}.
@@ -616,12 +622,15 @@ public interface TaskService {
    *     the {@linkplain Task} or {@linkplain KadaiRole#ADMIN}
    * @throws NotAuthorizedOnWorkbasketException if the current user has no {@linkplain
    *     WorkbasketPermission#READ} for the {@linkplain Workbasket} the {@linkplain Task} is in
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to complete it
    */
   Task completeTask(String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ConcurrencyException;
 
   /**
    * Completes a {@linkplain Task} and updates {@linkplain Task#getState() state} and timestamps in
@@ -640,12 +649,15 @@ public interface TaskService {
    *     the {@linkplain Task} or {@linkplain KadaiRole#ADMIN}
    * @throws NotAuthorizedOnWorkbasketException if the current user has no {@linkplain
    *     WorkbasketPermission#READ} for the {@linkplain Workbasket} the {@linkplain Task} is in
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to complete it
    */
   Task forceCompleteTask(String taskId)
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException;
+          InvalidTaskStateException,
+          ConcurrencyException;
 
   /**
    * Completes a List of {@linkplain Task Tasks}.
@@ -754,7 +766,8 @@ public interface TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return transfer(taskId, destinationWorkbasketId, true);
   }
 
@@ -780,13 +793,16 @@ public interface TaskService {
    *     TaskState#END_STATES}
    * @throws TransferCheckException if a {@linkplain
    *     io.kadai.spi.task.api.BeforeTransferTaskProvider} denies the transfer
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to transfer it
    */
   Task transfer(String taskId, String destinationWorkbasketId, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException;
+          TransferCheckException,
+          ConcurrencyException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} while always setting
@@ -807,7 +823,8 @@ public interface TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return transfer(taskId, workbasketKey, domain, true);
   }
 
@@ -835,13 +852,16 @@ public interface TaskService {
    *     TaskState#END_STATES}
    * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
    *     BeforeTransferTaskProvider} denies the transfer
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to transfer it
    */
   Task transfer(String taskId, String workbasketKey, String domain, boolean setTransferFlag)
       throws TaskNotFoundException,
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException;
+          TransferCheckException,
+          ConcurrencyException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} and sets the owner of the
@@ -862,7 +882,8 @@ public interface TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return transferWithOwner(taskId, destinationWorkbasketId, owner, true);
   }
 
@@ -890,6 +911,8 @@ public interface TaskService {
    *     TaskState#END_STATES}
    * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
    *     BeforeTransferTaskProvider} denies the transfer
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to transfer it
    */
   Task transferWithOwner(
       String taskId, String destinationWorkbasketId, String owner, boolean setTransferFlag)
@@ -897,7 +920,8 @@ public interface TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException;
+          TransferCheckException,
+          ConcurrencyException;
 
   /**
    * Transfers a {@linkplain Task} to another {@linkplain Workbasket} and sets the owner of the
@@ -920,7 +944,8 @@ public interface TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return transferWithOwner(taskId, workbasketKey, domain, owner, true);
   }
 
@@ -950,6 +975,8 @@ public interface TaskService {
    *     TaskState#END_STATES}
    * @throws TransferCheckException if a {@link io.kadai.spi.task.api.BeforeTransferTaskProvider
    *     BeforeTransferTaskProvider} denies the transfer
+   * @throws ConcurrencyException if the {@linkplain Task} was modified concurrently on every
+   *     attempt to transfer it
    */
   Task transferWithOwner(
       String taskId, String workbasketKey, String domain, String owner, boolean setTransferFlag)
@@ -957,7 +984,8 @@ public interface TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException;
+          TransferCheckException,
+          ConcurrencyException;
 
   /**
    * Transfers a List of {@linkplain Task Tasks} to another {@linkplain Workbasket} while always

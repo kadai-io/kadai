@@ -22,9 +22,11 @@ import static java.util.Map.entry;
 import static java.util.stream.Collectors.toList;
 
 import io.kadai.common.api.BulkOperationResults;
+import io.kadai.common.api.exceptions.ConcurrencyException;
 import io.kadai.common.api.exceptions.InvalidArgumentException;
 import io.kadai.common.api.exceptions.KadaiException;
 import io.kadai.common.internal.InternalKadaiEngine;
+import io.kadai.common.internal.util.CollectionUtil;
 import io.kadai.common.internal.util.EnumUtil;
 import io.kadai.common.internal.util.IdGenerator;
 import io.kadai.common.internal.util.ObjectAttributeChangeDetector;
@@ -38,6 +40,7 @@ import io.kadai.task.api.exceptions.TaskNotFoundException;
 import io.kadai.task.api.exceptions.TransferCheckException;
 import io.kadai.task.api.models.Task;
 import io.kadai.task.api.models.TaskSummary;
+import io.kadai.task.internal.models.MinimalTaskSummary;
 import io.kadai.task.internal.models.TaskImpl;
 import io.kadai.task.internal.models.TaskSummaryImpl;
 import io.kadai.workbasket.api.WorkbasketPermission;
@@ -53,6 +56,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -87,7 +91,8 @@ final class TaskTransferrer {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketId).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, null, setTransferFlag);
@@ -102,7 +107,8 @@ final class TaskTransferrer {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketKey, destinationDomain).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, null, setTransferFlag);
@@ -169,7 +175,8 @@ final class TaskTransferrer {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketId).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, owner, setTransferFlag);
@@ -185,7 +192,8 @@ final class TaskTransferrer {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     WorkbasketSummary destinationWorkbasket =
         workbasketService.getWorkbasket(destinationWorkbasketKey, destinationDomain).asSummary();
     return transferSingleTask(taskId, destinationWorkbasket, owner, setTransferFlag);
@@ -197,36 +205,50 @@ final class TaskTransferrer {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     try {
       kadaiEngine.openConnection();
-      TaskImpl task = (TaskImpl) taskService.getTask(taskId);
-      TaskImpl oldTask = task.copy();
-      oldTask.setId(task.getId());
-      oldTask.setExternalId(task.getExternalId());
+      for (int attempt = 1; ; attempt++) {
+        TaskImpl task = (TaskImpl) taskService.getTask(taskId);
+        final Instant expectedModified = task.getModified();
+        TaskImpl oldTask = task.copy();
+        oldTask.setId(task.getId());
+        oldTask.setExternalId(task.getExternalId());
 
-      WorkbasketSummary originWorkbasket = task.getWorkbasketSummary();
-      checkPreconditionsForTransferTask(task, destinationWorkbasket, originWorkbasket);
+        WorkbasketSummary originWorkbasket = task.getWorkbasketSummary();
+        checkPreconditionsForTransferTask(task, destinationWorkbasket, originWorkbasket);
 
-      if (beforeTransferTaskManager.isEnabled()) {
-        Workbasket destinationWorkbasketFull =
-            workbasketService.getWorkbasket(destinationWorkbasket.getId());
-        beforeTransferTaskManager.checkTransferAllowed(task, destinationWorkbasketFull);
-      }
+        if (beforeTransferTaskManager.isEnabled()) {
+          Workbasket destinationWorkbasketFull =
+              workbasketService.getWorkbasket(destinationWorkbasket.getId());
+          beforeTransferTaskManager.checkTransferAllowed(task, destinationWorkbasketFull);
+        }
 
-      applyTransferValuesForTask(task, destinationWorkbasket, owner, setTransferFlag);
-      taskMapper.update(task);
-
-      eventPublisher.publishing(() -> {
-        String details = ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
-        return new TaskTransferredEvent(
-            IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+        applyTransferValuesForTask(
             task,
-            originWorkbasket.getId(),
-            destinationWorkbasket.getId(),
-            details);
-      });
-      return task;
+            destinationWorkbasket,
+            owner,
+            setTransferFlag,
+            TaskModifiedTimestamps.next(Instant.now(), expectedModified));
+        if (isUpdatedIfUnmodified(task, expectedModified)) {
+          eventPublisher.publishing(() -> {
+            String details =
+                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task);
+            return new TaskTransferredEvent(
+                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                task,
+                originWorkbasket.getId(),
+                destinationWorkbasket.getId(),
+                details);
+          });
+          return task;
+        }
+        if (attempt >= TaskModifiedTimestamps.MAX_UPDATE_ATTEMPTS) {
+          throw new ConcurrencyException(taskId);
+        }
+        LOGGER.debug("Task '{}' was modified concurrently. Retrying the transfer.", taskId);
+      }
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -247,30 +269,45 @@ final class TaskTransferrer {
     try {
       kadaiEngine.openConnection();
 
-      List<TaskSummary> taskSummaries =
-          kadaiEngine
-              .getEngine()
-              .runAsAdmin(
-                  () -> taskService.createTaskQuery().idIn(taskIds.toArray(new String[0])).list());
-      taskSummaries =
-          filterOutTasksWhichDoNotMatchTransferCriteria(taskIds, taskSummaries, bulkLog);
+      for (int attempt = 1; ; attempt++) {
+        String[] taskIdArray = taskIds.toArray(new String[0]);
+        List<TaskSummary> taskSummaries =
+            kadaiEngine
+                .getEngine()
+                .runAsAdmin(() -> taskService.createTaskQuery().idIn(taskIdArray).list());
+        taskSummaries =
+            filterOutTasksWhichDoNotMatchTransferCriteria(taskIds, taskSummaries, bulkLog);
 
-      if (beforeTransferTaskManager.isEnabled()) {
-        BulkOperationResults<String, KadaiException> spiErrors =
-            checkTransferAllowedForBulk(taskSummaries, destinationWorkbasket);
-        if (spiErrors.containsErrors()) {
-          LOGGER.warn(
-              "BeforeTransferTaskProvider denied transfer for {} task(s). "
-                  + "No tasks will be transferred.",
-              spiErrors.getFailedIds().size());
-          bulkLog.addAllErrors(spiErrors);
+        if (beforeTransferTaskManager.isEnabled()) {
+          BulkOperationResults<String, KadaiException> spiErrors =
+              checkTransferAllowedForBulk(taskSummaries, destinationWorkbasket);
+          if (spiErrors.containsErrors()) {
+            bulkLog.addAllErrors(spiErrors);
+            if (attempt == 1) {
+              LOGGER.warn(
+                  "BeforeTransferTaskProvider denied transfer for {} task(s). "
+                      + "No tasks will be transferred.",
+                  spiErrors.getFailedIds().size());
+              return bulkLog;
+            }
+            // tasks of previous attempts have already been transferred
+            Set<String> deniedTaskIds = new HashSet<>(spiErrors.getFailedIds());
+            taskSummaries =
+                taskSummaries.stream().filter(t -> !deniedTaskIds.contains(t.getId())).toList();
+          }
+        }
+
+        taskIds =
+            updateTransferableTasks(taskSummaries, destinationWorkbasket, owner, setTransferFlag);
+        if (taskIds.isEmpty()) {
           return bulkLog;
         }
+        if (attempt >= TaskModifiedTimestamps.MAX_UPDATE_ATTEMPTS) {
+          taskIds.forEach(taskId -> bulkLog.addError(taskId, new ConcurrencyException(taskId)));
+          return bulkLog;
+        }
+        LOGGER.debug("Tasks {} were modified concurrently. Retrying the transfer.", taskIds);
       }
-
-      updateTransferableTasks(taskSummaries, destinationWorkbasket, owner, setTransferFlag);
-
-      return bulkLog;
     } finally {
       kadaiEngine.returnConnection();
     }
@@ -389,33 +426,52 @@ final class TaskTransferrer {
     return sourceWorkbaskets.stream().map(WorkbasketSummary::getId).collect(Collectors.toSet());
   }
 
-  private void updateTransferableTasks(
+  /**
+   * Transfers the given Tasks unless they have been modified since they were read.
+   *
+   * @param taskSummaries the Tasks to transfer
+   * @param destinationWorkbasket the Workbasket to transfer the Tasks to
+   * @param owner the new owner of the Tasks
+   * @param setTransferFlag whether to mark the Tasks as transferred
+   * @return the ids of the Tasks which were modified concurrently and therefore not transferred
+   */
+  private List<String> updateTransferableTasks(
       List<TaskSummary> taskSummaries,
       WorkbasketSummary destinationWorkbasket,
       String owner,
       boolean setTransferFlag) {
+    List<String> concurrentlyModifiedTaskIds = new ArrayList<>();
     Map<TaskState, List<TaskSummary>> summariesByState = groupTasksByState(taskSummaries);
     for (Map.Entry<TaskState, List<TaskSummary>> entry : summariesByState.entrySet()) {
       TaskState goalState = entry.getKey();
       List<TaskSummary> taskSummariesWithSameGoalState = entry.getValue();
       if (!taskSummariesWithSameGoalState.isEmpty()) {
+        Instant modified =
+            TaskModifiedTimestamps.next(
+                Instant.now(),
+                taskSummariesWithSameGoalState.stream().map(TaskSummary::getModified).toList());
         TaskImpl updateObject = new TaskImpl();
         updateObject.setState(goalState);
-        applyTransferValuesForTask(updateObject, destinationWorkbasket, owner, setTransferFlag);
-        taskMapper.updateTransfered(
-            taskSummariesWithSameGoalState.stream()
-                .map(TaskSummary::getId)
-                .collect(Collectors.toSet()),
-            updateObject);
+        applyTransferValuesForTask(
+            updateObject, destinationWorkbasket, owner, setTransferFlag, modified);
+
+        List<TaskSummary> transferredTasks =
+            updateUnmodifiedTasks(taskSummariesWithSameGoalState, updateObject);
+        Set<String> transferredTaskIds =
+            transferredTasks.stream().map(TaskSummary::getId).collect(Collectors.toSet());
+        taskSummariesWithSameGoalState.stream()
+            .map(TaskSummary::getId)
+            .filter(taskId -> !transferredTaskIds.contains(taskId))
+            .forEach(concurrentlyModifiedTaskIds::add);
 
         eventPublisher.publishingAll(() ->
-            taskSummaries.stream()
+            transferredTasks.stream()
                 .map(oldSummary -> {
                   TaskSummaryImpl newSummary = (TaskSummaryImpl) oldSummary.copy();
                   newSummary.setId(oldSummary.getId());
                   newSummary.setExternalId(oldSummary.getExternalId());
                   applyTransferValuesForTask(
-                      newSummary, destinationWorkbasket, owner, setTransferFlag);
+                      newSummary, destinationWorkbasket, owner, setTransferFlag, modified);
 
                   String details =
                       ObjectAttributeChangeDetector.determineChangesInAttributes(
@@ -430,17 +486,72 @@ final class TaskTransferrer {
                 .collect(toList()));
       }
     }
+    return concurrentlyModifiedTaskIds;
+  }
+
+  /**
+   * Applies the transfer values of the given update object to all given Tasks which have not been
+   * modified since they were read.
+   *
+   * @param taskSummaries the Tasks to update, as they were read
+   * @param updateObject holds the values to apply to the Tasks
+   * @return the Tasks which were updated
+   */
+  private List<TaskSummary> updateUnmodifiedTasks(
+      List<TaskSummary> taskSummaries, TaskImpl updateObject) {
+    int updatedRows =
+        CollectionUtil.partitionBasedOnSize(
+                taskSummaries, TaskModifiedTimestamps.GUARDED_UPDATE_BATCH_SIZE)
+            .stream()
+            .mapToInt(batch ->
+                taskMapper.updateTransfered(
+                    batch.stream()
+                        .map(t -> new ExpectedTaskModification(t.getId(), t.getModified()))
+                        .toList(),
+                    updateObject))
+            .sum();
+    if (updatedRows == taskSummaries.size()) {
+      return taskSummaries;
+    }
+    // some Tasks have been modified concurrently. Find out which ones were updated by us.
+    Set<String> updatedTaskIds =
+        CollectionUtil.partitionBasedOnSize(
+                taskSummaries.stream().map(TaskSummary::getId).toList(),
+                TaskModifiedTimestamps.GUARDED_UPDATE_BATCH_SIZE)
+            .stream()
+            .flatMap(batch -> taskMapper.findExistingTasks(batch, null).stream())
+            .filter(persisted -> isTransferredBy(persisted, updateObject))
+            .map(MinimalTaskSummary::getTaskId)
+            .collect(Collectors.toSet());
+    return taskSummaries.stream().filter(t -> updatedTaskIds.contains(t.getId())).toList();
+  }
+
+  private static boolean isTransferredBy(MinimalTaskSummary persisted, TaskImpl updateObject) {
+    return updateObject.getModified().equals(persisted.getModified())
+        && updateObject.getState() == persisted.getTaskState()
+        && updateObject.getWorkbasketSummary().getId().equals(persisted.getWorkbasketId())
+        && Objects.equals(updateObject.getOwner(), persisted.getOwner());
+  }
+
+  private boolean isUpdatedIfUnmodified(TaskImpl task, Instant expectedModified) {
+    return taskMapper.updateIfUnmodified(
+            task, new ExpectedTaskModification(task.getId(), expectedModified))
+        > 0;
   }
 
   private void applyTransferValuesForTask(
-      TaskSummaryImpl task, WorkbasketSummary workbasket, String owner, boolean setTransferFlag) {
+      TaskSummaryImpl task,
+      WorkbasketSummary workbasket,
+      String owner,
+      boolean setTransferFlag,
+      Instant modified) {
     task.setRead(false);
     task.setTransferred(setTransferFlag);
     task.setState(getStateAfterTransfer(task));
     task.setOwner(owner);
     task.setWorkbasketSummary(workbasket);
     task.setDomain(workbasket.getDomain());
-    task.setModified(Instant.now());
+    task.setModified(modified);
   }
 
   private TaskState getStateAfterTransfer(TaskSummary taskSummary) {

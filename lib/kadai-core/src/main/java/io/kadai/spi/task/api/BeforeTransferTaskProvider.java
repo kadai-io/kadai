@@ -42,6 +42,9 @@ public interface BeforeTransferTaskProvider extends KadaiInitializable {
    * <p>This SPI is executed with the same {@linkplain io.kadai.common.api.security.UserPrincipal}
    * and {@linkplain io.kadai.common.api.security.GroupPrincipal} as in the transfer operation.
    *
+   * <p>If the {@linkplain Task} is modified concurrently, the operation reads the {@linkplain Task}
+   * again and retries. Therefore, this SPI may be called more than once per operation.
+   *
    * @param task the {@linkplain Task} that is about to be transferred
    * @param destinationWorkbasket the destination {@linkplain Workbasket} the {@linkplain Task} will
    *     be transferred to

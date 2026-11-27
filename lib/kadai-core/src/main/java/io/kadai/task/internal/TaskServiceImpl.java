@@ -252,7 +252,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          ConcurrencyException {
     return claim(taskId, false);
   }
 
@@ -261,7 +262,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          ConcurrencyException {
     return claim(taskId, true);
   }
 
@@ -441,7 +443,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          ConcurrencyException {
     return completeTask(taskId, false);
   }
 
@@ -450,7 +453,8 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          ConcurrencyException {
     return completeTask(taskId, true);
   }
 
@@ -564,7 +568,8 @@ public class TaskServiceImpl implements TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return taskTransferrer.transfer(taskId, destinationWorkbasketId, setTransferFlag);
   }
 
@@ -574,7 +579,8 @@ public class TaskServiceImpl implements TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return taskTransferrer.transfer(taskId, workbasketKey, domain, setTransferFlag);
   }
 
@@ -585,7 +591,8 @@ public class TaskServiceImpl implements TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return taskTransferrer.transferWithOwner(
         taskId, destinationWorkbasketId, owner, setTransferFlag);
   }
@@ -597,7 +604,8 @@ public class TaskServiceImpl implements TaskService {
           WorkbasketNotFoundException,
           NotAuthorizedOnWorkbasketException,
           InvalidTaskStateException,
-          TransferCheckException {
+          TransferCheckException,
+          ConcurrencyException {
     return taskTransferrer.transferWithOwner(taskId, workbasketKey, domain, owner, setTransferFlag);
   }
 
@@ -609,7 +617,7 @@ public class TaskServiceImpl implements TaskService {
       kadaiEngine.openConnection();
       task = (TaskImpl) getTask(taskId);
       task.setRead(isRead);
-      task.setModified(Instant.now());
+      task.setModified(TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Method setTaskRead() set read property of Task '{}' to {} ", task, isRead);
@@ -866,7 +874,11 @@ public class TaskServiceImpl implements TaskService {
         }
       }
 
-      reopenActionsOnTask(task, userId, userLongName, Instant.now());
+      reopenActionsOnTask(
+          task,
+          userId,
+          userLongName,
+          TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
         LOGGER.debug("Task '{}' reopened by user '{}'.", task.getId(), userId);
@@ -1688,7 +1700,7 @@ public class TaskServiceImpl implements TaskService {
   }
 
   private static void terminateCancelCommonActions(TaskImpl task, TaskState targetState) {
-    Instant now = Instant.now();
+    Instant now = TaskModifiedTimestamps.next(Instant.now(), task.getModified());
     task.setModified(now);
     task.setCompleted(now);
     task.setState(targetState);
@@ -1912,47 +1924,76 @@ public class TaskServiceImpl implements TaskService {
       }
       BulkOperationResults<String, KadaiException> bulkLog = new BulkOperationResults<>();
 
-      Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-      Stream<TaskSummaryImpl> filteredSummaries =
-          filterNotExistingTaskIds(taskIds, bulkLog)
-              .filter(task -> task.getState() != TaskState.COMPLETED)
-              .filter(
-                  addErrorToBulkLog(TaskServiceImpl::checkIfTaskIsTerminatedOrCancelled, bulkLog));
-      if (!forced) {
-        filteredSummaries =
-            filteredSummaries.filter(
-                addErrorToBulkLog(this::checkPreconditionsForCompleteTask, bulkLog));
-      } else {
-        String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
-        String userLongName;
-        if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
-          User user = userMapper.findById(userId);
-          if (user != null) {
-            userLongName = user.getLongName();
-          } else {
-            userLongName = null;
-          }
-        } else {
-          userLongName = null;
+      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
+      String userLongName = null;
+      if (forced && kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
+        User user = userMapper.findById(userId);
+        if (user != null) {
+          userLongName = user.getLongName();
         }
-        filteredSummaries =
-            filteredSummaries.filter(
-                addErrorToBulkLog(
-                    summary -> {
-                      if (taskIsNotClaimed(summary)) {
-                        checkPreconditionsForClaimTask(summary, true);
-                        claimActionsOnTask(summary, userId, userLongName, now);
-                      }
-                    },
-                    bulkLog));
       }
 
-      updateTasksToBeCompleted(filteredSummaries, now);
+      List<String> remainingTaskIds = taskIds.stream().distinct().toList();
+      for (int attempt = 1; !remainingTaskIds.isEmpty(); attempt++) {
+        List<TaskSummaryImpl> taskSummaries =
+            selectTasksToComplete(remainingTaskIds, forced, bulkLog);
+        if (taskSummaries.isEmpty()) {
+          break;
+        }
+        Map<String, Instant> expectedModifiedById = new HashMap<>();
+        taskSummaries.forEach(t -> expectedModifiedById.put(t.getId(), t.getModified()));
+        Instant now =
+            TaskModifiedTimestamps.next(
+                Instant.now().truncatedTo(ChronoUnit.MILLIS), expectedModifiedById.values());
+        if (forced) {
+          for (TaskSummaryImpl taskSummary : taskSummaries) {
+            if (taskIsNotClaimed(taskSummary)) {
+              claimActionsOnTask(taskSummary, userId, userLongName, now);
+            }
+          }
+        }
+
+        remainingTaskIds =
+            updateTasksToBeCompleted(taskSummaries, now, expectedModifiedById, userId);
+        if (!remainingTaskIds.isEmpty() && attempt >= TaskModifiedTimestamps.MAX_UPDATE_ATTEMPTS) {
+          remainingTaskIds.forEach(id -> bulkLog.addError(id, new ConcurrencyException(id)));
+          break;
+        }
+        if (!remainingTaskIds.isEmpty()) {
+          LOGGER.debug(
+              "Tasks {} were modified concurrently. Retrying the completion.", remainingTaskIds);
+        }
+      }
 
       return bulkLog;
     } finally {
       kadaiEngine.returnConnection();
     }
+  }
+
+  private List<TaskSummaryImpl> selectTasksToComplete(
+      List<String> taskIds, boolean forced, BulkOperationResults<String, KadaiException> bulkLog) {
+    Stream<TaskSummaryImpl> filteredSummaries =
+        filterNotExistingTaskIds(taskIds, bulkLog)
+            .filter(task -> task.getState() != TaskState.COMPLETED)
+            .filter(
+                addErrorToBulkLog(TaskServiceImpl::checkIfTaskIsTerminatedOrCancelled, bulkLog));
+    if (!forced) {
+      filteredSummaries =
+          filteredSummaries.filter(
+              addErrorToBulkLog(this::checkPreconditionsForCompleteTask, bulkLog));
+    } else {
+      filteredSummaries =
+          filteredSummaries.filter(
+              addErrorToBulkLog(
+                  summary -> {
+                    if (taskIsNotClaimed(summary)) {
+                      checkPreconditionsForClaimTask(summary, true);
+                    }
+                  },
+                  bulkLog));
+    }
+    return filteredSummaries.toList();
   }
 
   private Stream<TaskSummaryImpl> filterNotExistingTaskIds(
@@ -1984,7 +2025,7 @@ public class TaskServiceImpl implements TaskService {
         || !Objects.equals(oldTaskImpl.getState(), newTaskImpl.getState())) {
       throw new ConcurrencyException(newTaskImpl.getId());
     }
-    newTaskImpl.setModified(Instant.now());
+    newTaskImpl.setModified(TaskModifiedTimestamps.next(Instant.now(), oldTaskImpl.getModified()));
   }
 
   private void verifyServerOwnedTaskFieldsUnchanged(
@@ -2022,49 +2063,66 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
-    TaskImpl task;
+          InvalidTaskStateException,
+          ConcurrencyException {
     try {
       kadaiEngine.openConnection();
-      task = (TaskImpl) getTask(taskId);
+      for (int attempt = 1; ; attempt++) {
+        TaskImpl task = (TaskImpl) getTask(taskId);
+        final Instant expectedModified = task.getModified();
 
-      final TaskImpl oldTask = duplicateTaskExactly(task);
-      Instant now = Instant.now();
+        final TaskImpl oldTask = duplicateTaskExactly(task);
+        Instant now = TaskModifiedTimestamps.next(Instant.now(), expectedModified);
 
-      checkPreconditionsForClaimTask(task, forceClaim);
+        checkPreconditionsForClaimTask(task, forceClaim);
 
-      String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
-      String userLongName = null;
-      if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
-        User user = userMapper.findById(userId);
-        if (user != null) {
-          userLongName = user.getLongName();
+        String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
+        String userLongName = null;
+        if (kadaiEngine.getEngine().getConfiguration().isAddAdditionalUserInfo()) {
+          User user = userMapper.findById(userId);
+          if (user != null) {
+            userLongName = user.getLongName();
+          }
         }
-      }
 
-      claimActionsOnTask(task, userId, userLongName, now);
-      taskMapper.update(task);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task '{}' claimed by user '{}'.", task.getId(), userId);
-      }
-
-      if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
-        eventPublisher.publishing(() ->
-            new TaskClaimedReviewEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
-      } else {
-        eventPublisher.publishing(() ->
-            new TaskClaimedEvent(
-                IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
-                task,
-                ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
+        claimActionsOnTask(task, userId, userLongName, now);
+        if (isUpdatedIfUnmodified(task, expectedModified)) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Task '{}' claimed by user '{}'.", task.getId(), userId);
+          }
+          publishClaimedEvent(oldTask, task);
+          return task;
+        }
+        if (attempt >= TaskModifiedTimestamps.MAX_UPDATE_ATTEMPTS) {
+          throw new ConcurrencyException(taskId);
+        }
+        LOGGER.debug("Task '{}' was modified concurrently. Retrying the claim.", taskId);
       }
     } finally {
       kadaiEngine.returnConnection();
     }
-    return task;
+  }
+
+  private boolean isUpdatedIfUnmodified(TaskImpl task, Instant expectedModified) {
+    return taskMapper.updateIfUnmodified(
+            task, new ExpectedTaskModification(task.getId(), expectedModified))
+        > 0;
+  }
+
+  private void publishClaimedEvent(TaskImpl oldTask, TaskImpl task) {
+    if (Set.of(READY_FOR_REVIEW, IN_REVIEW).contains(task.getState())) {
+      eventPublisher.publishing(() ->
+          new TaskClaimedReviewEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+              task,
+              ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
+    } else {
+      eventPublisher.publishing(() ->
+          new TaskClaimedEvent(
+              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+              task,
+              ObjectAttributeChangeDetector.determineChangesInAttributes(oldTask, task)));
+    }
   }
 
   private Task requestReview(String taskId, String workbasketId, String ownerId, boolean force)
@@ -2092,7 +2150,7 @@ public class TaskServiceImpl implements TaskService {
 
       task.setState(READY_FOR_REVIEW);
       task.setOwner(ownerId);
-      task.setModified(Instant.now());
+      task.setModified(TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
 
       taskMapper.requestReview(task);
       if (LOGGER.isDebugEnabled()) {
@@ -2140,7 +2198,7 @@ public class TaskServiceImpl implements TaskService {
 
       task.setState(READY);
       task.setOwner(ownerId);
-      task.setModified(Instant.now());
+      task.setModified(TaskModifiedTimestamps.next(Instant.now(), task.getModified()));
 
       taskMapper.requestChanges(task);
       if (LOGGER.isDebugEnabled()) {
@@ -2227,7 +2285,7 @@ public class TaskServiceImpl implements TaskService {
       if (state.isClaimedState() && !forceUnclaim && !userId.equals(task.getOwner())) {
         throw new InvalidOwnerException(userId, taskId);
       }
-      Instant now = Instant.now();
+      Instant now = TaskModifiedTimestamps.next(Instant.now(), task.getModified());
       cancelClaimActionsOnTask(task, now, keepOwner);
       taskMapper.update(task);
       if (LOGGER.isDebugEnabled()) {
@@ -2249,44 +2307,52 @@ public class TaskServiceImpl implements TaskService {
       throws TaskNotFoundException,
           InvalidOwnerException,
           NotAuthorizedOnWorkbasketException,
-          InvalidTaskStateException {
+          InvalidTaskStateException,
+          ConcurrencyException {
     String userId = kadaiEngine.getEngine().getCurrentUserContext().getUserId();
-    TaskImpl task;
     try {
       kadaiEngine.openConnection();
-      task = (TaskImpl) this.getTask(taskId);
-      if (reviewRequiredManager.reviewRequired(task)) {
-        return requestReview(taskId);
+      for (int attempt = 1; ; attempt++) {
+        TaskImpl task = (TaskImpl) this.getTask(taskId);
+        if (reviewRequiredManager.reviewRequired(task)) {
+          return requestReview(taskId);
+        }
+
+        if (task.getState() == TaskState.COMPLETED) {
+          return task;
+        }
+
+        checkIfTaskIsTerminatedOrCancelled(task);
+
+        if (!isForced) {
+          checkPreconditionsForCompleteTask(task);
+        } else if (taskIsNotClaimed(task)) {
+          task = (TaskImpl) this.forceClaim(taskId);
+        }
+        final Instant expectedModified = task.getModified();
+
+        completeActionsOnTask(
+            task, userId, TaskModifiedTimestamps.next(Instant.now(), expectedModified));
+        task = (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(task);
+        if (isUpdatedIfUnmodified(task, expectedModified)) {
+          if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Task '{}' completed by user '{}'.", task.getId(), userId);
+          }
+          final TaskImpl finalTask = task;
+          eventPublisher.publishing(() ->
+              new TaskCompletedEvent(
+                  IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT),
+                  finalTask));
+          return task;
+        }
+        if (attempt >= TaskModifiedTimestamps.MAX_UPDATE_ATTEMPTS) {
+          throw new ConcurrencyException(taskId);
+        }
+        LOGGER.debug("Task '{}' was modified concurrently. Retrying the completion.", taskId);
       }
-
-      if (task.getState() == TaskState.COMPLETED) {
-        return task;
-      }
-
-      checkIfTaskIsTerminatedOrCancelled(task);
-
-      if (!isForced) {
-        checkPreconditionsForCompleteTask(task);
-      } else if (taskIsNotClaimed(task)) {
-        task = (TaskImpl) this.forceClaim(taskId);
-      }
-
-      Instant now = Instant.now();
-      completeActionsOnTask(task, userId, now);
-      task = (TaskImpl) taskEndstatePreprocessorManager.processTaskBeforeEndstate(task);
-      taskMapper.update(task);
-      if (LOGGER.isDebugEnabled()) {
-        LOGGER.debug("Task '{}' completed by user '{}'.", task.getId(), userId);
-      }
-      final TaskImpl finalTask = task;
-      eventPublisher.publishing(() ->
-          new TaskCompletedEvent(
-              IdGenerator.generateWithPrefix(IdGenerator.ID_PREFIX_TASK_HISTORY_EVENT), finalTask));
-
     } finally {
       kadaiEngine.returnConnection();
     }
-    return task;
   }
 
   private void deleteTask(String taskId, boolean forceDelete)
@@ -2543,38 +2609,78 @@ public class TaskServiceImpl implements TaskService {
     }
   }
 
-  private void updateTasksToBeCompleted(Stream<TaskSummaryImpl> taskSummaries, Instant now) {
-
+  /**
+   * Completes the given Tasks unless they have been modified since they were read.
+   *
+   * @param taskSummaries the Tasks to complete
+   * @param now the timestamp to use for the completion
+   * @param expectedModifiedById the modified timestamps of the Tasks when they were read
+   * @param userId the id of the user who completes the Tasks
+   * @return the ids of the Tasks which were modified concurrently and therefore not completed
+   */
+  private List<String> updateTasksToBeCompleted(
+      List<TaskSummaryImpl> taskSummaries,
+      Instant now,
+      Map<String, Instant> expectedModifiedById,
+      String userId) {
     List<TaskSummary> taskSummaryList =
-        taskSummaries
+        taskSummaries.stream()
             .map(summary -> {
-              completeActionsOnTask(
-                  summary, kadaiEngine.getEngine().getCurrentUserContext().getUserId(), now);
+              completeActionsOnTask(summary, userId, now);
               return (TaskSummary) summary;
             })
             .toList();
+    TaskSummary completedReference = taskSummaryList.get(0);
 
-    List<String> taskIds = taskSummaryList.stream().map(TaskSummary::getId).toList();
-
-    List<String> updateClaimedTaskIds =
-        taskSummaryList.stream()
-            .filter(summary -> now.equals(summary.getClaimed()))
-            .map(TaskSummary::getId)
-            .toList();
-
-    TaskSummary claimedReference =
-        taskSummaryList.stream()
-            .filter(summary -> updateClaimedTaskIds.contains(summary.getId()))
-            .findFirst()
-            .orElse(null);
-
-    if (!taskSummaryList.isEmpty()) {
-      taskMapper.updateCompleted(taskIds, taskSummaryList.get(0));
-      if (!updateClaimedTaskIds.isEmpty()) {
-        taskMapper.updateClaimed(updateClaimedTaskIds, claimedReference);
-      }
-      createTasksCompletedEvents(taskSummaryList);
+    int updatedRows =
+        CollectionUtil.partitionBasedOnSize(
+                taskSummaryList, TaskModifiedTimestamps.GUARDED_UPDATE_BATCH_SIZE)
+            .stream()
+            .mapToInt(batch ->
+                taskMapper.updateCompleted(
+                    batch.stream()
+                        .map(t ->
+                            new ExpectedTaskModification(
+                                t.getId(), expectedModifiedById.get(t.getId())))
+                        .toList(),
+                    completedReference))
+            .sum();
+    List<TaskSummary> completedTasks = taskSummaryList;
+    if (updatedRows != taskSummaryList.size()) {
+      // some Tasks have been modified concurrently. Find out which ones were updated by us.
+      Set<String> completedTaskIds =
+          CollectionUtil.partitionBasedOnSize(
+                  taskSummaryList.stream().map(TaskSummary::getId).toList(),
+                  TaskModifiedTimestamps.GUARDED_UPDATE_BATCH_SIZE)
+              .stream()
+              .flatMap(batch -> taskMapper.findExistingTasks(batch, null).stream())
+              .filter(persisted -> isCompletedBy(persisted, completedReference))
+              .map(MinimalTaskSummary::getTaskId)
+              .collect(Collectors.toSet());
+      completedTasks =
+          taskSummaryList.stream().filter(t -> completedTaskIds.contains(t.getId())).toList();
     }
+
+    List<TaskSummary> claimedTasks =
+        completedTasks.stream().filter(summary -> now.equals(summary.getClaimed())).toList();
+    if (!claimedTasks.isEmpty()) {
+      taskMapper.updateClaimed(
+          claimedTasks.stream().map(TaskSummary::getId).toList(), claimedTasks.get(0));
+    }
+    createTasksCompletedEvents(completedTasks);
+
+    Set<String> completedTaskIds =
+        completedTasks.stream().map(TaskSummary::getId).collect(Collectors.toSet());
+    return taskSummaryList.stream()
+        .map(TaskSummary::getId)
+        .filter(taskId -> !completedTaskIds.contains(taskId))
+        .toList();
+  }
+
+  private static boolean isCompletedBy(MinimalTaskSummary persisted, TaskSummary reference) {
+    return reference.getModified().equals(persisted.getModified())
+        && persisted.getTaskState() == TaskState.COMPLETED
+        && Objects.equals(reference.getOwner(), persisted.getOwner());
   }
 
   private void updateTasksToBeTerminated(Stream<TaskSummaryImpl> taskSummaries, Instant now) {
