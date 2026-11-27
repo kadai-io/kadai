@@ -17,7 +17,7 @@
  */
 
 import { TestBed } from '@angular/core/testing';
-import { NgxsModule, Store } from '@ngxs/store';
+import { Actions, NgxsModule, ofActionDispatched, Store } from '@ngxs/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { of, Subject, throwError } from 'rxjs';
 import { Location } from '@angular/common';
@@ -211,6 +211,100 @@ describe('WorkbasketState', () => {
       expect(state.selectedWorkbasket).toBeUndefined();
       expect(state.action).toBe(ACTION.READ);
       expect(locationMock.go).toHaveBeenCalled();
+    });
+
+    it('should not change the url outside the workbaskets', async () => {
+      (locationMock.path as ReturnType<typeof vi.fn>).mockReturnValue('/kadai/administration/classifications');
+
+      await store.dispatch(new DeselectWorkbasket()).toPromise();
+
+      expect(store.snapshot().workbasket.selectedWorkbasket).toBeUndefined();
+      expect(locationMock.go).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('domain switch', () => {
+    let selectedDomain$: Subject<string>;
+
+    beforeEach(async () => {
+      selectedDomain$ = new Subject<string>();
+      (domainServiceMock.getSelectedDomain as ReturnType<typeof vi.fn>).mockReturnValue(selectedDomain$);
+      await store.dispatch({ type: '[Workbasket] Initializing state' }).toPromise();
+    });
+
+    it('should deselect the workbasket when switching to a domain it does not belong to', () => {
+      selectedDomain$.next('A');
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...store.snapshot().workbasket, selectedWorkbasket: { workbasketId: 'WBI:1', domain: 'A' } }
+      });
+
+      selectedDomain$.next('B');
+
+      expect(store.snapshot().workbasket.selectedWorkbasket).toBeUndefined();
+    });
+
+    it('should deselect a new workbasket being created when switching the domain', () => {
+      selectedDomain$.next('A');
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...store.snapshot().workbasket, selectedWorkbasket: { domain: 'A' }, action: ACTION.CREATE }
+      });
+
+      selectedDomain$.next('B');
+
+      expect(store.snapshot().workbasket.selectedWorkbasket).toBeUndefined();
+      expect(store.snapshot().workbasket.action).toBe(ACTION.READ);
+    });
+
+    it('should keep the workbasket when switching to the domain it belongs to', () => {
+      selectedDomain$.next('A');
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...store.snapshot().workbasket, selectedWorkbasket: { workbasketId: 'WBI:1', domain: 'B' } }
+      });
+
+      selectedDomain$.next('B');
+
+      expect(store.snapshot().workbasket.selectedWorkbasket.workbasketId).toBe('WBI:1');
+    });
+
+    it('should keep the workbasket when the current domain is emitted again', () => {
+      selectedDomain$.next('A');
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...store.snapshot().workbasket, selectedWorkbasket: { workbasketId: 'WBI:1', domain: 'B' } }
+      });
+
+      selectedDomain$.next('A');
+
+      expect(store.snapshot().workbasket.selectedWorkbasket.workbasketId).toBe('WBI:1');
+    });
+
+    it('should keep a workbasket of another domain when the first domain is selected', () => {
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...store.snapshot().workbasket, selectedWorkbasket: { workbasketId: 'WBI:1', domain: 'B' } }
+      });
+
+      selectedDomain$.next('A');
+
+      expect(store.snapshot().workbasket.selectedWorkbasket.workbasketId).toBe('WBI:1');
+    });
+
+    it('should not deselect when switching the domain without a selected workbasket', async () => {
+      const actions$ = TestBed.inject(Actions);
+      let actionDispatched = false;
+      actions$.pipe(ofActionDispatched(DeselectWorkbasket)).subscribe(() => (actionDispatched = true));
+      selectedDomain$.next('A');
+      store.reset({
+        ...store.snapshot(),
+        workbasket: { ...store.snapshot().workbasket, selectedWorkbasket: undefined }
+      });
+
+      selectedDomain$.next('B');
+
+      expect(actionDispatched).toBe(false);
     });
   });
 

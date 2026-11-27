@@ -96,7 +96,6 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
   private domainService = inject(DomainService);
   private requestInProgressService = inject(RequestInProgressService);
   private ngxsActions$ = inject(Actions);
-  private previousDomain?: string;
 
   constructor() {
     this.ngxsActions$.pipe(ofActionDispatched(GetWorkbasketsSummary), takeUntil(this.destroy$)).subscribe(() => {
@@ -144,20 +143,8 @@ export class WorkbasketListComponent implements OnInit, OnDestroy {
       .getSelectedDomain()
       .pipe(takeUntil(this.destroy$))
       .subscribe((domain) => {
-        const domainSwitched = this.previousDomain !== undefined && this.previousDomain !== domain;
-        this.previousDomain = domain;
-
         this.filterBy.domain = [domain];
         this.performRequest();
-
-        if (!domainSwitched) {
-          return;
-        }
-
-        const { domain: workbasketDomain } = this.store.selectSnapshot(WorkbasketSelectors.selectedWorkbasket);
-        if (workbasketDomain && workbasketDomain !== domain) {
-          this.store.dispatch(new DeselectWorkbasket());
-        }
       });
 
     this.workbasketService
