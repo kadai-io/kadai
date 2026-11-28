@@ -22,19 +22,25 @@ import { Observable, ReplaySubject } from 'rxjs';
 import { RequestInProgressService } from 'app/shared/services/request-in-progress/request-in-progress.service';
 import { SelectedRouteService } from 'app/shared/services/selected-route/selected-route';
 import { RuntimeConfigService } from 'app/shared/services/runtime-config/runtime-config.service';
+import { UrlSerializer, UrlTree } from '@angular/router';
+import { Location } from '@angular/common';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DomainService {
+  private location = inject(Location);
+  private urlSerializer = inject(UrlSerializer);
   private httpClient = inject(HttpClient);
   private requestInProgressService = inject(RequestInProgressService);
   private selectedRouteService = inject(SelectedRouteService);
   private runtimeConfigService = inject(RuntimeConfigService);
 
+  // the url is only read at startup, so back to an entry with another domain doesn't switch it
+  private readonly domainFromUrl: string | undefined = this.parseUrl()?.queryParams['domain'];
   private domainRestValue: Array<string> = new Array<string>();
   private domainValue: Array<string> = new Array<string>();
-  private domainSelectedValue!: string;
+  private domainSelectedValue: string | undefined;
   private domainSelected = new ReplaySubject<string>(1);
   private dataObs$ = new ReplaySubject<Array<string>>(1);
   private hasMasterDomain = false;
@@ -52,6 +58,8 @@ export class DomainService {
         this.addMasterDomain();
       }
     });
+
+    this.location.onUrlChange(() => this.writeDomainToUrl());
   }
   get url(): string {
     return this.runtimeConfigService.kadaiRestUrl + '/v1/domains';
@@ -65,8 +73,17 @@ export class DomainService {
           this.domainRestValue = domains;
           this.domainValue = domains;
           this.dataObs$.next(this.hasMasterDomain ? this.addEmptyDomain(domains) : domains);
-          if (!this.domainSelectedValue && this.domainValue.length > 0) {
-            this.selectDomain(this.domainValue[0]);
+
+          if (this.domainSelectedValue === undefined) {
+            if (
+              this.domainFromUrl !== undefined &&
+              domains.includes(this.domainFromUrl) &&
+              (this.domainFromUrl !== '' || this.location.path().startsWith('/kadai/administration/classifications'))
+            ) {
+              this.selectDomain(this.domainFromUrl);
+            } else if (this.domainValue.length > 0) {
+              this.selectDomain(this.domainValue[0]);
+            }
           }
         },
         (error) => {
@@ -114,11 +131,33 @@ export class DomainService {
   private selectDomain(value: string) {
     this.domainSelectedValue = value;
     this.domainSelected.next(value);
+    this.writeDomainToUrl();
   }
 
   private addEmptyDomain(domains: Array<string>): Array<string> {
     this.domainValue = Object.assign([], domains);
     this.domainValue.push('');
     return this.domainValue;
+  }
+
+  private writeDomainToUrl() {
+    const domain = this.domainSelectedValue;
+    const path = this.location.path();
+    if (domain === undefined || !(path.startsWith('/kadai/administration') || path.startsWith('/kadai/monitor'))) {
+      return;
+    }
+    const tree = this.parseUrl();
+    if (tree !== undefined && tree.queryParams['domain'] !== domain) {
+      tree.queryParams = { ...tree.queryParams, domain: domain };
+      this.location.replaceState(this.urlSerializer.serialize(tree), '', this.location.getState());
+    }
+  }
+
+  private parseUrl(): UrlTree | undefined {
+    try {
+      return this.urlSerializer.parse(this.location.path());
+    } catch {
+      return undefined;
+    }
   }
 }
